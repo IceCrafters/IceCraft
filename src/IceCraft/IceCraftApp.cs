@@ -8,15 +8,16 @@ internal class IceCraftApp : IManagerDriver
     internal static readonly string UserDataDirecory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "IceCraft");
 
-    public ICachingManager CachingManager { get; }
+    public ICacheManager CachingManager { get; }
 
     internal IceCraftApp()
     {
         CachingManager = new FileSystemCacheManager(Path.Combine(UserDataDirecory, "caches"));
     }
 
-    public static void Initialize()
+    public static IceCraftApp Initialize()
     {
         Directory.CreateDirectory(UserDataDirecory);
+        return new IceCraftApp();
     }
 }

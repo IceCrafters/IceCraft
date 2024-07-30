@@ -36,7 +36,7 @@ internal class AdoptiumApiClient
         .Version?.ToString() ?? "unknown";
     #endregion
 
-    internal async Task<AvailableReleaseInfo?> GetAvailableReleases()
+    internal async Task<AvailableReleaseInfo?> GetAvailableReleasesAsync()
     {
         const string endpoint = "/v3/info/available_releases";
 

@@ -3,7 +3,7 @@
 using System;
 using IceCraft.Core.Caching;
 
-internal class FileSystemCacheManager : ICachingManager
+internal class FileSystemCacheManager : ICacheManager
 {
     private readonly string _baseDirectory;
 

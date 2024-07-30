@@ -3,7 +3,7 @@
 /// <summary>
 /// Defines a manager which provides management for caches.
 /// </summary>
-public interface ICachingManager
+public interface ICacheManager
 {
     /// <summary>
     /// Gets a storage for non-volatile storage of various metadata caches. If the cache does not exist yet,

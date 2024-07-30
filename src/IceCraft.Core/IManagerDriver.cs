@@ -10,5 +10,5 @@ public interface IManagerDriver
     /// <summary>
     /// Gets a shared instance of cache manager implementation.
     /// </summary>
-    ICachingManager CachingManager { get; }
+    ICacheManager CachingManager { get; }
 }

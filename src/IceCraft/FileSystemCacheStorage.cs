@@ -93,6 +93,7 @@ internal class FileSystemCacheStorage : ICacheStorage
         }
 
         _cacheIndex.Remove(objectName);
+        InternalSaveIndex();
         return;
     }
 
