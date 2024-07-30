@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IceCraft", "IceCraft\IceCraft.csproj", "{7D5A1266-44AA-48FE-892E-B29A74AFB723}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IceCraft.Core", "IceCraft.Core\IceCraft.Core.csproj", "{6F56786B-321D-44F9-9B50-911A839871CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IceCraft.Repositories.Adoptium", "IceCraft.Repositories.Adoptium\IceCraft.Repositories.Adoptium.csproj", "{3EBCBC15-0A99-4280-ADCF-EC20048FD1C2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7D5A1266-44AA-48FE-892E-B29A74AFB723}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D5A1266-44AA-48FE-892E-B29A74AFB723}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D5A1266-44AA-48FE-892E-B29A74AFB723}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D5A1266-44AA-48FE-892E-B29A74AFB723}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F56786B-321D-44F9-9B50-911A839871CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F56786B-321D-44F9-9B50-911A839871CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F56786B-321D-44F9-9B50-911A839871CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F56786B-321D-44F9-9B50-911A839871CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EBCBC15-0A99-4280-ADCF-EC20048FD1C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EBCBC15-0A99-4280-ADCF-EC20048FD1C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EBCBC15-0A99-4280-ADCF-EC20048FD1C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EBCBC15-0A99-4280-ADCF-EC20048FD1C2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

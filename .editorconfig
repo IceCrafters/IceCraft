@@ -1,0 +1,7 @@
+[*.cs]
+
+# IDE0065: Misplaced using directive
+csharp_using_directive_placement = inside_namespace
+
+# IDE0290: Use primary constructor
+csharp_style_prefer_primary_constructors = false
