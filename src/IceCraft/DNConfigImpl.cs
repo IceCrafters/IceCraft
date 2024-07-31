@@ -10,6 +10,9 @@ internal class DNConfigImpl : IManagerConfiguration
     private const string SectionSources = "source";
     private const string EntrySourcesEnabled = "enabled";
 
+    private const string SectionBehaviour = "behaviour";
+    private const string EntryBehaviourAllowUncertainHash = "allowUncertainHash";
+
     public DNConfigImpl()
     {
         _config = Config.Build();
@@ -23,6 +26,12 @@ internal class DNConfigImpl : IManagerConfiguration
     public void SetSourceEnabled(string sourceId, bool enabled)
     {
         _config.SetBoolean(SectionSources, sourceId, EntrySourcesEnabled, enabled);
+    }
+
+    public bool DoesAllowUncertainHash
+    {
+        get => _config.GetBoolean(SectionBehaviour, EntryBehaviourAllowUncertainHash) ?? false;
+        set => _config.SetBoolean(SectionBehaviour, EntryBehaviourAllowUncertainHash, value);
     }
 
     public string GetCachePath()

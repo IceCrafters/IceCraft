@@ -16,4 +16,6 @@ public interface IChecksumValidator
     /// <param name="b">The checksum B.</param>
     /// <returns>Whether the checksum matches.</returns>
     bool CompareChecksum(string a, string b);
+
+    Task<byte[]> GetChecksumBinaryAsync(Stream stream, CancellationToken cancellation = default);
 }

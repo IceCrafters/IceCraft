@@ -9,19 +9,19 @@ using IceCraft.Core.Archive.Checksums;
 [DebuggerDisplay($"{{{nameof(GetDebuggerDisplay)}(),nq}}")]
 public sealed record RemoteArtefact : IEquatable<RemoteArtefact>
 {
-    public RemoteArtefact(Uri downloadUri, string? checksum, IChecksumValidator checksumValidator)
+    public RemoteArtefact(Uri downloadUri, string? checksum, string checksumType)
     {
         DownloadUri = downloadUri;
         Checksum = checksum;
-        ChecksumValidator = checksumValidator;
+        ChecksumType = checksumType;
     }
 
     public Uri DownloadUri { get; }
     public string? Checksum { get; }
-    public IChecksumValidator ChecksumValidator { get; }
+    public string ChecksumType { get; }
 
     private string GetDebuggerDisplay()
     {
-        return $"RemoteArtefact{{DownloadUri={DownloadUri},Checksum={Checksum},Validator=(is {ChecksumValidator.GetType()})}}";
+        return $"RemoteArtefact{{DownloadUri={DownloadUri},Checksum={Checksum},Validator=(is {ChecksumType.GetType()})}}";
     }
 }
