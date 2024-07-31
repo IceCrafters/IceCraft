@@ -1,7 +1,7 @@
 ﻿namespace IceCraft.Frontend;
 
 using System;
-using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using Spectre.Console.Cli;
 
 public sealed class TypeResolver : ITypeResolver, IDisposable
@@ -10,7 +10,6 @@ public sealed class TypeResolver : ITypeResolver, IDisposable
 
     public TypeResolver(IServiceProvider provider)
     {
-        System.Console.WriteLine("Trace: creating resolver");
         _provider = provider ?? throw new ArgumentNullException(nameof(provider));
     }
 
@@ -21,7 +20,13 @@ public sealed class TypeResolver : ITypeResolver, IDisposable
             return null;
         }
 
-        return _provider.GetService(type);
+        var retVal = _provider.GetService(type);
+        if (retVal == null)
+        {
+            Log.Warning("Cannot satisfy CLI service: {}", type);
+        }
+
+        return retVal;
     }
 
     public void Dispose()

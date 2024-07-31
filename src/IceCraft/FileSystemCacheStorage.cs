@@ -3,6 +3,7 @@
 using System.IO;
 using System.Text.Json;
 using IceCraft.Core.Caching;
+using Serilog;
 
 internal class FileSystemCacheStorage : ICacheStorage
 {
@@ -44,8 +45,7 @@ internal class FileSystemCacheStorage : ICacheStorage
             }
             catch (Exception ex)
             {
-                Console.WriteLine("WARNING: Failed to read cache index for storage: '{0}'", _id);
-                Console.WriteLine(ex);
+                Log.Warning(ex, "Failed to read cache index for storage: '{}'", _id);
             }
         }
 
@@ -58,10 +58,9 @@ internal class FileSystemCacheStorage : ICacheStorage
         }
         catch (Exception ex)
         {
-            Console.WriteLine("WARNING: Failed to create cache index for storage: '{0}'", _id);
+            Log.Warning(ex, "WARNING: Failed to create cache index for storage: '{}'", _id);
             Console.WriteLine("WARNING: Cache will not be stored on disk.");
             _dry = true;
-            Console.WriteLine(ex);
         }
 
         return dict;
@@ -71,7 +70,7 @@ internal class FileSystemCacheStorage : ICacheStorage
     {
         if (_dry)
         {
-            Console.WriteLine("WARNING: Cache object '{0}' will not be saved", objectName);
+            Log.Warning("WARNING: Cache object '{}' will not be saved", objectName);
             var mem = new MemoryStream();
             return mem;
         }

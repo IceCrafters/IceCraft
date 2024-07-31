@@ -6,9 +6,12 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using IceCraft.Repositories.Adoptium.Models;
+using Microsoft.Extensions.Logging;
 
 internal class AdoptiumApiClient
 {
+    private readonly ILogger _logger;
+
     #region Site Service
     private static readonly string Root = "https://api.adoptium.net";
 
@@ -61,6 +64,11 @@ internal class AdoptiumApiClient
         .GetName()
         .Version?.ToString() ?? "unknown";
     #endregion
+
+    public AdoptiumApiClient(ILogger logger)
+    {
+        _logger = logger;
+    }
 
     internal async Task<AvailableReleaseInfo?> GetAvailableReleasesAsync()
     {

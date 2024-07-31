@@ -26,13 +26,13 @@ public abstract class SourceSwitchCommand : Command<SourceSwitchCommand.Settings
     {
         if (!_sourceManager.ContainsSource(settings.SourceName))
         {
-            return ValidationResult.Error($"Source '{settings.SourceName}' does not exist.");
+            return ValidationResult.Error($"No such source: '{settings.SourceName}'");
         }
 
         return base.Validate(context, settings);
     }
 
-    public class Settings : CommandSettings
+    public class Settings : BaseSettings
     {
         [CommandArgument(0, "<SOURCE>")]
         public required string SourceName { get; set; }

@@ -4,20 +4,21 @@ using System.Diagnostics;
 using IceCraft.Core.Archive.Providers;
 using IceCraft.Core.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 public class RepositoryManager : IRepositorySourceManager
 {
-    private static int _counter;
-
     private readonly IManagerConfiguration _config;
     private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<RepositoryManager> _logger;
 
-    public RepositoryManager(IManagerConfiguration config, IServiceProvider serviceProvider)
+    public RepositoryManager(IManagerConfiguration config, 
+        IServiceProvider serviceProvider,
+        ILogger<RepositoryManager> logger)
     {
-        _counter++;
-        System.Console.WriteLine("Trace: created #{0}", _counter);
         _config = config;
         _serviceProvider = serviceProvider;
+        _logger = logger;
     }
 
     private readonly Dictionary<string, IRepositorySource> _sources = [];
@@ -30,12 +31,10 @@ public class RepositoryManager : IRepositorySourceManager
     public void RegisterSourceAsService(string key)
     {
         _sources.Add(key, _serviceProvider.GetRequiredKeyedService<IRepositorySource>(key));
-        Console.WriteLine("Trace: added source {0} to #{1}", key, _counter);
     }
 
     public bool ContainsSource(string id)
     {
-        Console.WriteLine("Trace: query source existence {0} ({1}) from #{2}", id, _sources.ContainsKey(id), _counter);
         return _sources.ContainsKey(id);
     }
 
@@ -56,7 +55,7 @@ public class RepositoryManager : IRepositorySourceManager
                 continue;
             }
 
-            Debug.WriteLine($"RepositoryManager: repository acquried: '{provider.Key}'");
+            _logger.LogTrace("RepositoryManager: provider gone through: '{}'", provider.Key);
             list.Add(repo);
         }
 
