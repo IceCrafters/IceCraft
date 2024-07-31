@@ -6,6 +6,7 @@ using IceCraft.Core.Configuration;
 /// <summary>
 /// Defines an interface for the user interface driver of the package manager.
 /// </summary>
+[Obsolete("Use dependency injection instead.")]
 public interface IManagerDriver
 {
     /// <summary>

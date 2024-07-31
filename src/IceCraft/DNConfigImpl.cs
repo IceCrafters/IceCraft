@@ -10,9 +10,9 @@ internal class DNConfigImpl : IManagerConfiguration
     private const string SectionSources = "source";
     private const string EntrySourcesEnabled = "enabled";
 
-    internal DNConfigImpl(Config config)
+    public DNConfigImpl()
     {
-        _config = config;
+        _config = Config.Build();
     }
 
     public bool IsSourceEnabled(string sourceId)
@@ -23,5 +23,10 @@ internal class DNConfigImpl : IManagerConfiguration
     public void SetSourceEnabled(string sourceId, bool enabled)
     {
         _config.SetBoolean(SectionSources, sourceId, EntrySourcesEnabled, enabled);
+    }
+
+    public string GetCachePath()
+    {
+        return IceCraftApp.CachesDirectory;
     }
 }

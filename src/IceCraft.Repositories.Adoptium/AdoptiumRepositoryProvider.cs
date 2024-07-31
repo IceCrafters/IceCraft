@@ -4,6 +4,7 @@ using IceCraft.Core.Archive;
 using IceCraft.Core.Archive.Providers;
 using IceCraft.Core.Caching;
 using IceCraft.Repositories.Adoptium.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 public class AdoptiumRepositoryProvider : IRepositorySource
 {
@@ -14,9 +15,9 @@ public class AdoptiumRepositoryProvider : IRepositorySource
     private readonly ICacheManager _cacheManager;
     private readonly ICacheStorage _cacheStorage;
 
-    public AdoptiumRepositoryProvider(ICacheManager cacheManager)
+    public AdoptiumRepositoryProvider(IServiceProvider provider)
     {
-        _cacheManager = cacheManager;
+        _cacheManager = provider.GetRequiredService<ICacheManager>();
         _cacheStorage = _cacheManager.GetStorage(StorageGuid);
     }
 

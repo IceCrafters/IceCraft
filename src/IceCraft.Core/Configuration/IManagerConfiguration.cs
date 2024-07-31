@@ -6,4 +6,6 @@
 public interface IManagerConfiguration
 {
     bool IsSourceEnabled(string sourceId);
+
+    string GetCachePath();
 }

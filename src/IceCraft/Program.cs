@@ -1,25 +1,44 @@
 ﻿using System.Diagnostics;
 using IceCraft;
+using IceCraft.Core.Archive.Providers;
 using IceCraft.Core.Archive.Repositories;
+using IceCraft.Core.Caching;
+using IceCraft.Core.Configuration;
+using IceCraft.Frontend;
 using IceCraft.Repositories.Adoptium;
+using Microsoft.Extensions.DependencyInjection;
+using Spectre.Console.Cli;
 
-var app = IceCraftApp.Initialize();
+IceCraftApp.Initialize();
+var appServices = new ServiceCollection();
+appServices.AddSingleton<IManagerConfiguration, DNConfigImpl>()
+    .AddSingleton<ICacheManager, FileSystemCacheManager>()
+    .AddSingleton<RepositoryManager>()
+    .AddKeyedSingleton<IRepositorySource, AdoptiumRepositoryProvider>("adoptium");
 
-var manager = new RepositoryManager();
-manager.RegisterProvider("adoptium", new AdoptiumRepositoryProvider(app.CachingManager));
+var provider = appServices.BuildServiceProvider();
+var repoMan = provider.GetRequiredService<RepositoryManager>();
+
+repoMan.RegisterSourceAsService("adoptium");
 
 var stopwatch = Stopwatch.StartNew();
-var repos = await manager.GetRepositories();
+
+var repos = await repoMan.GetRepositories();
 stopwatch.Stop();
 Console.WriteLine("Acquiring repositories took {0}ms", stopwatch.ElapsedMilliseconds);
 
-var pkgCount = 0;
-var repoCount = 0;
+// Initialize command line
 
-foreach (var repo in repos)
+var registrar = new TypeRegistrar(appServices);
+
+var cmdApp = new CommandApp(registrar);
+cmdApp.Configure(root =>
 {
-    repoCount++;
-    pkgCount += repo.GetExpectedSeriesCount();
-}
+    root.AddBranch<SourceSwitchSettings>("source", source =>
+    {
+        source.AddCommand<SourceEnableCommand>("enable");
+        source.AddCommand<SourceDisableCommand>("disable");
+    });
+});
 
-Console.WriteLine("{0} repositories and {1} series", repoCount, pkgCount);
+await cmdApp.RunAsync(args);
