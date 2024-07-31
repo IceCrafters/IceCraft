@@ -33,8 +33,11 @@ Console.WriteLine("Acquiring repositories took {0}ms", stopwatch.ElapsedMillisec
 var registrar = new TypeRegistrar(appServices);
 
 var cmdApp = new CommandApp(registrar);
+
 cmdApp.Configure(root =>
 {
+    root.SetApplicationVersion(IceCraftApp.ProductVersion);
+
     root.AddBranch<SourceSwitchCommand.Settings>("source", source =>
     {
         source.AddCommand<SourceSwitchCommand.EnableCommand>("enable");
