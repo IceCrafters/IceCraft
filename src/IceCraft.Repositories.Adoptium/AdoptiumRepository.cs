@@ -9,7 +9,7 @@ public class AdoptiumRepository : IRepository
     private readonly AvailableReleaseInfo _info;
     private readonly Dictionary<string, AdoptiumPackageSeries> _series;
 
-    internal AdoptiumRepository(AvailableReleaseInfo releaseInfo, AdoptiumRepositoryProvider provider)
+    internal AdoptiumRepository(AvailableReleaseInfo releaseInfo, AdoptiumRepositorySource provider)
     {
         Provider = provider;
         _info = releaseInfo;
@@ -24,7 +24,7 @@ public class AdoptiumRepository : IRepository
         }
     }
 
-    internal AdoptiumRepositoryProvider Provider { get; }
+    internal AdoptiumRepositorySource Provider { get; }
 
     public IEnumerable<IPackageSeries> EnumerateSeries()
     {

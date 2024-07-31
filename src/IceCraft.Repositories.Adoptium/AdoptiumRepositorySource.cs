@@ -6,18 +6,18 @@ using IceCraft.Core.Caching;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-public class AdoptiumRepositoryProvider : IRepositorySource
+public class AdoptiumRepositorySource : IRepositorySource
 {
     private static readonly Guid StorageGuid = new("ad2c3cc6-4ad4-4c7a-bb45-cd3c85cea041");
     private const string AvailableReleaseCacheId = "available_releases";
 
     private readonly ICacheManager _cacheManager;
 
-    public AdoptiumRepositoryProvider(IServiceProvider provider)
+    public AdoptiumRepositorySource(IServiceProvider provider)
     {
         _cacheManager = provider.GetRequiredService<ICacheManager>();
         CacheStorage = _cacheManager.GetStorage(StorageGuid);
-        Client = new(provider.GetRequiredService<ILogger<AdoptiumRepositoryProvider>>());
+        Client = new(provider.GetRequiredService<ILogger<AdoptiumRepositorySource>>());
     }
 
     internal AdoptiumApiClient Client { get; }
@@ -39,7 +39,7 @@ public class AdoptiumRepositoryProvider : IRepositorySource
         return new AdoptiumRepository(releases, this);
     }
 
-    public async Task<IRepository?> CreateRepository()
+    public async Task<IRepository?> CreateRepositoryAsync()
     {
         return await CreateRepositoryInternal(false);
     }
@@ -47,5 +47,14 @@ public class AdoptiumRepositoryProvider : IRepositorySource
     public async Task<IRepository?> RegenerateRepository()
     {
         return await CreateRepositoryInternal(true);
+    }
+
+    public Task RefreshAsync()
+    {
+        // Clears all cache storage objects so all latest information, etc.
+        // are regenerated.
+        CacheStorage.Clear();
+
+        return Task.CompletedTask;
     }
 }

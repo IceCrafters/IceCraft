@@ -49,7 +49,7 @@ public class RepositoryManager : IRepositorySourceManager
                 continue;
             }
 
-            var repo = await provider.Value.CreateRepository();
+            var repo = await provider.Value.CreateRepositoryAsync();
             if (repo == null)
             {
                 continue;
@@ -60,5 +60,10 @@ public class RepositoryManager : IRepositorySourceManager
         }
 
         return list.AsReadOnly();
+    }
+
+    public IEnumerable<IRepositorySource> EnumerateSources()
+    {
+        return _sources.Values;
     }
 }

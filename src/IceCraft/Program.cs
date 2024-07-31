@@ -19,7 +19,7 @@ appServices.AddSingleton<IManagerConfiguration, DNConfigImpl>()
     .AddSingleton<ICacheManager, FileSystemCacheManager>()
     .AddSingleton<IRepositorySourceManager, RepositoryManager>()
     // Sources
-    .AddKeyedSingleton<IRepositorySource, AdoptiumRepositoryProvider>("adoptium")
+    .AddKeyedSingleton<IRepositorySource, AdoptiumRepositorySource>("adoptium")
     .AddLogging(configure => configure.AddSerilog());
 
 var registrar = new TypeRegistrar(appServices);
@@ -30,7 +30,11 @@ var cmdApp = new CommandApp(registrar);
 
 cmdApp.Configure(root =>
 {
+    root.SetApplicationName("IceCraft");
     root.SetApplicationVersion(IceCraftApp.ProductVersion);
+
+    root.AddCommand<UpdateCommand>("update")
+        .WithDescription("Regenerates package cache and refs");
 
     root.AddBranch<SourceSwitchCommand.Settings>("source", source =>
     {

@@ -38,4 +38,9 @@ public interface ICacheStorage
     /// </summary>
     /// <param name="objectName">The name of the object to delete.</param>
     void DeleteObject(string objectName);
+
+    /// <summary>
+    /// Deletes all storage objects.
+    /// </summary>
+    void Clear();
 }

@@ -152,5 +152,20 @@ internal class FileSystemCacheStorage : ICacheStorage
         _dry = false;
     }
 
+    public void Clear()
+    {
+        foreach (var obj in _cacheIndex)
+        {
+            var file = InternalGetFileName(obj.Value);
+            if (File.Exists(file))
+            {
+                File.Delete(file);
+            }
+        }
+
+        _cacheIndex.Clear();
+        InternalSaveIndex();
+    }
+
     #endregion
 }
