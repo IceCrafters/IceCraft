@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using Flurl;
 using IceCraft.Repositories.Adoptium.Models;
 using Microsoft.Extensions.Logging;
 
@@ -26,6 +27,18 @@ internal class AdoptiumApiClient
             Architecture.Armv6 => true,
             _ => false
         };
+    }
+
+    public static bool IsOsSupported()
+    {
+        if (!OperatingSystem.IsLinux()
+            && !OperatingSystem.IsWindows()
+            && !OperatingSystem.IsMacOS())
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public static string GetApiArchitecture(Architecture architecture)
@@ -63,6 +76,26 @@ internal class AdoptiumApiClient
     private static readonly string ClientVersion = Assembly.GetExecutingAssembly()
         .GetName()
         .Version?.ToString() ?? "unknown";
+
+    internal static string GetOs()
+    {
+        if (OperatingSystem.IsLinux())
+        {
+            return "linux";
+        }
+        
+        if (OperatingSystem.IsWindows())
+        {
+            return "windows";
+        }
+
+        if (OperatingSystem.IsMacOS())
+        {
+            return "mac";
+        }
+
+        throw new PlatformNotSupportedException("Platform not supported.");
+    }
     #endregion
 
     public AdoptiumApiClient(ILogger logger)
@@ -77,10 +110,41 @@ internal class AdoptiumApiClient
         return await _client.GetFromJsonAsync<AvailableReleaseInfo>($"{Root}{endpoint}", SerializerOptions);
     }
 
-    internal async Task<IEnumerable<AdoptiumBinaryAssetView>?> GetLatestReleaseAsync(int featureVersion, string jvm, Architecture architecture, string imageType)
+    internal async Task<IEnumerable<AdoptiumBinaryAssetView>?> GetLatestReleaseAsync(int featureVersion, 
+        string jvm, 
+        Architecture architecture, 
+        string imageType,
+        string os)
     {
-        var endpoint = $"/v3/assets/latest/{featureVersion}/{jvm}?vendor=eclipse&image_type={imageType}&architecture={GetApiArchitecture(architecture)}";
+        var url = new Url(Root)
+            .AppendPathSegment("/v3/assets/latest")
+            .AppendPathSegment(featureVersion)
+            .AppendPathSegment(jvm)
+            .AppendQueryParam("vendor", "eclipse")
+            .AppendQueryParam("image_type", imageType)
+            .AppendQueryParam("architecture", GetApiArchitecture(architecture))
+            .AppendQueryParam("os", os);
 
-        return await _client.GetFromJsonAsync<IEnumerable<AdoptiumBinaryAssetView>>($"{Root}{endpoint}]", SerializerOptions);
+        return await _client.GetFromJsonAsync<IEnumerable<AdoptiumBinaryAssetView>>(url, SerializerOptions);
+    }
+
+    internal async Task<IEnumerable<AdoptiumBinaryAssetView>?> GetFeatureReleasesAsync(int featureVersion, 
+        string releaseType, 
+        Architecture architecture, 
+        string imageType,
+        string jvm,
+        string os)
+    {
+        var url = new Url(Root)
+            .AppendPathSegment("/v3/assets/feature_releases/")
+            .AppendPathSegment(featureVersion)
+            .AppendPathSegment(releaseType)
+            .AppendQueryParam("vendor", "eclipse")
+            .AppendQueryParam("image_type", imageType)
+            .AppendQueryParam("architecture", GetApiArchitecture(architecture))
+            .AppendQueryParam("jvm_impl", jvm)
+            .AppendQueryParam("os", os);
+
+        return await _client.GetFromJsonAsync<IEnumerable<AdoptiumBinaryAssetView>>(url, SerializerOptions);
     }
 }

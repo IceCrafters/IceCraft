@@ -5,6 +5,8 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using IceCraft.Core.Archive;
 using IceCraft.Core.Caching;
+using IceCraft.Repositories.Adoptium.Models;
+using Microsoft.Extensions.Logging;
 
 public class AdoptiumPackageSeries : IPackageSeries
 {
@@ -22,16 +24,40 @@ public class AdoptiumPackageSeries : IPackageSeries
 
     public string Name { get; }
 
-    public Task<IEnumerable<IPackage>> EnumeratePackagesAsync()
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<IPackage?> GetLatestAsync()
+    public async Task<IEnumerable<IPackage>> EnumeratePackagesAsync()
     {
         if (!AdoptiumApiClient.IsArchitectureSupported(RuntimeInformation.OSArchitecture))
         {
             // Architecture not supported.
+            return [];
+        }
+
+        var all = await _repository.Provider.CacheStorage.RollJsonAsync($"{Name}.all",
+            async () => await _repository.Provider.Client.GetFeatureReleasesAsync(_majorVersion,
+            "ga",
+            RuntimeInformation.OSArchitecture,
+            _type,
+            "hotspot",
+            AdoptiumApiClient.GetOs()));
+
+        if (all == null)
+        {
+            // Malformed upstream
+            return [];
+        }
+
+        return all
+            .Where(x => x != null)
+            .Where(x => x.Binary != null && x.Binary.Package != null)
+            .Select(x => new AdoptiumPackage(this, x));
+    }
+
+    public async Task<IPackage?> GetLatestAsync()
+    {
+        if (!AdoptiumApiClient.IsArchitectureSupported(RuntimeInformation.OSArchitecture)
+            || !AdoptiumApiClient.IsOsSupported())
+        {
+            // Architecture/OS not supported.
             return null;
         }
 
@@ -39,20 +65,13 @@ public class AdoptiumPackageSeries : IPackageSeries
             async () => (await _repository.Provider.Client.GetLatestReleaseAsync(_majorVersion,
             "hotspot",
             RuntimeInformation.OSArchitecture,
-            _type))?.FirstOrDefault());
-        if (latest == null)
-        {
-            // No version available.
-            return null;
-        }
+            _type,
+            AdoptiumApiClient.GetOs()))?.FirstOrDefault(x => x != null
+                && x.Binary != null 
+                && x.Binary.Package != null));
 
-        if (latest.Binary == null || latest.Binary.Package == null)
-        {
-            // Missing binary.
-            Console.WriteLine("Warning: adoptium: Missing binary for package {0}", Name);
-            return null;
-        }
-
-        return new AdoptiumPackage(this, latest);
+        return latest != null
+            ? new AdoptiumPackage(this, latest)
+            : null;
     }
 }
