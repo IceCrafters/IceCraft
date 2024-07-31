@@ -5,7 +5,7 @@ using IceCraft.Core.Archive.Providers;
 using IceCraft.Core.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-public class RepositoryManager
+public class RepositoryManager : IRepositorySourceManager
 {
     private readonly IManagerConfiguration _config;
     private readonly IServiceProvider _serviceProvider;

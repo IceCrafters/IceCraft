@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using IceCraft;
+using IceCraft.Core;
 using IceCraft.Core.Archive.Providers;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
@@ -13,11 +14,11 @@ IceCraftApp.Initialize();
 var appServices = new ServiceCollection();
 appServices.AddSingleton<IManagerConfiguration, DNConfigImpl>()
     .AddSingleton<ICacheManager, FileSystemCacheManager>()
-    .AddSingleton<RepositoryManager>()
+    .AddSingleton<IRepositorySourceManager, RepositoryManager>()
     .AddKeyedSingleton<IRepositorySource, AdoptiumRepositoryProvider>("adoptium");
 
 var provider = appServices.BuildServiceProvider();
-var repoMan = provider.GetRequiredService<RepositoryManager>();
+var repoMan = provider.GetRequiredService<IRepositorySourceManager>();
 
 repoMan.RegisterSourceAsService("adoptium");
 
@@ -34,10 +35,10 @@ var registrar = new TypeRegistrar(appServices);
 var cmdApp = new CommandApp(registrar);
 cmdApp.Configure(root =>
 {
-    root.AddBranch<SourceSwitchSettings>("source", source =>
+    root.AddBranch<SourceSwitchCommand.Settings>("source", source =>
     {
-        source.AddCommand<SourceEnableCommand>("enable");
-        source.AddCommand<SourceDisableCommand>("disable");
+        source.AddCommand<SourceSwitchCommand.EnableCommand>("enable");
+        source.AddCommand<SourceSwitchCommand.DisableCommand>("disable");
     });
 });
 
