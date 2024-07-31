@@ -22,12 +22,6 @@ var repoMan = provider.GetRequiredService<IRepositorySourceManager>();
 
 repoMan.RegisterSourceAsService("adoptium");
 
-var stopwatch = Stopwatch.StartNew();
-
-var repos = await repoMan.GetRepositories();
-stopwatch.Stop();
-Console.WriteLine("Acquiring repositories took {0}ms", stopwatch.ElapsedMilliseconds);
-
 // Initialize command line
 
 var registrar = new TypeRegistrar(appServices);
