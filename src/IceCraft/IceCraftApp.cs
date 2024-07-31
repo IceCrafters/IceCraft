@@ -1,7 +1,9 @@
 ﻿namespace IceCraft;
 
+using DotNetConfig;
 using IceCraft.Core;
 using IceCraft.Core.Caching;
+using IceCraft.Core.Configuration;
 
 internal class IceCraftApp : IManagerDriver
 {
@@ -10,9 +12,12 @@ internal class IceCraftApp : IManagerDriver
 
     public ICacheManager CachingManager { get; }
 
+    public IManagerConfiguration Configuration { get; }
+
     internal IceCraftApp()
     {
         CachingManager = new FileSystemCacheManager(Path.Combine(UserDataDirecory, "caches"));
+        Configuration = new DNConfigImpl(Config.Build());
     }
 
     public static IceCraftApp Initialize()

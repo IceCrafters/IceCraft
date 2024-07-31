@@ -2,12 +2,20 @@
 
 using System.Diagnostics;
 using IceCraft.Core.Archive.Providers;
+using IceCraft.Core.Configuration;
 
 public class RepositoryManager
 {
-    private readonly Dictionary<string, IRepositoryProvider> _providers = [];
+    private readonly IManagerConfiguration _config;
 
-    public void RegisterProvider(string id, IRepositoryProvider provider)
+    public RepositoryManager(IManagerConfiguration config)
+    {
+        _config = config;
+    }
+
+    private readonly Dictionary<string, IRepositorySource> _providers = [];
+
+    public void RegisterProvider(string id, IRepositorySource provider)
     {
         _providers.Add(id, provider);
     }
@@ -18,6 +26,11 @@ public class RepositoryManager
 
         foreach (var provider in _providers)
         {
+            if (!_config.IsSourceEnabled(provider.Key))
+            {
+                continue;
+            }
+
             var repo = await provider.Value.CreateRepository();
             if (repo == null)
             {

@@ -5,6 +5,10 @@
     <ProjectReference Include="..\IceCraft.Repositories.Adoptium\IceCraft.Repositories.Adoptium.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="DotNetConfig" Version="1.2.0" />
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>

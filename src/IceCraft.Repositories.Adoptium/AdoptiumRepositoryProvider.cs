@@ -5,7 +5,7 @@ using IceCraft.Core.Archive.Providers;
 using IceCraft.Core.Caching;
 using IceCraft.Repositories.Adoptium.Models;
 
-public class AdoptiumRepositoryProvider : IRepositoryProvider
+public class AdoptiumRepositoryProvider : IRepositorySource
 {
     private static readonly Guid StorageGuid = new("ad2c3cc6-4ad4-4c7a-bb45-cd3c85cea041");
     private const string AvailableReleaseCacheId = "available_releases";
