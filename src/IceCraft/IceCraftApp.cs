@@ -2,6 +2,7 @@
 
 using System.Diagnostics;
 using System.Reflection;
+using IceCraft.Core;
 
 internal static class IceCraftApp
 {
@@ -33,5 +34,10 @@ internal static class IceCraftApp
     public static void Initialize()
     {
         Directory.CreateDirectory(UserDataDirecory);
+    }
+
+    public static void Prepare(IRepositorySourceManager manager)
+    {
+        manager.RegisterSourceAsService("adoptium");
     }
 }

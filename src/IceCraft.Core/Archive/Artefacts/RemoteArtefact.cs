@@ -9,7 +9,7 @@ using IceCraft.Core.Archive.Checksums;
 [DebuggerDisplay($"{{{nameof(GetDebuggerDisplay)}(),nq}}")]
 public sealed record RemoteArtefact : IEquatable<RemoteArtefact>
 {
-    public RemoteArtefact(Uri downloadUri, string checksum, IChecksumValidator checksumValidator)
+    public RemoteArtefact(Uri downloadUri, string? checksum, IChecksumValidator checksumValidator)
     {
         DownloadUri = downloadUri;
         Checksum = checksum;

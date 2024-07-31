@@ -3,7 +3,7 @@
 internal class AdoptiumPackageArtefact
 {
     public required string Name { get; init; }
-    public required string Link { get; init; }
+    public required Uri Link { get; init; }
     public long Size { get; init; }
     public string? Checksum { get; init; }
     public Uri? ChecksumLink { get; init; }

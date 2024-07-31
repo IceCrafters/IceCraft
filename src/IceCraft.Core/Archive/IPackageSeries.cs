@@ -11,4 +11,16 @@
 public interface IPackageSeries
 {
     string Name { get; }
+
+    Task<IPackage?> GetLatestAsync();
+    Task<IEnumerable<IPackage>> EnumeratePackagesAsync();
+
+    async Task EnumeratePackagesAsync(Action<IPackage> consumer)
+    {
+        var enumerables = await EnumeratePackagesAsync();
+        foreach (var x in enumerables)
+        {
+            consumer(x);
+        }
+    }
 }

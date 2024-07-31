@@ -7,11 +7,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 public class RepositoryManager : IRepositorySourceManager
 {
+    private static int _counter;
+
     private readonly IManagerConfiguration _config;
     private readonly IServiceProvider _serviceProvider;
 
     public RepositoryManager(IManagerConfiguration config, IServiceProvider serviceProvider)
     {
+        _counter++;
+        System.Console.WriteLine("Trace: created #{0}", _counter);
         _config = config;
         _serviceProvider = serviceProvider;
     }
@@ -26,10 +30,12 @@ public class RepositoryManager : IRepositorySourceManager
     public void RegisterSourceAsService(string key)
     {
         _sources.Add(key, _serviceProvider.GetRequiredKeyedService<IRepositorySource>(key));
+        Console.WriteLine("Trace: added source {0} to #{1}", key, _counter);
     }
 
     public bool ContainsSource(string id)
     {
+        Console.WriteLine("Trace: query source existence {0} ({1}) from #{2}", id, _sources.ContainsKey(id), _counter);
         return _sources.ContainsKey(id);
     }
 

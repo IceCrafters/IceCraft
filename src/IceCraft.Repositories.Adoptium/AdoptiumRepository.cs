@@ -8,11 +8,10 @@ public class AdoptiumRepository : IRepository
 {
     private readonly AvailableReleaseInfo _info;
     private readonly Dictionary<string, AdoptiumPackageSeries> _series;
-    private readonly AdoptiumRepositoryProvider _provider;
 
     internal AdoptiumRepository(AvailableReleaseInfo releaseInfo, AdoptiumRepositoryProvider provider)
     {
-        _provider = provider;
+        Provider = provider;
         _info = releaseInfo;
         _series = new(releaseInfo.AvailableReleases.Count * 2);
         foreach (var release in releaseInfo.AvailableReleases)
@@ -24,6 +23,8 @@ public class AdoptiumRepository : IRepository
             _series.Add(jre.Name, jre);
         }
     }
+
+    internal AdoptiumRepositoryProvider Provider { get; }
 
     public IEnumerable<IPackageSeries> EnumerateSeries()
     {

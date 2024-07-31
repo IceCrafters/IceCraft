@@ -4,13 +4,14 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;
 
-public class TypeResolver : ITypeResolver
+public sealed class TypeResolver : ITypeResolver, IDisposable
 {
-    private readonly ServiceProvider _provider;
+    private readonly IServiceProvider _provider;
 
-    public TypeResolver(ServiceProvider provider)
+    public TypeResolver(IServiceProvider provider)
     {
-        _provider = provider;
+        System.Console.WriteLine("Trace: creating resolver");
+        _provider = provider ?? throw new ArgumentNullException(nameof(provider));
     }
 
     public object? Resolve(Type? type)
@@ -21,5 +22,13 @@ public class TypeResolver : ITypeResolver
         }
 
         return _provider.GetService(type);
+    }
+
+    public void Dispose()
+    {
+        if (_provider is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
     }
 }

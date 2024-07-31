@@ -15,19 +15,14 @@ var appServices = new ServiceCollection();
 appServices.AddSingleton<IManagerConfiguration, DNConfigImpl>()
     .AddSingleton<ICacheManager, FileSystemCacheManager>()
     .AddSingleton<IRepositorySourceManager, RepositoryManager>()
+    // Sources
     .AddKeyedSingleton<IRepositorySource, AdoptiumRepositoryProvider>("adoptium");
-
-var provider = appServices.BuildServiceProvider();
-var repoMan = provider.GetRequiredService<IRepositorySourceManager>();
-
-repoMan.RegisterSourceAsService("adoptium");
-
-// Initialize command line
 
 var registrar = new TypeRegistrar(appServices);
 
-var cmdApp = new CommandApp(registrar);
+// Initialize command line
 
+var cmdApp = new CommandApp(registrar);
 cmdApp.Configure(root =>
 {
     root.SetApplicationVersion(IceCraftApp.ProductVersion);
@@ -37,6 +32,13 @@ cmdApp.Configure(root =>
         source.AddCommand<SourceSwitchCommand.EnableCommand>("enable");
         source.AddCommand<SourceSwitchCommand.DisableCommand>("disable");
     });
+
+    // root.SetInterceptor(interceptor);
 });
+
+// // Final initialization
+// var provider = registrar.Provider;
+// var repoMan = provider.GetRequiredService<IRepositorySourceManager>();
+// repoMan.RegisterSourceAsService("adoptium");
 
 await cmdApp.RunAsync(args);
