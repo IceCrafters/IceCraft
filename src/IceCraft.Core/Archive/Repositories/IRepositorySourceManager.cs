@@ -6,6 +6,8 @@ using IceCraft.Core.Archive.Providers;
 
 public interface IRepositorySourceManager
 {
+    int Count { get; }
+
     /// <summary>
     /// Registers the specified instance as a source.
     /// </summary>
@@ -21,6 +23,6 @@ public interface IRepositorySourceManager
     void RegisterSourceAsService(string key);
 
     bool ContainsSource(string id);
-    Task<IEnumerable<IRepository>> GetRepositories();
+    Task<IEnumerable<IRepository>> GetRepositoriesAsync();
     IEnumerable<IRepositorySource> EnumerateSources();
 }

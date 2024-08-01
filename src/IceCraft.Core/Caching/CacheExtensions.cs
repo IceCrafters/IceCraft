@@ -1,6 +1,7 @@
 ﻿namespace IceCraft.Core.Caching;
 
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 
 public static class CacheExtensions
 {
@@ -76,6 +77,46 @@ public static class CacheExtensions
         return supplied;
     }
 
+    public static async Task<T> RollJsonAsync<T>(this ICacheStorage storage, 
+        string objId, 
+        Func<Task<T>> defaultSupplier, 
+        JsonTypeInfo<T> typeInfo,
+        bool reset = false)
+    {
+        if (!reset && storage.DoesObjectExist(objId))
+        {
+            try
+            {
+                using var readStream = storage.OpenReadObject(objId);
+                var retVal = await storage.ReadJsonAsync(objId, typeInfo);
+
+                if (retVal != null)
+                {
+                    return retVal;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("WARNING: Failed to read object '{0}'", objId);
+                Console.WriteLine(ex);
+            }
+        }
+
+        var supplied = await defaultSupplier();
+
+        try
+        {
+            await storage.CreateJsonAsync(objId, supplied, typeInfo);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("WARNING: Failed to store object '{0}'", objId);
+            Console.WriteLine(ex);
+        }
+
+        return supplied;
+    }
+
     public static T? ReadJson<T>(this ICacheStorage storage, string objId, JsonSerializerOptions? options = null)
     {
         using var stream = storage.OpenReadObject(objId);
@@ -88,6 +129,14 @@ public static class CacheExtensions
         return await JsonSerializer.DeserializeAsync<T>(stream, options);
     }
 
+    public static async Task<T?> ReadJsonAsync<T>(this ICacheStorage storage, 
+        string objId, 
+        JsonTypeInfo<T> typeInfo)
+    {
+        using var stream = storage.OpenReadObject(objId);
+        return await JsonSerializer.DeserializeAsync<T>(stream, typeInfo);
+    }
+
     public static void CreateJson<T>(this ICacheStorage storage, string objId, T value, JsonSerializerOptions? options = null)
     {
         using var stream = storage.CreateObject(objId);
@@ -98,5 +147,14 @@ public static class CacheExtensions
     {
         using var stream = storage.CreateObject(objId);
         await JsonSerializer.SerializeAsync(stream, value, options);
+    }
+
+    public static async Task CreateJsonAsync<T>(this ICacheStorage storage, 
+        string objId, 
+        T value, 
+        JsonTypeInfo<T> typeInfo)
+    {
+        using var stream = storage.CreateObject(objId);
+        await JsonSerializer.SerializeAsync(stream, value, typeInfo);
     }
 }

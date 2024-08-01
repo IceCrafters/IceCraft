@@ -43,6 +43,8 @@ public class RepositoryManager : IRepositorySourceManager
 
     private readonly Dictionary<string, IRepositorySource> _sources = [];
 
+    public int Count => _sources.Count;
+
     public void RegisterSource(string id, IRepositorySource source)
     {
         _sources.Add(id, source);
@@ -58,7 +60,7 @@ public class RepositoryManager : IRepositorySourceManager
         return _sources.ContainsKey(id);
     }
 
-    public async Task<IEnumerable<IRepository>> GetRepositories()
+    public async Task<IEnumerable<IRepository>> GetRepositoriesAsync()
     {
         var list = new List<IRepository>(_sources.Count);
 

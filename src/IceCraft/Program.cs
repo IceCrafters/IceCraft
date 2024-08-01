@@ -1,6 +1,7 @@
 ﻿using IceCraft;
 using IceCraft.Core;
 using IceCraft.Core.Archive.Checksums;
+using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Providers;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
@@ -22,6 +23,7 @@ appServices.AddSingleton<IManagerConfiguration, DNConfigImpl>()
     .AddSingleton<IRepositoryDefaultsSupplier, DefaultSource>()
     .AddSingleton<IRepositorySourceManager, RepositoryManager>()
     .AddSingleton<IChecksumRunner, DependencyChecksumRunner>()
+    .AddSingleton<IPackageIndexer, CachedIndexer>()
     // Hash validators
     .AddKeyedSingleton<IChecksumValidator, Sha256ChecksumValidator>("sha256")
     .AddLogging(configure => configure.AddSerilog());

@@ -1,8 +1,9 @@
 ﻿namespace IceCraft.Frontend.Commands;
 
 using System.ComponentModel;
+using System.Diagnostics;
 using IceCraft.Core;
-using IceCraft.Core.Archive;
+using IceCraft.Core.Archive.Indexing;
 using IceCraft.Frontend;
 using Serilog;
 using Spectre.Console;
@@ -11,10 +12,13 @@ using Spectre.Console.Cli;
 public class InfoCommand : AsyncCommand<InfoCommand.Settings>
 {
     private readonly IRepositorySourceManager _sourceManager;
+    private readonly IPackageIndexer _indexer;
 
-    public InfoCommand(IRepositorySourceManager sourceManager)
+    public InfoCommand(IRepositorySourceManager sourceManager,
+        IPackageIndexer indexer)
     {
         _sourceManager = sourceManager;
+        _indexer = indexer;
     }
 
     public override ValidationResult Validate(CommandContext context, Settings settings)
@@ -29,19 +33,13 @@ public class InfoCommand : AsyncCommand<InfoCommand.Settings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        var repos = await _sourceManager.GetRepositories();
+        Log.Information("Indexing packages");
+        var stopwatch = Stopwatch.StartNew();
+        var index = await _indexer.IndexAsync(_sourceManager);
+        stopwatch.Stop();
+        Log.Verbose("Indexing packages took {ElapsedMilliseconds} milliseconds", stopwatch.ElapsedMilliseconds);
 
-        IPackageSeries? result = null;
-
-        foreach (var repo in repos)
-        {
-            result = repo.GetSeriesOrDefault(settings.PackageId);
-            if (result == null)
-            {
-                continue;
-            }
-            break;
-        }
+        var result = index[settings.PackageId];
 
         if (result == null)
         {
@@ -49,18 +47,9 @@ public class InfoCommand : AsyncCommand<InfoCommand.Settings>
             return -2;
         }
 
-        var latest = await result.GetLatestAsync();
-        Log.Information("Package ID: {PackageId}", result.Name);
-
-        if (latest == null)
-        {
-            Log.Information("Package series {Name} doesn't have a latest version", result.Name);
-            return 0;
-        }
-
-        var meta = latest.GetMeta();
-        Log.Information("Latest version release: {ReleaseDate}", meta.ReleaseDate);
-        Log.Information("Latest version number: {Version}", meta.Version);
+        Log.Information("Package ID: {PackageId}", result.Id);
+        Log.Information("Latest version release: {ReleaseDate}", result.ReleaseDate);
+        Log.Information("Latest version number: {Version}", result.Version);
         return 0;
     }
 

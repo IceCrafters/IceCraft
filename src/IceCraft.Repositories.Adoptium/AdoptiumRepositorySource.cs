@@ -30,8 +30,7 @@ public class AdoptiumRepositorySource : IRepositorySource
     {
         var releases = await CacheStorage.RollJsonAsync(AvailableReleaseCacheId,
             Client.GetAvailableReleasesAsync, 
-            null, 
-            regenerate);
+            reset: regenerate);
 
         if (releases == null)
         {
