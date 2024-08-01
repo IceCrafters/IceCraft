@@ -55,7 +55,7 @@ public class RepositoryManager : IRepositorySourceManager
                 continue;
             }
 
-            _logger.LogTrace("RepositoryManager: provider gone through: '{}'", provider.Key);
+            _logger.LogDebug("RepositoryManager: provider gone through: '{}'", provider.Key);
             list.Add(repo);
         }
 

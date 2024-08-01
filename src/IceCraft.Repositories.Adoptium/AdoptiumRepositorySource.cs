@@ -12,12 +12,14 @@ public class AdoptiumRepositorySource : IRepositorySource
     private const string AvailableReleaseCacheId = "available_releases";
 
     private readonly ICacheManager _cacheManager;
+    private readonly ILogger _logger;
 
     public AdoptiumRepositorySource(IServiceProvider provider)
     {
         _cacheManager = provider.GetRequiredService<ICacheManager>();
         CacheStorage = _cacheManager.GetStorage(StorageGuid);
-        Client = new(provider.GetRequiredService<ILogger<AdoptiumRepositorySource>>());
+        _logger = provider.GetRequiredService<ILogger<AdoptiumRepositorySource>>();
+        Client = new(_logger);
     }
 
     internal AdoptiumApiClient Client { get; }
@@ -35,7 +37,8 @@ public class AdoptiumRepositorySource : IRepositorySource
         {
             return null;
         }
-
+        _logger.LogTrace("Adoptium: {Count} releases", releases.AvailableReleases.Count);
+        
         return new AdoptiumRepository(releases, this);
     }
 

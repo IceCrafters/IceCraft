@@ -23,7 +23,7 @@ public class AdoptiumPackage : IPackage
     {
         return new RemoteArtefact(_asset.Binary!.Package!.Link,
             _asset.Binary!.Package!.Checksum,
-            Sha256ChecksumValidator.Shared);
+            "sha256");
     }
 
     public PackageMeta GetMeta()

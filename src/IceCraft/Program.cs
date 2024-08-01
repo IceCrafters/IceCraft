@@ -6,6 +6,7 @@ using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Configuration;
 using IceCraft.Frontend;
+using IceCraft.Frontend.Commands;
 using IceCraft.Repositories.Adoptium;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -39,6 +40,9 @@ cmdApp.Configure(root =>
 
     root.AddCommand<UpdateCommand>("update")
         .WithDescription("Regenerates package cache and refs");
+
+    root.AddCommand<InfoCommand>("info")
+        .WithDescription("Shows various metadata for a package series");
 
     root.AddBranch<SourceSwitchCommand.Settings>("source", source =>
     {

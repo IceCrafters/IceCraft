@@ -11,19 +11,24 @@ public class LogInterceptor : ICommandInterceptor
 {
     void ICommandInterceptor.Intercept(CommandContext context, CommandSettings settings)
     {
-        var logSwitch = new LoggingLevelSwitch();
-
-        Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console(outputTemplate: "[{Level:u3}] {Message:lj}{NewLine}{Exception}",
-                             theme: AnsiConsoleTheme.Code,
-                             levelSwitch: logSwitch)
-            .CreateLogger();
+        var level = LogEventLevel.Information;
 
         if (settings is BaseSettings baseSettings
             && baseSettings.Verbose)
         {
-            Log.Verbose("Verbose logging enabled.");
-            logSwitch.MinimumLevel = LogEventLevel.Verbose;
+            level = LogEventLevel.Verbose;
+        }
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Is(level)
+            .WriteTo.Console(outputTemplate: "[{Level:u3}] {Message:lj}{NewLine}{Exception}",
+                     theme: AnsiConsoleTheme.Code,
+                     restrictedToMinimumLevel: level)
+            .CreateLogger();
+
+        if (level == LogEventLevel.Verbose)
+        {
+            Log.Verbose("Verbose logging is enabled.");
         }
     }
 }
