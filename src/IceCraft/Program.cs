@@ -19,12 +19,11 @@ IceCraftApp.Initialize();
 var appServices = new ServiceCollection();
 appServices.AddSingleton<IManagerConfiguration, DNConfigImpl>()
     .AddSingleton<ICacheManager, FileSystemCacheManager>()
+    .AddSingleton<IRepositoryDefaultsSupplier, DefaultSource>()
     .AddSingleton<IRepositorySourceManager, RepositoryManager>()
     .AddSingleton<IChecksumRunner, DependencyChecksumRunner>()
     // Hash validators
     .AddKeyedSingleton<IChecksumValidator, Sha256ChecksumValidator>("sha256")
-    // Sources
-    .AddKeyedSingleton<IRepositorySource, AdoptiumRepositorySource>("adoptium")
     .AddLogging(configure => configure.AddSerilog());
 
 var registrar = new TypeRegistrar(appServices);

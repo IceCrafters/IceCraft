@@ -35,9 +35,4 @@ internal static class IceCraftApp
     {
         Directory.CreateDirectory(UserDataDirecory);
     }
-
-    public static void Prepare(IRepositorySourceManager manager)
-    {
-        manager.RegisterSourceAsService("adoptium");
-    }
 }

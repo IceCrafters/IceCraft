@@ -18,8 +18,6 @@ public abstract class SourceSwitchCommand : Command<SourceSwitchCommand.Settings
         _sourceManager = sourceManager;
         _config = config;
         _toggle = state;
-
-        IceCraftApp.Prepare(_sourceManager);
     }
 
     public override ValidationResult Validate(CommandContext context, Settings settings)

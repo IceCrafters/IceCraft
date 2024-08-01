@@ -1,6 +1,6 @@
 ﻿namespace IceCraft.Core.Archive.Repositories;
 
-using System.Diagnostics;
+using System;
 using IceCraft.Core.Archive.Providers;
 using IceCraft.Core.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,14 +11,34 @@ public class RepositoryManager : IRepositorySourceManager
     private readonly IManagerConfiguration _config;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<RepositoryManager> _logger;
+    private readonly IRepositoryDefaultsSupplier? _defaults;
 
     public RepositoryManager(IManagerConfiguration config, 
         IServiceProvider serviceProvider,
-        ILogger<RepositoryManager> logger)
+        ILogger<RepositoryManager> logger,
+        IRepositoryDefaultsSupplier? defaults)
     {
         _config = config;
         _serviceProvider = serviceProvider;
         _logger = logger;
+        _defaults = defaults;
+
+        ApplyDefaults();
+    }
+
+    private void ApplyDefaults()
+    {
+        if (_defaults == null)
+        {
+            return;
+        }
+
+        var enumerable = _defaults.GetDefaultSources();
+
+        foreach (var entry in enumerable)
+        {
+            RegisterSource(entry.Key, entry.Value.Invoke(_serviceProvider));
+        }
     }
 
     private readonly Dictionary<string, IRepositorySource> _sources = [];
@@ -55,7 +75,7 @@ public class RepositoryManager : IRepositorySourceManager
                 continue;
             }
 
-            _logger.LogDebug("RepositoryManager: provider gone through: '{}'", provider.Key);
+            _logger.LogDebug("RepositoryManager: provider gone through: '{Key}'", provider.Key);
             list.Add(repo);
         }
 

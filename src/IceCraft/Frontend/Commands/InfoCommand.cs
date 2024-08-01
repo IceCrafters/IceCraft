@@ -29,7 +29,6 @@ public class InfoCommand : AsyncCommand<InfoCommand.Settings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        IceCraftApp.Prepare(_sourceManager);
         var repos = await _sourceManager.GetRepositories();
 
         IPackageSeries? result = null;
