@@ -4,11 +4,15 @@ using System.ComponentModel;
 using System.Diagnostics;
 using IceCraft.Core;
 using IceCraft.Core.Archive.Indexing;
+using IceCraft.Core.Archive.Repositories;
 using IceCraft.Frontend;
+using JetBrains.Annotations;
 using Serilog;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
+[Description("Displays information about a package series")]
+[UsedImplicitly(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature)]
 public class InfoCommand : AsyncCommand<InfoCommand.Settings>
 {
     private readonly IRepositorySourceManager _sourceManager;
@@ -39,20 +43,19 @@ public class InfoCommand : AsyncCommand<InfoCommand.Settings>
         stopwatch.Stop();
         Log.Verbose("Indexing packages took {ElapsedMilliseconds} milliseconds", stopwatch.ElapsedMilliseconds);
 
-        var result = index[settings.PackageId];
-
-        if (result == null)
+        if (!index.TryGetValue(settings.PackageId, out var result))
         {
             Log.Error("Package series {PackageId} not found", settings.PackageId);
             return -2;
         }
-
+        
         Log.Information("Package ID: {PackageId}", result.Id);
         Log.Information("Latest version release: {ReleaseDate}", result.ReleaseDate);
         Log.Information("Latest version number: {Version}", result.Version);
         return 0;
     }
 
+    [UsedImplicitly(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature)]
     public class Settings : BaseSettings
     {
         [CommandArgument(0, "<PACKAGE>")]

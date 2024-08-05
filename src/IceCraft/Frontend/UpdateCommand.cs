@@ -3,16 +3,19 @@
 using System.ComponentModel;
 using IceCraft.Core;
 using IceCraft.Core.Archive.Indexing;
+using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
+using JetBrains.Annotations;
 using Serilog;
 using Spectre.Console.Cli;
 
 [Description("Regenerate all package refs")]
+[UsedImplicitly(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature)]
 public class UpdateCommand : AsyncCommand<BaseSettings>
 {
     private readonly IRepositorySourceManager _sourceManager;
     private readonly IPackageIndexer _indexer;
-
+    
     public UpdateCommand(IRepositorySourceManager sourceManager,
         IPackageIndexer indexer)
     {
@@ -47,6 +50,8 @@ public class UpdateCommand : AsyncCommand<BaseSettings>
 
         Log.Information("Refreshed {PkgNum} package series from {SourceNum} sources", pkgNum, sourceNum);
 
+        // ReSharper disable once InvertIf
+        // Justification: ICacheClearable is a special case
         if (_indexer is ICacheClearable clearable)
         {
             Log.Information("Updating packages index");

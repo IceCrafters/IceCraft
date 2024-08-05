@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using IceCraft.Core.Archive;
 using IceCraft.Core.Caching;
-using IceCraft.Repositories.Adoptium.Models;
 using Microsoft.Extensions.Logging;
 
 public class AdoptiumPackageSeries : IPackageSeries
@@ -13,13 +12,15 @@ public class AdoptiumPackageSeries : IPackageSeries
     private readonly int _majorVersion;
     private readonly string _type;
     private readonly AdoptiumRepository _repository;
+    private readonly ILogger _logger;
 
-    internal AdoptiumPackageSeries(int majorVersion, string type, AdoptiumRepository repository)
+    internal AdoptiumPackageSeries(int majorVersion, string type, AdoptiumRepository repository, ILogger logger)
     {
         _majorVersion = majorVersion;
         _type = type;
         Name = $"adoptium{_majorVersion}-{type}";
         _repository = repository;
+        _logger = logger;
     }
 
     public string Name { get; }
@@ -40,15 +41,17 @@ public class AdoptiumPackageSeries : IPackageSeries
             "hotspot",
             AdoptiumApiClient.GetOs()));
 
+        // ReSharper disable once InvertIf
         if (all == null)
         {
             // Malformed upstream
+            _logger.LogWarning("Adoptium API returned no valid versions conforming to required pattern");
+            _logger.LogWarning("Not providing packages");
             return [];
         }
 
         return all
-            .Where(x => x != null)
-            .Where(x => x.Binary != null && x.Binary.Package != null)
+            .Where(x => x.Binary is { Package: not null })
             .Select(x => new AdoptiumPackage(this, x));
     }
 
@@ -66,9 +69,8 @@ public class AdoptiumPackageSeries : IPackageSeries
             "hotspot",
             RuntimeInformation.OSArchitecture,
             _type,
-            AdoptiumApiClient.GetOs()))?.FirstOrDefault(x => x != null
-                && x.Binary != null 
-                && x.Binary.Package != null));
+            AdoptiumApiClient.GetOs()))?.FirstOrDefault(x
+                => x is { Binary.Package: not null }));
 
         return latest != null
             ? new AdoptiumPackage(this, latest)

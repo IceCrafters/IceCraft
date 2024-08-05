@@ -14,7 +14,8 @@ internal class AdoptiumApiClient
     private readonly ILogger _logger;
 
     #region Site Service
-    private static readonly string Root = "https://api.adoptium.net";
+
+    private const string Root = "https://api.adoptium.net";
 
     public static bool IsArchitectureSupported(Architecture architecture)
     {
@@ -31,17 +32,12 @@ internal class AdoptiumApiClient
 
     public static bool IsOsSupported()
     {
-        if (!OperatingSystem.IsLinux()
-            && !OperatingSystem.IsWindows()
-            && !OperatingSystem.IsMacOS())
-        {
-            return false;
-        }
-
-        return true;
+        return OperatingSystem.IsLinux()
+               || OperatingSystem.IsWindows()
+               || OperatingSystem.IsMacOS();
     }
 
-    public static string GetApiArchitecture(Architecture architecture)
+    private static string GetApiArchitecture(Architecture architecture)
     {
         return architecture switch
         {

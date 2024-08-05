@@ -1,19 +1,22 @@
 ﻿namespace IceCraft;
 
-using System;
 using System.Collections.Generic;
-using IceCraft.Core.Archive.Providers;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Repositories.Adoptium;
 
+using SourceFactoryPair = KeyValuePair<string, Func<IServiceProvider, 
+    IceCraft.Core.Archive.Providers.IRepositorySource>>;
+
 public class DefaultSource : IRepositoryDefaultsSupplier
 {
-    public IEnumerable<KeyValuePair<string, Func<IServiceProvider, IRepositorySource>>> GetDefaultSources()
+    public IEnumerable<SourceFactoryPair> GetDefaultSources()
     {
         // TODO make this extensible.
         return
         [
-            new("adoptium", provider => new AdoptiumRepositorySource(provider))
+            new SourceFactoryPair(
+                "adoptium", 
+                provider => new AdoptiumRepositorySource(provider))
         ];
     }
 }

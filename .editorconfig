@@ -4,4 +4,9 @@
 csharp_using_directive_placement = inside_namespace
 
 # IDE0290: Use primary constructor
+# RESHARPER/RIDER USERS: DON'T REMOVE THIS
+# THIS IS A VALID ROSLYN ENTRY
 csharp_style_prefer_primary_constructors = false
+
+resharper_csharp_qualified_using_at_nested_scope = true
+resharper_convert_to_primary_constructor_highlighting = false

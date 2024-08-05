@@ -1,8 +1,6 @@
 namespace IceCraft.Frontend;
 
-using System.Diagnostics;
 using Serilog;
-using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using Spectre.Console.Cli;
@@ -13,8 +11,7 @@ public class LogInterceptor : ICommandInterceptor
     {
         var level = LogEventLevel.Information;
 
-        if (settings is BaseSettings baseSettings
-            && baseSettings.Verbose)
+        if (settings is BaseSettings { Verbose: true })
         {
             level = LogEventLevel.Verbose;
         }

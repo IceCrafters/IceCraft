@@ -2,6 +2,7 @@
 
 using System.Threading.Tasks;
 using IceCraft.Core.Archive.Packaging;
+using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Serialization;
 
@@ -9,15 +10,12 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
 {
     private static readonly Guid CacheStorageId = new("5ce7b9d1-0aea-4aa1-bb9d-e713c457c632");
     private const string PackageIndexStorage = "pkgIndex";
-
-    private readonly ICacheManager _cacheManager;
+    
     private readonly ICacheStorage _cacheStorage;
 
     public CachedIndexer(ICacheManager cacheManager)
     {
-        _cacheManager = cacheManager;
-
-        _cacheStorage = _cacheManager.GetStorage(CacheStorageId);
+        _cacheStorage = cacheManager.GetStorage(CacheStorageId);
     }
 
     public async Task<PackageIndex> IndexAsync(IRepositorySourceManager manager)

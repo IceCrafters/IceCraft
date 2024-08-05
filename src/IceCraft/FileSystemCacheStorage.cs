@@ -93,22 +93,12 @@ internal class FileSystemCacheStorage : ICacheStorage
 
         _cacheIndex.Remove(objectName);
         InternalSaveIndex();
-        return;
     }
 
     public bool DoesObjectExist(string objectName)
     {
-        if (!_cacheIndex.TryGetValue(objectName, out var id))
-        {
-            return false;
-        }
-
-        if (!File.Exists(InternalGetFileName(id)))
-        {
-            return false;
-        }
-
-        return true;
+        return _cacheIndex.TryGetValue(objectName, out var id)
+               && File.Exists(InternalGetFileName(id));
     }
 
     public Stream OpenReadObject(string objectName)

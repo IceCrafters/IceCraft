@@ -1,5 +1,9 @@
 ﻿namespace IceCraft.Repositories.Adoptium.Models;
 
+using JetBrains.Annotations;
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers,
+    Reason = "JSON model")]
 internal class AdoptiumBinaryAssetView
 {
     public AdoptiumBinaryAsset? Binary { get; init; }

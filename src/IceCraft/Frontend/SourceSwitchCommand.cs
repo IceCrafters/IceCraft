@@ -1,10 +1,14 @@
 ﻿namespace IceCraft.Frontend;
 
 using IceCraft.Core;
+using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Configuration;
+using JetBrains.Annotations;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers,
+        Reason = "Used by Program; see Spectre.Console.Cli docs and Program.cs")]
 public abstract class SourceSwitchCommand : Command<SourceSwitchCommand.Settings>
 {
     private readonly IRepositorySourceManager _sourceManager;

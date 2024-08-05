@@ -2,23 +2,19 @@
 using IceCraft.Core;
 using IceCraft.Core.Archive.Checksums;
 using IceCraft.Core.Archive.Indexing;
-using IceCraft.Core.Archive.Providers;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Configuration;
 using IceCraft.Frontend;
 using IceCraft.Frontend.Commands;
-using IceCraft.Repositories.Adoptium;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using Serilog.Sinks.SystemConsole.Themes;
 using Spectre.Console;
 using Spectre.Console.Cli;
-using Spectre.Console.Cli.Internal.Configuration;
 
 IceCraftApp.Initialize();
 var appServices = new ServiceCollection();
-appServices.AddSingleton<IManagerConfiguration, DNConfigImpl>()
+appServices.AddSingleton<IManagerConfiguration, DotNetConfigServiceImpl>()
     .AddSingleton<ICacheManager, FileSystemCacheManager>()
     .AddSingleton<IRepositoryDefaultsSupplier, DefaultSource>()
     .AddSingleton<IRepositorySourceManager, RepositoryManager>()
@@ -51,7 +47,7 @@ cmdApp.Configure(root =>
         source.AddCommand<SourceSwitchCommand.DisableCommand>("disable");
     });
 
-    root.SetExceptionHandler((ex, resolver) =>
+    root.SetExceptionHandler((ex, _) =>
     {
         if (ex is CommandRuntimeException cex)
         {

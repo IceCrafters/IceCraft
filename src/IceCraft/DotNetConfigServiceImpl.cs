@@ -3,20 +3,15 @@
 using DotNetConfig;
 using IceCraft.Core.Configuration;
 
-internal class DNConfigImpl : IManagerConfiguration
+internal class DotNetConfigServiceImpl : IManagerConfiguration
 {
-    private readonly Config _config;
+    private readonly Config _config = Config.Build();
 
     private const string SectionSources = "source";
     private const string EntrySourcesEnabled = "enabled";
 
     private const string SectionBehaviour = "behaviour";
     private const string EntryBehaviourAllowUncertainHash = "allowUncertainHash";
-
-    public DNConfigImpl()
-    {
-        _config = Config.Build();
-    }
 
     public bool IsSourceEnabled(string sourceId)
     {

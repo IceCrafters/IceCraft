@@ -2,13 +2,12 @@
 
 using System.Diagnostics;
 using System.Reflection;
-using IceCraft.Core;
 
 internal static class IceCraftApp
 {
-    internal static readonly string UserDataDirecory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+    private static readonly string UserDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "IceCraft");
-    internal static readonly string CachesDirectory = Path.Combine(UserDataDirecory, "caches");
+    internal static readonly string CachesDirectory = Path.Combine(UserDataDirectory, "caches");
 
     /// <summary>
     /// Gets the product version information of the IceCraft driver.
@@ -33,6 +32,6 @@ internal static class IceCraftApp
 
     public static void Initialize()
     {
-        Directory.CreateDirectory(UserDataDirecory);
+        Directory.CreateDirectory(UserDataDirectory);
     }
 }

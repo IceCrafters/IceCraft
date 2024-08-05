@@ -1,4 +1,4 @@
-﻿namespace IceCraft.Core;
+﻿namespace IceCraft.Core.Archive.Repositories;
 
 using System.Threading.Tasks;
 using IceCraft.Core.Archive;

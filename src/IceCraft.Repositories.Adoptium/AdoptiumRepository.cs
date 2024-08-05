@@ -3,21 +3,23 @@
 using System.Collections.Generic;
 using IceCraft.Core.Archive;
 using IceCraft.Repositories.Adoptium.Models;
+using Microsoft.Extensions.Logging;
 
 public class AdoptiumRepository : IRepository
 {
     private readonly AvailableReleaseInfo _info;
     private readonly Dictionary<string, AdoptiumPackageSeries> _series;
 
-    internal AdoptiumRepository(AvailableReleaseInfo releaseInfo, AdoptiumRepositorySource provider)
+    internal AdoptiumRepository(AvailableReleaseInfo releaseInfo, AdoptiumRepositorySource provider,
+        ILogger logger)
     {
         Provider = provider;
         _info = releaseInfo;
-        _series = new(releaseInfo.AvailableReleases.Count * 2);
+        _series = new Dictionary<string, AdoptiumPackageSeries>(releaseInfo.AvailableReleases.Count * 2);
         foreach (var release in releaseInfo.AvailableReleases)
         {
-            var jdk = new AdoptiumPackageSeries(release, "jdk", this);
-            var jre = new AdoptiumPackageSeries(release, "jre", this);
+            var jdk = new AdoptiumPackageSeries(release, "jdk", this, logger);
+            var jre = new AdoptiumPackageSeries(release, "jre", this, logger);
 
             _series.Add(jdk.Name, jdk);
             _series.Add(jre.Name, jre);

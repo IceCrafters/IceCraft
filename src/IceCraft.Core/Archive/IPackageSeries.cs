@@ -17,8 +17,8 @@ public interface IPackageSeries
 
     async Task EnumeratePackagesAsync(Action<IPackage> consumer)
     {
-        var enumerables = await EnumeratePackagesAsync();
-        foreach (var x in enumerables)
+        var enumerable = await EnumeratePackagesAsync();
+        foreach (var x in enumerable)
         {
             consumer(x);
         }

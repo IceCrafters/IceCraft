@@ -1,5 +1,9 @@
-﻿namespace IceCraft.Repositories.Adoptium;
+﻿namespace IceCraft.Repositories.Adoptium.Models;
 
+using JetBrains.Annotations;
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers,
+    Reason = "JSON model")]
 public class AdoptiumReleaseVersion
 {
     public int Major { get; init; }

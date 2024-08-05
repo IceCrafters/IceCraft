@@ -1,7 +1,10 @@
 ﻿namespace IceCraft.Repositories.Adoptium.Models;
 
 using System.Text.Json.Serialization;
+using JetBrains.Annotations;
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers,
+    Reason = "JSON model")]
 internal class AdoptiumBinaryAsset
 {
     public required string Os { get; init; }

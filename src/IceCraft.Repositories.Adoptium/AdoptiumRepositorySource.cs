@@ -38,7 +38,7 @@ public class AdoptiumRepositorySource : IRepositorySource
         }
         _logger.LogTrace("Adoptium: {Count} releases", releases.AvailableReleases.Count);
         
-        return new AdoptiumRepository(releases, this);
+        return new AdoptiumRepository(releases, this, _logger);
     }
 
     public async Task<IRepository?> CreateRepositoryAsync()

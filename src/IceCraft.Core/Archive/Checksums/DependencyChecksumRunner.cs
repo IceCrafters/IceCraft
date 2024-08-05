@@ -1,7 +1,6 @@
-﻿namespace IceCraft.Core;
+﻿namespace IceCraft.Core.Archive.Checksums;
 
 using IceCraft.Core.Archive.Artefacts;
-using IceCraft.Core.Archive.Checksums;
 using IceCraft.Core.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -50,7 +49,7 @@ public class DependencyChecksumRunner : IChecksumRunner
 
         byte[] checkCode;
 
-        using (var stream = File.OpenRead(file))
+        await using (var stream = File.OpenRead(file))
         {
             checkCode = await validator.GetChecksumBinaryAsync(stream);
         }

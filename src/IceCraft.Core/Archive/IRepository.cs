@@ -12,7 +12,7 @@ public interface IRepository
     /// <summary>
     /// Enumerate all series available for this repository.
     /// </summary>
-    /// <returns>An enumeratable for the series.</returns>
+    /// <returns>An enumerable for the series.</returns>
     IEnumerable<IPackageSeries> EnumerateSeries();
 
     int GetExpectedSeriesCount();
