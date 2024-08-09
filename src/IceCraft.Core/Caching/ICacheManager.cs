@@ -19,4 +19,6 @@ public interface ICacheManager
     /// <param name="id">The ID of the storage to acquire. Should be unique.</param>
     /// <returns>The acquired storage.</returns>
     ICacheStorage GetStorage(Guid id);
+
+    void RemoveAll();
 }

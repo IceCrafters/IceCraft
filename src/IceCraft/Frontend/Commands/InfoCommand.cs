@@ -48,10 +48,21 @@ public class InfoCommand : AsyncCommand<InfoCommand.Settings>
             Log.Error("Package series {PackageId} not found", settings.PackageId);
             return -2;
         }
-        
-        Log.Information("Package ID: {PackageId}", result.Id);
-        Log.Information("Latest version release: {ReleaseDate}", result.ReleaseDate);
-        Log.Information("Latest version number: {Version}", result.Version);
+
+        var latestId = result.LatestVersion;
+
+        if (latestId == null
+            || !result.Versions.TryGetValue(latestId, out var latest))
+        {
+            Log.Warning("Package did not specify latest version");
+            return 0;
+        }
+
+        var meta = latest.Metadata;
+
+        Log.Information("Package ID: {PackageId}", meta.Id);
+        Log.Information("Latest version release: {ReleaseDate}", meta.ReleaseDate);
+        Log.Information("Latest version number: {Version}", meta.Version);
         return 0;
     }
 

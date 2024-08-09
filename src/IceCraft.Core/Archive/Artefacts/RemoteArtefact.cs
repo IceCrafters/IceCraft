@@ -8,16 +8,13 @@ using System.Diagnostics;
 [DebuggerDisplay($"{{{nameof(GetDebuggerDisplay)}(),nq}}")]
 public sealed record RemoteArtefact
 {
-    public RemoteArtefact(Uri downloadUri, string? checksum, string checksumType)
+    public RemoteArtefact()
     {
-        DownloadUri = downloadUri;
-        Checksum = checksum;
-        ChecksumType = checksumType;
     }
 
-    public Uri DownloadUri { get; }
-    public string? Checksum { get; }
-    public string ChecksumType { get; }
+    public required Uri DownloadUri { get; init; }
+    public string? Checksum { get; init; }
+    public required string ChecksumType { get; init; }
 
     private string GetDebuggerDisplay()
     {

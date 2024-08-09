@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text.Json;
 using Flurl;
 using IceCraft.Repositories.Adoptium.Models;
@@ -30,6 +31,9 @@ internal class AdoptiumApiClient
         };
     }
 
+    [SupportedOSPlatformGuard("linux")]
+    [SupportedOSPlatformGuard("windows")]
+    [SupportedOSPlatformGuard("macos")]
     public static bool IsOsSupported()
     {
         return OperatingSystem.IsLinux()
@@ -131,6 +135,14 @@ internal class AdoptiumApiClient
         string jvm,
         string os)
     {
+        _logger.LogTrace("Getting eclipse (Java {FeatureVersion}) {Jvm}/{ImageType} {ReleaseType} releases for os {OS} and arch {Architecture}", 
+            featureVersion, 
+            jvm, 
+            imageType,
+            releaseType, 
+            os, 
+            GetApiArchitecture(architecture));
+
         var url = new Url(Root)
             .AppendPathSegment("/v3/assets/feature_releases/")
             .AppendPathSegment(featureVersion)
@@ -141,6 +153,21 @@ internal class AdoptiumApiClient
             .AppendQueryParam("jvm_impl", jvm)
             .AppendQueryParam("os", os);
 
-        return await _client.GetFromJsonAsync<IEnumerable<AdoptiumBinaryAssetView>>(url, SerializerOptions);
+        var response = await _client.GetAsync(url);
+        _logger.LogDebug("Url: {Url}", url);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            _logger.LogWarning("Found nothing for Java {FeatureVersion} {Jvm}/{ImageType} {ReleaseType} releases for os {OS} and arch {Architecture}", 
+            featureVersion, 
+            jvm, 
+            imageType,
+            releaseType, 
+            os, 
+            GetApiArchitecture(architecture));
+            return [];
+        }
+
+        return await response.Content.ReadFromJsonAsync<IEnumerable<AdoptiumBinaryAssetView>>(SerializerOptions);
     }
 }

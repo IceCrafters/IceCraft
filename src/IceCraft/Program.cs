@@ -50,6 +50,11 @@ cmdApp.Configure(root =>
         source.AddCommand<SourceSwitchCommand.DisableCommand>("disable");
     });
 
+    root.AddBranch<BaseSettings>("cache", cache =>
+    {
+        cache.AddCommand<ClearCacheCommand>("clear");
+    });
+
     root.SetExceptionHandler((ex, _) =>
     {
         if (ex is CommandRuntimeException cex)

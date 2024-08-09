@@ -15,6 +15,10 @@ public interface IPackageSeries
     Task<IPackage?> GetLatestAsync();
     Task<IEnumerable<IPackage>> EnumeratePackagesAsync();
 
+    Task<string?> GetLatestVersionIdAsync();
+
+    Task<int> GetExpectedPackageCountAsync();
+
     async Task EnumeratePackagesAsync(Action<IPackage> consumer)
     {
         var enumerable = await EnumeratePackagesAsync();

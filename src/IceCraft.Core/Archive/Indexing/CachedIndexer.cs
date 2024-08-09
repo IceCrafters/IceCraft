@@ -1,52 +1,90 @@
 ﻿namespace IceCraft.Core.Archive.Indexing;
 
 using System.Threading.Tasks;
-using IceCraft.Core.Archive.Packaging;
+using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Serialization;
+using Microsoft.Extensions.Logging;
 
 public class CachedIndexer : IPackageIndexer, ICacheClearable
 {
     private static readonly Guid CacheStorageId = new("5ce7b9d1-0aea-4aa1-bb9d-e713c457c632");
-    private const string PackageIndexStorage = "pkgIndex";
+    private const string PackageIndexStorage = "pkgIndex_v0_1";
     
     private readonly ICacheStorage _cacheStorage;
 
-    public CachedIndexer(ICacheManager cacheManager)
+    private readonly ILogger<CachedIndexer> _logger;
+
+    public CachedIndexer(ICacheManager cacheManager,
+        ILogger<CachedIndexer> logger)
     {
         _cacheStorage = cacheManager.GetStorage(CacheStorageId);
+        _logger = logger;
     }
 
     public async Task<PackageIndex> IndexAsync(IRepositorySourceManager manager)
     {
         var dict = await _cacheStorage.RollJsonAsync(PackageIndexStorage, 
             async () => await GenerateNewIndex(manager),
-            IceCraftCoreContext.Default.BasePackageIndex);
+            IceCraftCoreContext.Default.BasePackageIndex_v0_1);
 
         return new PackageIndex(dict);
     }
 
-    private static async Task<Dictionary<string, PackageMeta>> GenerateNewIndex(IRepositorySourceManager manager)
+    private async Task<Dictionary<string, CachedPackageSeriesInfo>> GenerateNewIndex(IRepositorySourceManager manager)
     {
-        var index = new Dictionary<string, PackageMeta>(manager.Count);
+        var index = new Dictionary<string, CachedPackageSeriesInfo>(manager.Count);
         var repos = await manager.GetRepositoriesAsync();
         
         foreach (var repo in repos)
         {
             index.EnsureCapacity(index.Count + repo.GetExpectedSeriesCount());
-            var series = repo.EnumerateSeries();
+            var seriesList = repo.EnumerateSeries();
             
-            foreach (var x in series)
+            foreach (var series in seriesList)
             {
-                var latest = await x.GetLatestAsync();
-                if (latest == null)
+                var latestVersion = await series.GetLatestVersionIdAsync();
+                var expectedCount = await series.GetExpectedPackageCountAsync();
+
+                _logger.LogInformation("Indexing series {Name} with {ExpectedCount} packages", series.Name, expectedCount);
+
+                // Creates this whole dictionary of version information.
+                var versions = new Dictionary<string, CachedPackageInfo>(
+                    expectedCount);
+
+                var pkgInfos = await series.EnumeratePackagesAsync();
+                foreach (var pkg in pkgInfos)
                 {
-                    continue;
+                    // Go through everything.
+                    var pkgMeta = pkg.GetMeta();
+                    _logger.LogTrace("Indexing version {Version}", pkgMeta.Version);
+
+                    RemoteArtefact remoteArtefact; 
+
+                    try
+                    {
+                        remoteArtefact = pkg.GetArtefact();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to index package {Id} {Version}", pkgMeta.Id, pkgMeta.Version);
+                        continue;
+                    }
+
+                    versions.Add(pkgMeta.Version, new CachedPackageInfo
+                    {
+                        Metadata = pkgMeta,
+                        Artefact = remoteArtefact
+                    });
                 }
 
-                var meta = latest.GetMeta();
-                index.Add(x.Name, meta);
+                index.Add(series.Name, new CachedPackageSeriesInfo
+                {
+                    Name = series.Name,
+                    Versions = versions,
+                    LatestVersion = latestVersion
+                });
             }
         }
 

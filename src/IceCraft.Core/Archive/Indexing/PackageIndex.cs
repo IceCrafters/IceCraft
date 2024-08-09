@@ -2,11 +2,10 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using IceCraft.Core.Archive.Packaging;
 
-public sealed class PackageIndex : ReadOnlyDictionary<string, PackageMeta>
+public sealed class PackageIndex : ReadOnlyDictionary<string, CachedPackageSeriesInfo>
 {
-    public PackageIndex(IDictionary<string, PackageMeta> dictionary) : base(dictionary)
+    public PackageIndex(IDictionary<string, CachedPackageSeriesInfo> dictionary) : base(dictionary)
     {
     }
 }
