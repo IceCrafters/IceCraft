@@ -1,10 +1,11 @@
 ﻿using IceCraft;
-using IceCraft.Core;
 using IceCraft.Core.Archive.Checksums;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Configuration;
+using IceCraft.Core.Network;
+using IceCraft.Core.Platform;
 using IceCraft.Frontend;
 using IceCraft.Frontend.Commands;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,8 @@ using Spectre.Console.Cli;
 IceCraftApp.Initialize();
 var appServices = new ServiceCollection();
 appServices.AddSingleton<IManagerConfiguration, DotNetConfigServiceImpl>()
+    .AddSingleton<IFrontendApp, IceCraftApp>()
+    .AddSingleton<IDownloadManager, DownloadManager>()
     .AddSingleton<ICacheManager, FileSystemCacheManager>()
     .AddSingleton<IRepositoryDefaultsSupplier, DefaultSource>()
     .AddSingleton<IRepositorySourceManager, RepositoryManager>()
