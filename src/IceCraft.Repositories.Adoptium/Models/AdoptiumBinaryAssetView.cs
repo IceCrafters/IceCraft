@@ -1,4 +1,4 @@
-﻿namespace IceCraft.Repositories.Adoptium.Models;
+namespace IceCraft.Repositories.Adoptium.Models;
 
 using JetBrains.Annotations;
 
@@ -6,11 +6,10 @@ using JetBrains.Annotations;
     Reason = "JSON model")]
 internal class AdoptiumBinaryAssetView
 {
-    public IList<AdoptiumBinaryAsset>? Binaries { get; init; }
+    public AdoptiumBinaryAsset? Binary { get; init; }
     public required string ReleaseName { get; init; }
     public required Uri ReleaseLink { get; init; }
     public string? Vendor { get; init; }
-    public DateTime? Timestamp { get; init; }
-    public DateTime? UpdatedAt { get; init; }
-    public AdoptiumReleaseVersion? VersionData { get; init; }
+    public AdoptiumReleaseVersion? Version { get; init; }
 }
+

@@ -10,10 +10,10 @@ using Microsoft.Extensions.Logging;
 public class AdoptiumPackage : IPackage
 {
     private readonly AdoptiumPackageSeries _series;
-    private readonly AdoptiumBinaryAssetView _asset;
+    private readonly AdoptiumBinaryRelease _asset;
     private readonly ILogger _logger;
 
-    internal AdoptiumPackage(AdoptiumPackageSeries series, AdoptiumBinaryAssetView asset, ILogger logger)
+    internal AdoptiumPackage(AdoptiumPackageSeries series, AdoptiumBinaryRelease asset, ILogger logger)
     {
         _series = series;
         _asset = asset;

@@ -49,7 +49,7 @@ public class AdoptiumPackageSeries : IPackageSeries
             .Select(x => new AdoptiumPackage(this, x, _logger));
     }
 
-    private async Task<IEnumerable<AdoptiumBinaryAssetView>?> GetAllAssetViewsAsync()
+    private async Task<IEnumerable<AdoptiumBinaryRelease>?> GetAllAssetViewsAsync()
     {
         return await _repository.Provider.CacheStorage.RollJsonAsync($"{Name}.all",
             async () => await _repository.Provider.Client.GetFeatureReleasesAsync(_majorVersion,
@@ -66,13 +66,10 @@ public class AdoptiumPackageSeries : IPackageSeries
         return views?.Count() ?? 0;
     }
 
-    public async Task<IPackage?> GetLatestAsync()
+    public Task<IPackage?> GetLatestAsync()
     {
-        var latest = await GetLatestAssetView();
-
-        return latest != null
-            ? new AdoptiumPackage(this, latest, _logger)
-            : null;
+        _logger.LogWarning("Unsupported API call GetLatestAsync");
+        return Task.FromResult<IPackage?>(null);
     }
 
     private async Task<AdoptiumBinaryAssetView?> GetLatestAssetView()
@@ -96,18 +93,18 @@ public class AdoptiumPackageSeries : IPackageSeries
             RuntimeInformation.OSArchitecture,
             _type,
             AdoptiumApiClient.GetOs()))?.FirstOrDefault(x
-                => x is { Binaries: not null }));
+                => x is { Binary: not null }));
     }
 
     public async Task<string?> GetLatestVersionIdAsync()
     {
         var view = await GetLatestAssetView();
-        if (view is not { VersionData: not null })
+        if (view is not { Version: not null })
         {
             _logger.LogWarning("Adoptium latest release ('{ReleaseName}') comes without a version", view?.ReleaseName);
             return null;
         }
 
-        return view.VersionData.Semver;
+        return view.Version.Semver;
     }
 }

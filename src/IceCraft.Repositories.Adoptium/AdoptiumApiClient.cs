@@ -125,10 +125,12 @@ internal class AdoptiumApiClient
             .AppendQueryParam("architecture", GetApiArchitecture(architecture))
             .AppendQueryParam("os", os);
 
+        _logger.LogDebug("{Url}", url);
+
         return await _client.GetFromJsonAsync<IEnumerable<AdoptiumBinaryAssetView>>(url, SerializerOptions);
     }
 
-    internal async Task<IEnumerable<AdoptiumBinaryAssetView>?> GetFeatureReleasesAsync(int featureVersion, 
+    internal async Task<IEnumerable<AdoptiumBinaryRelease>?> GetFeatureReleasesAsync(int featureVersion, 
         string releaseType, 
         Architecture architecture, 
         string imageType,
@@ -168,6 +170,6 @@ internal class AdoptiumApiClient
             return [];
         }
 
-        return await response.Content.ReadFromJsonAsync<IEnumerable<AdoptiumBinaryAssetView>>(SerializerOptions);
+        return await response.Content.ReadFromJsonAsync<IEnumerable<AdoptiumBinaryRelease>>(SerializerOptions);
     }
 }
