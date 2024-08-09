@@ -7,11 +7,11 @@ using Serilog;
 
 internal class FileSystemCacheStorage : ICacheStorage
 {
-    private readonly string _baseDirectory;
-    private readonly string _id;
     private readonly Dictionary<string, Guid> _cacheIndex;
     private bool _dry;
     private readonly string _indexFilePath;
+
+    public const string IndexFile = "index.json";
 
     internal FileSystemCacheStorage(string id, string baseDirectory)
     {
@@ -23,12 +23,14 @@ internal class FileSystemCacheStorage : ICacheStorage
             throw new DirectoryNotFoundException("Base directory is either non-existent or is not a directory.");
         }
 
-        _baseDirectory = baseDirectory;
-        _id = id;
+        BaseDirectory = baseDirectory;
+        Id = id;
 
-        _indexFilePath = Path.Combine(_baseDirectory, "index.json");
+        _indexFilePath = Path.Combine(BaseDirectory, IndexFile);
         _cacheIndex = InitializeCacheIndex();
     }
+
+    public string BaseDirectory { get; }
 
     private Dictionary<string, Guid> InitializeCacheIndex()
     {
@@ -45,7 +47,7 @@ internal class FileSystemCacheStorage : ICacheStorage
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Failed to read cache index for storage: '{}'", _id);
+                Log.Warning(ex, "Failed to read cache index for storage: '{}'", Id);
             }
         }
 
@@ -58,7 +60,7 @@ internal class FileSystemCacheStorage : ICacheStorage
         }
         catch (Exception ex)
         {
-            Log.Warning(ex, "WARNING: Failed to create cache index for storage: '{}'", _id);
+            Log.Warning(ex, "WARNING: Failed to create cache index for storage: '{}'", Id);
             Console.WriteLine("WARNING: Cache will not be stored on disk.");
             _dry = true;
         }
@@ -119,6 +121,15 @@ internal class FileSystemCacheStorage : ICacheStorage
 
     #region Helpers
 
+    public int IndexedObjectCount => _cacheIndex.Count;
+
+    public string Id { get; }
+
+    public bool DoesMapToObject(Guid guid)
+    {
+        return _cacheIndex.ContainsValue(guid);
+    }
+
     private FileStream InternalOverwriteObject(string objectName)
     {
         var guid = Guid.NewGuid();
@@ -129,7 +140,7 @@ internal class FileSystemCacheStorage : ICacheStorage
 
     private string InternalGetFileName(Guid guid)
     {
-        return Path.Combine(_baseDirectory, $"{guid}.cache");
+        return Path.Combine(BaseDirectory, $"{guid}.cache");
     }
 
     private void InternalSaveIndex()

@@ -21,4 +21,6 @@ public interface ICacheManager
     ICacheStorage GetStorage(Guid id);
 
     void RemoveAll();
+
+    IEnumerable<ICacheStorage> EnumerateStorages();
 }

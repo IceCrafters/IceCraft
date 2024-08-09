@@ -53,6 +53,7 @@ cmdApp.Configure(root =>
     root.AddBranch<BaseSettings>("cache", cache =>
     {
         cache.AddCommand<ClearCacheCommand>("clear");
+        cache.AddCommand<MaintainCacheCommand>("maintain");
     });
 
     root.SetExceptionHandler((ex, _) =>
