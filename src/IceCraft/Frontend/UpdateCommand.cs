@@ -1,7 +1,6 @@
 ﻿namespace IceCraft.Frontend;
 
 using System.ComponentModel;
-using IceCraft.Core;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
@@ -26,29 +25,14 @@ public class UpdateCommand : AsyncCommand<BaseSettings>
     public override async Task<int> ExecuteAsync(CommandContext context, BaseSettings settings)
     {
         var sourceNum = 0;
-        var pkgNum = 0;
+
         foreach (var source in _sourceManager.EnumerateSources())
         {
             sourceNum++;
             await source.RefreshAsync();
-
-            // So that cache is regenerated.
-            var repo = await source.CreateRepositoryAsync();
-            if (repo == null)
-            {
-                continue;
-            }
-
-            foreach (var series in repo.EnumerateSeries())
-            {
-                // Also regenerate latest if they are ever cached.
-                _ = await series.GetLatestAsync();
-
-                pkgNum++;
-            }
         }
 
-        Log.Information("Refreshed {PkgNum} package series from {SourceNum} sources", pkgNum, sourceNum);
+        Log.Information("Refreshed {SourceNum} sources", sourceNum);
 
         // ReSharper disable once InvertIf
         // Justification: ICacheClearable is a special case

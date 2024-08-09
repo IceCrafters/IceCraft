@@ -12,7 +12,9 @@ public interface IPackageSeries
 {
     string Name { get; }
 
+    [Obsolete("Unsupported. Get latest ID and index instead.")]
     Task<IPackage?> GetLatestAsync();
+    
     Task<IEnumerable<IPackage>> EnumeratePackagesAsync();
 
     Task<string?> GetLatestVersionIdAsync();
