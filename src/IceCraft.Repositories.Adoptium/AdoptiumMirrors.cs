@@ -12,7 +12,7 @@ public static class AdoptiumMirrors
 
     internal static ArtefactMirrorInfo GetGitHubMirror(AdoptiumBinaryRelease release)
     {
-        var artefact = (release.Binaries?.FirstOrDefault(x => x.Package != null))
+        var artefact = (release.Binaries?.FirstOrDefault(x => x is { Package.Checksum: not null }))
             ?? throw new NotSupportedException("Asset does not contain binary asset");
 
         return new()

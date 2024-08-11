@@ -26,8 +26,9 @@ public class AdoptiumPackage : IPackage
 
     public RemoteArtefact GetArtefact()
     {
-        var binary = (_asset.Binaries?.FirstOrDefault())
-         ?? throw new NotSupportedException("Asset does not contain binary asset");
+        var binary = (_asset.Binaries?.FirstOrDefault(x => x.Package is { Checksum: not null }))
+            ?? throw new NotSupportedException("Asset does not contain binary asset");
+
         return new RemoteArtefact
         {
             DownloadUri = binary.Package!.Link,
