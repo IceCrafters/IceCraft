@@ -23,27 +23,31 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
         _logger = logger;
     }
 
-    public async Task<PackageIndex> IndexAsync(IRepositorySourceManager manager)
+    public async Task<PackageIndex> IndexAsync(IRepositorySourceManager manager,
+        CancellationToken? token = null)
     {
         var dict = await _cacheStorage.RollJsonAsync(PackageIndexStorage, 
-            async () => await GenerateNewIndex(manager),
+            async () => await GenerateNewIndex(manager, token),
             IceCraftCoreContext.Default.BasePackageIndex_v0_1);
 
         return new PackageIndex(dict);
     }
 
-    private async Task<Dictionary<string, CachedPackageSeriesInfo>> GenerateNewIndex(IRepositorySourceManager manager)
+    private async Task<Dictionary<string, CachedPackageSeriesInfo>> GenerateNewIndex(IRepositorySourceManager manager, CancellationToken? token = null)
     {
         var index = new Dictionary<string, CachedPackageSeriesInfo>(manager.Count);
         var repos = await manager.GetRepositoriesAsync();
         
         foreach (var repo in repos)
         {
+            token?.ThrowIfCancellationRequested();
+
             index.EnsureCapacity(index.Count + repo.GetExpectedSeriesCount());
             var seriesList = repo.EnumerateSeries();
             
             foreach (var series in seriesList)
             {
+                token?.ThrowIfCancellationRequested();
                 var latestVersion = await series.GetLatestVersionIdAsync();
                 var expectedCount = await series.GetExpectedPackageCountAsync();
 
@@ -56,6 +60,7 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
                 var pkgInfos = await series.EnumeratePackagesAsync();
                 foreach (var pkg in pkgInfos)
                 {
+                    token?.ThrowIfCancellationRequested();
                     // Go through everything.
                     var pkgMeta = pkg.GetMeta();
                     _logger.LogTrace("Indexing version {Version}", pkgMeta.Version);
@@ -63,6 +68,7 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
                     RemoteArtefact remoteArtefact;
                     IEnumerable<ArtefactMirrorInfo>? mirrors;
 
+                    token?.ThrowIfCancellationRequested();
                     try
                     {
                         remoteArtefact = pkg.GetArtefact();

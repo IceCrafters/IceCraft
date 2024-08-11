@@ -23,7 +23,8 @@ internal class IceCraftApp : IFrontendApp
             {
                 new ProductInfoHeaderValue("IceCraft", ProductVersion)
             }
-        }
+        },
+        Timeout = new TimeSpan(0, 0, 20)
     };
 
     /// <summary>

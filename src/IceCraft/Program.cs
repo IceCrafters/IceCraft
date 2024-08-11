@@ -17,6 +17,7 @@ IceCraftApp.Initialize();
 var appServices = new ServiceCollection();
 appServices.AddSingleton<IManagerConfiguration, DotNetConfigServiceImpl>()
     .AddSingleton<IFrontendApp, IceCraftApp>()
+    .AddSingleton<IMirrorSearcher, MirrorSearcher>()
     .AddSingleton<IDownloadManager, DownloadManager>()
     .AddSingleton<ICacheManager, FileSystemCacheManager>()
     .AddSingleton<IRepositoryDefaultsSupplier, DefaultSource>()
@@ -57,6 +58,9 @@ cmdApp.Configure(root =>
     });
 
     root.AddCommand<DownloadCommand>("download");
+    
+    root.AddCommand<MirrorGetBestCommand>("best-mirror")
+        .WithDescription("Tests for the best mirror for a given package");
 
     root.SetExceptionHandler((ex, _) =>
     {
