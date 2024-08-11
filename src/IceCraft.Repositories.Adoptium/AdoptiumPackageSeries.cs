@@ -11,20 +11,21 @@ using Microsoft.Extensions.Logging;
 public class AdoptiumPackageSeries : IPackageSeries
 {
     private readonly int _majorVersion;
-    private readonly string _type;
     private readonly AdoptiumRepository _repository;
     private readonly ILogger _logger;
 
     internal AdoptiumPackageSeries(int majorVersion, string type, AdoptiumRepository repository, ILogger logger)
     {
         _majorVersion = majorVersion;
-        _type = type;
+        Type = type;
         Name = $"adoptium{_majorVersion}-{type}";
         _repository = repository;
         _logger = logger;
     }
 
     public string Name { get; }
+
+    public string Type { get; }
 
     public async Task<IEnumerable<IPackage>> EnumeratePackagesAsync()
     {
@@ -55,7 +56,7 @@ public class AdoptiumPackageSeries : IPackageSeries
             async () => await _repository.Provider.Client.GetFeatureReleasesAsync(_majorVersion,
             "ga",
             RuntimeInformation.OSArchitecture,
-            _type,
+            Type,
             "hotspot",
             AdoptiumApiClient.GetOs()));
     }
@@ -83,7 +84,7 @@ public class AdoptiumPackageSeries : IPackageSeries
 
         _logger.LogTrace("Getting a hotspot Java {MajorVersion} '{Type}' for '{OS}' '{OSArchitecture}'",
             _majorVersion,
-            _type,
+            Type,
             AdoptiumApiClient.GetOs(),
             RuntimeInformation.OSArchitecture);
 
@@ -91,7 +92,7 @@ public class AdoptiumPackageSeries : IPackageSeries
             async () => (await _repository.Provider.Client.GetLatestReleaseAsync(_majorVersion,
             "hotspot",
             RuntimeInformation.OSArchitecture,
-            _type,
+            Type,
             AdoptiumApiClient.GetOs()))?.FirstOrDefault(x
                 => x is { Binary: not null }));
     }

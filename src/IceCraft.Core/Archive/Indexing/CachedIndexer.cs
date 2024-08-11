@@ -60,11 +60,13 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
                     var pkgMeta = pkg.GetMeta();
                     _logger.LogTrace("Indexing version {Version}", pkgMeta.Version);
 
-                    RemoteArtefact remoteArtefact; 
+                    RemoteArtefact remoteArtefact;
+                    IEnumerable<ArtefactMirrorInfo>? mirrors;
 
                     try
                     {
                         remoteArtefact = pkg.GetArtefact();
+                        mirrors = pkg.GetMirrors();
                     }
                     catch (Exception ex)
                     {
@@ -75,7 +77,8 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
                     versions.Add(pkgMeta.Version, new CachedPackageInfo
                     {
                         Metadata = pkgMeta,
-                        Artefact = remoteArtefact
+                        Artefact = remoteArtefact,
+                        Mirrors = mirrors
                     });
                 }
 

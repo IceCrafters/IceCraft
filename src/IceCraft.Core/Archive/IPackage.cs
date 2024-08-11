@@ -10,4 +10,6 @@ public interface IPackage
     public RemoteArtefact GetArtefact();
 
     PackageMeta GetMeta();
+
+    IEnumerable<ArtefactMirrorInfo>? GetMirrors();
 }

@@ -12,6 +12,8 @@ using IceCraft.Core.Archive.Packaging;
 [JsonSerializable(typeof(CachedPackageSeriesInfo))]
 [JsonSerializable(typeof(string))]
 [JsonSerializable(typeof(Dictionary<string, CachedPackageSeriesInfo>), TypeInfoPropertyName = "BasePackageIndex_v0_1")]
+[JsonSerializable(typeof(ArtefactMirrorInfo))]
+[JsonSerializable(typeof(IEnumerable<ArtefactMirrorInfo>))]
 internal partial class IceCraftCoreContext : JsonSerializerContext
 {
 }
