@@ -8,4 +8,6 @@ public interface IFrontendApp
     string ProductVersion { get; }
 
     HttpClient GetClient();
+
+    CancellationToken GetCancellationToken();
 }

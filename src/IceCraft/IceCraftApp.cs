@@ -5,12 +5,15 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using IceCraft.Core.Platform;
+using Serilog;
 
 internal class IceCraftApp : IFrontendApp
 {
     private static readonly string UserDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "IceCraft");
     internal static readonly string CachesDirectory = Path.Combine(UserDataDirectory, "caches");
+    
+    private static readonly CancellationTokenSource _tokenSource = new();
 
     private static readonly HttpClient HttpClient = new()
     {
@@ -51,7 +54,22 @@ internal class IceCraftApp : IFrontendApp
     public static void Initialize()
     {
         Directory.CreateDirectory(UserDataDirectory);
+        Console.CancelKeyPress += Console_CancelKeyPress;
+    }
+
+    private static void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+    {
+        Console.WriteLine();
+        Console.WriteLine("-----------------------");
+        Console.WriteLine();
+        Log.Warning("Cancelled");
+        _tokenSource.Cancel();
     }
 
     public HttpClient GetClient() => HttpClient;
+
+    public CancellationToken GetCancellationToken()
+    {
+        return _tokenSource.Token;
+    }
 }

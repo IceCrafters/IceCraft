@@ -56,6 +56,8 @@ cmdApp.Configure(root =>
         cache.AddCommand<MaintainCacheCommand>("maintain");
     });
 
+    root.AddCommand<DownloadCommand>("download");
+
     root.SetExceptionHandler((ex, _) =>
     {
         if (ex is CommandRuntimeException cex)

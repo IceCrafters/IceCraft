@@ -4,19 +4,24 @@ using System.ComponentModel;
 using System.Diagnostics;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
+using IceCraft.Core.Network;
 using Serilog;
+using Spectre.Console;
 using Spectre.Console.Cli;
 
 public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
 {
     private readonly IRepositorySourceManager _sourceManager;
     private readonly IPackageIndexer _indexer;
+    private readonly IDownloadManager _downloadManager;
 
     public DownloadCommand(IRepositorySourceManager sourceManager,
-        IPackageIndexer indexer)
+        IPackageIndexer indexer,
+        IDownloadManager downloadManager)
     {
         _sourceManager = sourceManager;
         _indexer = indexer;
+        _downloadManager = downloadManager;
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
@@ -32,8 +37,51 @@ public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
             Log.Error("Package series {PackageId} not found", settings.Package);
             return -2;
         }
+
+        var targetVersion = settings.Version ?? result.LatestVersion;
+        if (string.IsNullOrEmpty(targetVersion))
+        {
+            Log.Error("Package series {PackageId} does not have latest version. Please specify a version.", settings.Package);
+            return -2;
+        }
         
-        // TODO complete implementation
+        if (!result.Versions.TryGetValue(targetVersion, out var versionInfo))
+        {
+            Log.Error("Version {TargetVersion} not found for package series {PackageId}", targetVersion, settings.Package);
+            return -2;
+        }
+
+        // Probe for the target directory.
+        string targetPath;
+        var localFileName = Path.GetFileName(versionInfo.Artefact.DownloadUri.LocalPath);
+        if (string.IsNullOrWhiteSpace(settings.Target))
+        {
+            Log.Debug("download: Using current directory");
+            targetPath = Path.Combine(Directory.GetCurrentDirectory(), localFileName);
+        }
+        else if (Directory.Exists(settings.Target))
+        {
+            Log.Debug("download: Using specified directory name");
+            targetPath = Path.Combine(settings.Target, localFileName);
+        }
+        else
+        {
+            Log.Debug("download: Using specified file name");
+            targetPath = settings.Target;
+        }
+
+        Log.Debug("download: Downloading to {TargetPath}", targetPath);
+
+        await AnsiConsole.Progress()
+            .StartAsync(async ctx =>
+            {
+                var task = ctx.AddTask("Download");
+
+                await _downloadManager.Download(versionInfo.Artefact.DownloadUri,
+                    targetPath,
+                    new SpectreDownloadTask(task));
+            });
+        
         return 0;
     }
 
