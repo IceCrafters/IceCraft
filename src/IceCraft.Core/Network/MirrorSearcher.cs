@@ -33,6 +33,8 @@ public class MirrorSearcher : IMirrorSearcher
 
         foreach (var mirror in mirrors)
         {
+            _logger.LogDebug("PRB: {Name} ({Host})", mirror.Name, mirror.DownloadUri.Host);
+
             HttpResponseMessage response;
 
             try

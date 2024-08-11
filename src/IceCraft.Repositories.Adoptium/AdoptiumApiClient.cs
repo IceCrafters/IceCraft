@@ -31,18 +31,6 @@ internal class AdoptiumApiClient
         };
     }
 
-    public static string GetTunaMirroredArchitecture(Architecture architecture)
-    {
-        return architecture switch
-        {
-            Architecture.X86 => "x86",
-            Architecture.X64 => "x64",
-            Architecture.Arm or Architecture.Armv6 => "arm",
-            Architecture.Arm64 => "aarch64",
-            _ => throw new ArgumentException("Unsupported architecture.", nameof(architecture))
-        };
-    }
-
     [SupportedOSPlatformGuard("linux")]
     [SupportedOSPlatformGuard("windows")]
     [SupportedOSPlatformGuard("macos")]

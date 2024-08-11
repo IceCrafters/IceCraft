@@ -1,7 +1,9 @@
 namespace IceCraft.Frontend.Commands;
 
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Network;
@@ -14,14 +16,17 @@ public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
     private readonly IRepositorySourceManager _sourceManager;
     private readonly IPackageIndexer _indexer;
     private readonly IDownloadManager _downloadManager;
+    private readonly IMirrorSearcher _mirrorSearcher;
 
     public DownloadCommand(IRepositorySourceManager sourceManager,
         IPackageIndexer indexer,
-        IDownloadManager downloadManager)
+        IDownloadManager downloadManager,
+        IMirrorSearcher mirrorSearcher)
     {
         _sourceManager = sourceManager;
         _indexer = indexer;
         _downloadManager = downloadManager;
+        _mirrorSearcher = mirrorSearcher;
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
@@ -51,6 +56,16 @@ public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
             return -2;
         }
 
+        // Get the best mirror.
+        Log.Information("Probing mirrors");
+        var bestMirror = await _mirrorSearcher.GetBestMirrorAsync(versionInfo.Mirrors);
+        if (bestMirror != null)
+        {
+            return await MirrorDownload(settings.Target, bestMirror);
+        }
+
+        Log.Warning("Downloading from old artefact system");
+
         // Probe for the target directory.
         string targetPath;
         var localFileName = Path.GetFileName(versionInfo.Artefact.DownloadUri.LocalPath);
@@ -78,6 +93,42 @@ public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
                 var task = ctx.AddTask("Download");
 
                 await _downloadManager.Download(versionInfo.Artefact.DownloadUri,
+                    targetPath,
+                    new SpectreDownloadTask(task));
+            });
+        
+        return 0;
+    }
+
+    private async Task<int> MirrorDownload(string? destination, ArtefactMirrorInfo bestMirror)
+    {
+         // Probe for the target directory.
+        string targetPath;
+        var localFileName = Path.GetFileName(bestMirror.DownloadUri.LocalPath);
+        if (string.IsNullOrWhiteSpace(destination))
+        {
+            Log.Debug("download: Using current directory");
+            targetPath = Path.Combine(Directory.GetCurrentDirectory(), localFileName);
+        }
+        else if (Directory.Exists(destination))
+        {
+            Log.Debug("download: Using specified directory name");
+            targetPath = Path.Combine(destination, localFileName);
+        }
+        else
+        {
+            Log.Debug("download: Using specified file name");
+            targetPath = destination;
+        }
+
+        Log.Debug("download: Downloading to {TargetPath}", targetPath);
+
+        await AnsiConsole.Progress()
+            .StartAsync(async ctx =>
+            {
+                var task = ctx.AddTask("Download");
+
+                await _downloadManager.Download(bestMirror.DownloadUri,
                     targetPath,
                     new SpectreDownloadTask(task));
             });
