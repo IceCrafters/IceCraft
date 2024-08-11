@@ -1,11 +1,8 @@
 ﻿namespace IceCraft.Repositories.Adoptium;
 
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using Flurl;
 using IceCraft.Core.Archive;
 using IceCraft.Core.Archive.Artefacts;
-using IceCraft.Core.Archive.Checksums;
 using IceCraft.Core.Archive.Packaging;
 using IceCraft.Repositories.Adoptium.Models;
 using Microsoft.Extensions.Logging;
@@ -15,12 +12,14 @@ public class AdoptiumPackage : IPackage
     private readonly AdoptiumPackageSeries _series;
     private readonly AdoptiumBinaryRelease _asset;
     private readonly ILogger _logger;
+    private readonly bool _addMirrors;
 
-    internal AdoptiumPackage(AdoptiumPackageSeries series, AdoptiumBinaryRelease asset, ILogger logger)
+    internal AdoptiumPackage(AdoptiumPackageSeries series, AdoptiumBinaryRelease asset, ILogger logger, bool addMirrors)
     {
         _series = series;
         _asset = asset;
         _logger = logger;
+        _addMirrors = addMirrors;
     }
 
     public IPackageSeries Series => _series;
@@ -48,6 +47,11 @@ public class AdoptiumPackage : IPackage
 
     public IEnumerable<ArtefactMirrorInfo>? GetMirrors()
     {
+        if (!_addMirrors)
+        {
+            return [AdoptiumMirrors.GetGitHubMirror(_asset)];
+        }
+
         return AdoptiumMirrors.GetMirrors(_asset, _series.Type);
     }
 }

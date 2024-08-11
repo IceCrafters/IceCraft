@@ -29,6 +29,8 @@ public class AdoptiumPackageSeries : IPackageSeries
 
     public async Task<IEnumerable<IPackage>> EnumeratePackagesAsync()
     {
+        var latest = await GetLatestVersionIdAsync();
+
         if (!AdoptiumApiClient.IsArchitectureSupported(RuntimeInformation.OSArchitecture))
         {
             _logger.LogWarning("Architecture not supported");
@@ -47,7 +49,9 @@ public class AdoptiumPackageSeries : IPackageSeries
         }
 
         return all
-            .Select(x => new AdoptiumPackage(this, x, _logger));
+            .Select(x => {
+                return new AdoptiumPackage(this, x, _logger, latest != null && x.VersionData?.Semver == latest);
+            });
     }
 
     private async Task<IEnumerable<AdoptiumBinaryRelease>?> GetAllAssetViewsAsync()

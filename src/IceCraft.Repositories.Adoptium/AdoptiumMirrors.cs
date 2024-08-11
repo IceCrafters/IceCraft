@@ -10,6 +10,21 @@ public static class AdoptiumMirrors
     private const string TunaAdoptiumRoot = "https://mirrors.tuna.tsinghua.edu.cn/Adoptium";
     private const string CernNetAdoptiumRoot = "https://mirrors.cernet.edu.cn/Adoptium";
 
+    internal static ArtefactMirrorInfo GetGitHubMirror(AdoptiumBinaryRelease release)
+    {
+        var artefact = (release.Binaries?.FirstOrDefault(x => x.Package != null))
+            ?? throw new NotSupportedException("Asset does not contain binary asset");
+
+        return new()
+        {
+            Name = "github",
+            IsOrigin = true,
+            DownloadUri = artefact.Package!.Link,
+            Checksum = artefact.Package!.Checksum!,
+            ChecksumType = "sha256"
+        };
+    }
+
     internal static IEnumerable<ArtefactMirrorInfo>? GetMirrors(AdoptiumBinaryRelease release, string type)
     {
         var binary = (release.Binaries?.FirstOrDefault())
@@ -25,14 +40,7 @@ public static class AdoptiumMirrors
         // Add original github mirror
         var list = new List<ArtefactMirrorInfo>(3)
         {
-            new()
-            {
-                Name = "github",
-                IsOrigin = true,
-                DownloadUri = binary.Package!.Link,
-                Checksum = checksum,
-                ChecksumType = "sha256"
-            }
+            GetGitHubMirror(release)
         };
 
         AddTunaMirror(list, release, type, checksum, "tuna", TunaAdoptiumRoot);
@@ -40,7 +48,7 @@ public static class AdoptiumMirrors
 
         return list.AsReadOnly();
     }
-    
+
     public static string GetTunaMirroredArchitecture(Architecture architecture)
     {
         return architecture switch
