@@ -1,9 +1,8 @@
+namespace IceCraft.Repositories.Adoptium;
 using System.Runtime.InteropServices;
 using Flurl;
 using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Repositories.Adoptium.Models;
-
-namespace IceCraft.Repositories.Adoptium;
 
 public static class AdoptiumMirrors
 {

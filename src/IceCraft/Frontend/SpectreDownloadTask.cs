@@ -1,8 +1,7 @@
+namespace IceCraft.Frontend;
 using System;
 using IceCraft.Core.Network;
 using Spectre.Console;
-
-namespace IceCraft.Frontend;
 
 public class SpectreDownloadTask : INetworkDownloadTask
 {

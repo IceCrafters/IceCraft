@@ -1,6 +1,5 @@
-using System;
-
 namespace IceCraft.Core.Platform;
+using System;
 
 public interface IFrontendApp
 {

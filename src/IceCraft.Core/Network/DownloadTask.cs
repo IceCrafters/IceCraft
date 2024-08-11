@@ -1,8 +1,7 @@
+namespace IceCraft.Core.Network;
 using System;
 using System.Buffers;
 using System.Diagnostics.Metrics;
-
-namespace IceCraft.Core.Network;
 
 public class DownloadTask
 {

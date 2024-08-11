@@ -1,6 +1,5 @@
-using System;
-
 namespace IceCraft.Core.Archive.Indexing;
+using System;
 
 public sealed record CachedPackageSeriesInfo
 {

@@ -1,11 +1,10 @@
+namespace IceCraft.Frontend.Commands;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Network;
 using IceCraft.Core.Platform;
 using Serilog;
 using Spectre.Console.Cli;
-
-namespace IceCraft.Frontend.Commands;
 
 public class MirrorGetBestCommand : AsyncCommand<MirrorGetBestCommand.Settings>
 {
