@@ -33,11 +33,18 @@ public class RepositoryManager : IRepositorySourceManager
             return;
         }
 
-        var enumerable = _defaults.GetDefaultSources();
+        var defaultSources = _defaults.GetDefaultSources();
 
-        foreach (var entry in enumerable)
+        foreach (var defaultSource in defaultSources)
         {
-            RegisterSource(entry.Key, entry.Value.Invoke(_serviceProvider));
+            RegisterSource(defaultSource.Key, defaultSource.Value.Invoke(_serviceProvider));
+        }
+
+        var factories = _serviceProvider.GetKeyedServices<IRepositorySourceFactory>(null);
+        foreach (var factory in factories)
+        {
+            var source = factory.CreateRepositorySource(_serviceProvider, out var name);
+            RegisterSource(name, source);
         }
     }
 

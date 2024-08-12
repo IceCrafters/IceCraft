@@ -14,9 +14,9 @@ public class DefaultSource : IRepositoryDefaultsSupplier
         // TODO make this extensible.
         return
         [
-            new SourceFactoryPair(
-                "adoptium", 
-                provider => new AdoptiumRepositorySource(provider))
+            // new SourceFactoryPair(
+            //     "adoptium", 
+            //     provider => new AdoptiumRepositorySource(provider))
         ];
     }
 }

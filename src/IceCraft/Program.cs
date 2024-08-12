@@ -1,13 +1,16 @@
-﻿using IceCraft;
+﻿using System.Runtime.InteropServices;
+using IceCraft;
 using IceCraft.Core.Archive.Checksums;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Configuration;
+using IceCraft.Core.Installation;
 using IceCraft.Core.Network;
 using IceCraft.Core.Platform;
 using IceCraft.Frontend;
 using IceCraft.Frontend.Commands;
+using IceCraft.Repositories.Adoptium;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Spectre.Console;
@@ -24,9 +27,11 @@ appServices.AddSingleton<IManagerConfiguration, DotNetConfigServiceImpl>()
     .AddSingleton<IRepositorySourceManager, RepositoryManager>()
     .AddSingleton<IChecksumRunner, DependencyChecksumRunner>()
     .AddSingleton<IPackageIndexer, CachedIndexer>()
+    .AddLogging(configure => configure.AddSerilog())
     // Hash validators
     .AddKeyedSingleton<IChecksumValidator, Sha256ChecksumValidator>("sha256")
-    .AddLogging(configure => configure.AddSerilog());
+    // Sources
+    .AddAdoptiumSource();
 
 var registrar = new TypeRegistrar(appServices);
 
