@@ -1,12 +1,8 @@
-﻿using System.Runtime.InteropServices;
-using IceCraft;
-using IceCraft.Core.Archive.Checksums;
-using IceCraft.Core.Archive.Indexing;
+﻿using IceCraft;
+using IceCraft.Core;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Configuration;
-using IceCraft.Core.Installation;
-using IceCraft.Core.Network;
 using IceCraft.Core.Platform;
 using IceCraft.Frontend;
 using IceCraft.Frontend.Commands;
@@ -20,16 +16,11 @@ IceCraftApp.Initialize();
 var appServices = new ServiceCollection();
 appServices.AddSingleton<IManagerConfiguration, DotNetConfigServiceImpl>()
     .AddSingleton<IFrontendApp, IceCraftApp>()
-    .AddSingleton<IMirrorSearcher, MirrorSearcher>()
-    .AddSingleton<IDownloadManager, DownloadManager>()
     .AddSingleton<ICacheManager, FileSystemCacheManager>()
     .AddSingleton<IRepositoryDefaultsSupplier, DefaultSource>()
-    .AddSingleton<IRepositorySourceManager, RepositoryManager>()
-    .AddSingleton<IChecksumRunner, DependencyChecksumRunner>()
-    .AddSingleton<IPackageIndexer, CachedIndexer>()
     .AddLogging(configure => configure.AddSerilog())
-    // Hash validators
-    .AddKeyedSingleton<IChecksumValidator, Sha256ChecksumValidator>("sha256")
+    // IceCraft
+    .AddIceCraftDefaults()
     // Sources
     .AddAdoptiumSource();
 
