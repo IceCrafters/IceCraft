@@ -9,10 +9,13 @@ public readonly record struct PackagePluginInfo
     }
 
     [SetsRequiredMembers]
-    public PackagePluginInfo(string installerRef)
+    public PackagePluginInfo(string installerRef, string configuratorRef)
     {
         InstallerRef = installerRef;
+        ConfiguratorRef = configuratorRef;
     }
 
     public required string InstallerRef { get; init; }
+
+    public required string ConfiguratorRef { get; init; }
 }
