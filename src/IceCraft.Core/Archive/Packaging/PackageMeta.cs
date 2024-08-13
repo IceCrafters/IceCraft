@@ -1,17 +1,27 @@
 ﻿namespace IceCraft.Core.Archive.Packaging;
 
-public class PackageMeta
+using System.Diagnostics.CodeAnalysis;
+
+public sealed record PackageMeta
 {
-    public PackageMeta(string id, string version, DateTime releaseDate)
+    public PackageMeta()
+    {
+    }
+
+    [SetsRequiredMembers]
+    public PackageMeta(string id, string version, DateTime releaseDate, PackagePluginInfo pluginInfo)
     {
         Id = id;
         Version = version;
         ReleaseDate = releaseDate;
+        PluginInfo = pluginInfo;
     }
 
-    public string Id { get; }
+    public required string Id { get; init; }
 
-    public string Version { get; }
+    public required string Version { get; init; }
 
-    public DateTime ReleaseDate { get; }
+    public required DateTime ReleaseDate { get; init; }
+
+    public required PackagePluginInfo PluginInfo { get; init; }
 }

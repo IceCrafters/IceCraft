@@ -43,7 +43,8 @@ public class AdoptiumPackage : IPackage
 
         return new PackageMeta(_series.Name,
             version: (asset.VersionData?.Semver) ?? (asset.ReleaseName),
-            releaseDate: asset.Timestamp ?? asset.UpdatedAt ?? DateTime.MinValue);
+            releaseDate: asset.Timestamp ?? asset.UpdatedAt ?? DateTime.MinValue,
+            pluginInfo: new PackagePluginInfo(installerRef: "adoptium"));
     }
 
     public IEnumerable<ArtefactMirrorInfo>? GetMirrors()

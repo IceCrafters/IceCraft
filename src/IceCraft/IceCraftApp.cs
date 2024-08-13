@@ -4,8 +4,12 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Threading.Tasks;
+using IceCraft.Core.Network;
 using IceCraft.Core.Platform;
+using IceCraft.Frontend;
 using Serilog;
+using Spectre.Console;
 
 internal class IceCraftApp : IFrontendApp
 {
@@ -40,6 +44,8 @@ internal class IceCraftApp : IFrontendApp
 
     string IFrontendApp.ProductVersion => ProductVersion;
 
+    public string DataBasePath => UserDataDirectory;
+
     private static string GetProductVersion()
     {
         var assemblyFile = Assembly.GetExecutingAssembly().Location;
@@ -72,5 +78,25 @@ internal class IceCraftApp : IFrontendApp
     public CancellationToken GetCancellationToken()
     {
         return _tokenSource.Token;
+    }
+
+    public async Task DoProgressedTaskAsync(string description, Func<IProgressedTask, Task> action)
+    {
+        var progress = AnsiConsole.Progress();
+        await progress.StartAsync(async (context) =>
+        {
+            var task = context.AddTask(description);
+            await action.Invoke(new SpectreProgressedTask(task));
+        });
+    }
+
+    public async Task DoDownloadTaskAsync(Func<INetworkDownloadTask, Task> action)
+    {
+         var progress = AnsiConsole.Progress();
+        await progress.StartAsync(async (context) =>
+        {
+            var task = context.AddTask("Download");
+            await action.Invoke(new SpectreDownloadTask(task));
+        });
     }
 }

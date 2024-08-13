@@ -92,7 +92,7 @@ public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
             {
                 var task = ctx.AddTask("Download");
 
-                await _downloadManager.Download(versionInfo.Artefact.DownloadUri,
+                await _downloadManager.DownloadAsync(versionInfo.Artefact.DownloadUri,
                     targetPath,
                     new SpectreDownloadTask(task));
             });
@@ -128,7 +128,7 @@ public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
             {
                 var task = ctx.AddTask("Download");
 
-                await _downloadManager.Download(bestMirror.DownloadUri,
+                await _downloadManager.DownloadAsync(bestMirror.DownloadUri,
                     targetPath,
                     new SpectreDownloadTask(task));
             });

@@ -1,6 +1,7 @@
 namespace IceCraft.Repositories.Adoptium;
 
 using IceCraft.Core.Archive.Providers;
+using IceCraft.Core.Installation;
 using Microsoft.Extensions.DependencyInjection;
 
 public static class AdoptiumExtensions
@@ -14,8 +15,9 @@ public static class AdoptiumExtensions
         }
     }
 
-    public static void AddAdoptiumSource(this IServiceCollection collection)
+    public static IServiceCollection AddAdoptiumSource(this IServiceCollection collection)
     {
-        collection.AddKeyedTransient<IRepositorySourceFactory, SourceFactory>("adoptium");
+        return collection.AddKeyedTransient<IRepositorySourceFactory, SourceFactory>("adoptium")
+            .AddKeyedSingleton<IPackageInstaller, AdoptiumInstaller>("adoptium");
     }
 }
