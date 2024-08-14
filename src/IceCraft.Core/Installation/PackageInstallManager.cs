@@ -8,7 +8,7 @@ using IceCraft.Core.Platform;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-public partial class PackageInstallManager
+public partial class PackageInstallManager : IPackageInstallManager
 {
     public const string PackagePath = "packages";
 
@@ -40,23 +40,28 @@ public partial class PackageInstallManager
         Directory.CreateDirectory(_packagesPath);
     }
 
-    public async Task Install(CachedPackageInfo packageInfo)
+    public async Task InstallAsync(CachedPackageInfo packageInfo)
     {
-        var databaseTask = _databaseFactory.GetAsync();
-
         var meta = packageInfo.Metadata;
-        var installer = _serviceProvider.GetKeyedService<IPackageInstaller>(meta.PluginInfo.InstallerRef)
-            ?? throw new ArgumentException($"Installer '{meta.PluginInfo.InstallerRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(packageInfo));
-        var configurator = _serviceProvider.GetKeyedService<IPackageConfigurator>(meta.PluginInfo.ConfiguratorRef)
-            ?? throw new ArgumentException($"Configurator '{meta.PluginInfo.ConfiguratorRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(packageInfo));
-
         var tempFilePath = await _downloadManager.DownloadTemporaryArtefactAsync(packageInfo);
+        // TODO validate package.
+        // TODO dependencies.
+        await InstallAsync(meta, tempFilePath);
+    }
+
+    public async Task InstallAsync(PackageMeta meta, string artefactPath)
+    {
         var pkgDir = GetPackageDirectory(meta);
-        await installer.InstallPackageAsync(tempFilePath, pkgDir);
+        var installer = _serviceProvider.GetKeyedService<IPackageInstaller>(meta.PluginInfo.InstallerRef)
+            ?? throw new ArgumentException($"Installer '{meta.PluginInfo.InstallerRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta));
+        var configurator = _serviceProvider.GetKeyedService<IPackageConfigurator>(meta.PluginInfo.ConfiguratorRef)
+            ?? throw new ArgumentException($"Configurator '{meta.PluginInfo.ConfiguratorRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta));
+
+        await installer.InstallPackageAsync(artefactPath, pkgDir);
 
         await configurator.ConfigurePackageAsync(pkgDir, meta);
 
-        var database = await databaseTask;
+        var database = await _databaseFactory.GetAsync();
         var entry = new InstalledPackageInfo()
         {
             Metadata = meta,

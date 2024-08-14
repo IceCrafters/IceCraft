@@ -8,7 +8,7 @@ using IceCraft.Core.Serialization;
 using Microsoft.Extensions.Logging;
 using InstalledPackageMap = Dictionary<string, InstalledPackageInfo>;
 
-public class PackageInstallDatabaseFactory
+public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
 {
     private readonly ILogger<PackageInstallDatabaseFactory> _logger;
     private readonly IFrontendApp _frontend;
@@ -85,6 +85,11 @@ public class PackageInstallDatabaseFactory
         }
 
         return retVal;
+    }
+
+    public Task SaveAsync()
+    {
+        throw new NotImplementedException();
     }
 
     internal class ValueMap : InstalledPackageMap, IPackageInstallDatabase

@@ -5,6 +5,7 @@ using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Installation;
+using IceCraft.Core.Installation.Execution;
 using IceCraft.Core.Installation.Storage;
 
 [JsonSerializable(typeof(Dictionary<string, PackageMeta>), TypeInfoPropertyName = "BasePackageIndex")]
@@ -17,6 +18,7 @@ using IceCraft.Core.Installation.Storage;
 [JsonSerializable(typeof(ArtefactMirrorInfo))]
 [JsonSerializable(typeof(IEnumerable<ArtefactMirrorInfo>))]
 [JsonSerializable(typeof(PackageInstallDatabaseFactory.ValueMap), TypeInfoPropertyName = "PackageInstallValueMap")]
+[JsonSerializable(typeof(Dictionary<string, ExecutableEntry>), TypeInfoPropertyName = "ExecutableDataFile")]
 internal partial class IceCraftCoreContext : JsonSerializerContext
 {
 }
