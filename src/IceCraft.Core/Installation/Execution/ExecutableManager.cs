@@ -1,6 +1,7 @@
 namespace IceCraft.Core.Installation.Execution;
 
 using System;
+using System.IO.Abstractions;
 using System.Text.Json;
 using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Platform;
@@ -9,22 +10,24 @@ using IceCraft.Core.Serialization;
 public class ExecutableManager : IExecutableManager
 {
     private readonly Task<Dictionary<string, ExecutableEntry>> _executables;
+    private readonly IFileSystem _fileSystem;
     private readonly string _dataFilePath;
     private readonly string _runPath;
 
-    public ExecutableManager(IFrontendApp frontendApp)
+    public ExecutableManager(IFrontendApp frontendApp, IFileSystem fileSystem)
     {
-        _dataFilePath = Path.Combine(frontendApp.DataBasePath, "runInfo.json");
+        _fileSystem = fileSystem;
+        _dataFilePath = _fileSystem.Path.Combine(frontendApp.DataBasePath, "runInfo.json");
 
         _executables = GetDataFile(_dataFilePath);
-        _runPath = Path.Combine(frontendApp.DataBasePath, "run");
-        Directory.CreateDirectory(_runPath);
+        _runPath = _fileSystem.Path.Combine(frontendApp.DataBasePath, "run");
+        _fileSystem.Directory.CreateDirectory(_runPath);
     }
 
     public async Task LinkExecutableAsync(PackageMeta meta, string linkName, string from)
     {
         var data = await _executables;
-        if (Path.GetInvalidFileNameChars().Any(linkName.Contains)
+        if (_fileSystem.Path.GetInvalidFileNameChars().Any(linkName.Contains)
             || linkName.Contains("..")
             || linkName.EndsWith('\0'))
         {
@@ -39,23 +42,13 @@ public class ExecutableManager : IExecutableManager
             PackageRef = meta.Id
         });
 
-        var tempFileName = Path.Combine(_runPath, Path.GetRandomFileName());
-        var target = Path.Combine(_runPath, linkName);
+        var tempFileName = _fileSystem.Path.Combine(_runPath, _fileSystem.Path.GetRandomFileName());
+        var target = _fileSystem.Path.Combine(_runPath, linkName);
 
-        File.CreateSymbolicLink(tempFileName, from);
+        _fileSystem.File.CreateSymbolicLink(tempFileName, from);
 
-        if (OperatingSystem.IsLinux())
-        {
-            File.Move(tempFileName, target, true);
-        }
-        else if (!File.Exists(target))
-        {
-            File.Move(tempFileName, target);
-        }
-        else
-        {
-            throw new NotImplementedException("Support for overwriting link files are not implemented yet.");
-        }
+        // TODO Implement a better overwrite system
+        _fileSystem.File.Move(tempFileName, target, true);
         await SaveDataFile();
     }
 
@@ -67,10 +60,10 @@ public class ExecutableManager : IExecutableManager
             return false;
         }
 
-        var target = Path.Combine(_runPath, linkName);
-        if (File.Exists(target))
+        var target = _fileSystem.Path.Combine(_runPath, linkName);
+        if (_fileSystem.File.Exists(target))
         {
-            File.Delete(target);
+            _fileSystem.File.Delete(target);
         }
 
         data.Remove(linkName);
@@ -79,7 +72,7 @@ public class ExecutableManager : IExecutableManager
     }
 
     #region Data File Management
-    private static async Task<Dictionary<string, ExecutableEntry>> GetDataFile(string filePath)
+    private async Task<Dictionary<string, ExecutableEntry>> GetDataFile(string filePath)
     {
         if (!File.Exists(filePath))
         {
@@ -90,7 +83,7 @@ public class ExecutableManager : IExecutableManager
         {
             Dictionary<string, ExecutableEntry>? retVal;
 
-            await using (var stream = File.OpenRead(filePath))
+            await using (var stream = _fileSystem.File.OpenRead(filePath))
             {
                 retVal = await JsonSerializer.DeserializeAsync(stream,
                     IceCraftCoreContext.Default.ExecutableDataFile);
@@ -109,9 +102,9 @@ public class ExecutableManager : IExecutableManager
         }
     }
 
-    private static async Task<Dictionary<string, ExecutableEntry>> CreateNewDataFile(string filePath)
+    private async Task<Dictionary<string, ExecutableEntry>> CreateNewDataFile(string filePath)
     {
-        using var stream = File.Create(filePath);
+        using var stream = _fileSystem.File.Create(filePath);
         var retVal = new Dictionary<string, ExecutableEntry>();
         await JsonSerializer.SerializeAsync(stream, retVal, IceCraftCoreContext.Default.ExecutableDataFile);
         return retVal;
@@ -121,7 +114,7 @@ public class ExecutableManager : IExecutableManager
     {
         var data = await _executables;
 
-        using var stream = File.Create(_dataFilePath);
+        using var stream = _fileSystem.File.Create(_dataFilePath);
         await JsonSerializer.SerializeAsync(stream, data, IceCraftCoreContext.Default.ExecutableDataFile);
     }
     #endregion

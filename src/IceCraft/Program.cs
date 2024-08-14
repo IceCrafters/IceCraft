@@ -1,4 +1,5 @@
-﻿using IceCraft;
+﻿using System.IO.Abstractions;
+using IceCraft;
 using IceCraft.Core;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
@@ -14,12 +15,15 @@ using Spectre.Console.Cli;
 
 IceCraftApp.Initialize();
 var appServices = new ServiceCollection();
-appServices.AddSingleton<IManagerConfiguration, DotNetConfigServiceImpl>()
+appServices
+    // Application
+    .AddSingleton<IManagerConfiguration, DotNetConfigServiceImpl>()
     .AddSingleton<IFrontendApp, IceCraftApp>()
     .AddSingleton<ICacheManager, FileSystemCacheManager>()
     .AddSingleton<IRepositoryDefaultsSupplier, DefaultSource>()
+    .AddSingleton<IFileSystem, FileSystem>()
     .AddLogging(configure => configure.AddSerilog())
-    // IceCraft
+    // Core
     .AddIceCraftDefaults()
     // Sources
     .AddAdoptiumSource();

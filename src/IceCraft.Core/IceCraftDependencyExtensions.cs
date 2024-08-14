@@ -4,6 +4,7 @@ using IceCraft.Core.Archive.Checksums;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Installation;
+using IceCraft.Core.Installation.Execution;
 using IceCraft.Core.Installation.Storage;
 using IceCraft.Core.Network;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,7 +25,8 @@ public static class IceCraftDependencyExtensions
             .AddSingleton<IChecksumRunner, DependencyChecksumRunner>()
             .AddSingleton<IPackageIndexer, CachedIndexer>()
             .AddSingleton<IPackageInstallDatabaseFactory, PackageInstallDatabaseFactory>()
-            .AddSingleton<IPackageInstallManager, PackageInstallManager>();
+            .AddSingleton<IPackageInstallManager, PackageInstallManager>()
+            .AddSingleton<IExecutableManager, ExecutableManager>();
     }
 
     public static IServiceCollection AddIceCraftHashers(this IServiceCollection services)
