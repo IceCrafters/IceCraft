@@ -11,10 +11,11 @@ public class ExecutableManager : IExecutableManager
 {
     private readonly Task<Dictionary<string, ExecutableEntry>> _executables;
     private readonly IFileSystem _fileSystem;
+    private readonly IPackageInstallManager _installManager;
     private readonly string _dataFilePath;
     private readonly string _runPath;
 
-    public ExecutableManager(IFrontendApp frontendApp, IFileSystem fileSystem)
+    public ExecutableManager(IFrontendApp frontendApp, IFileSystem fileSystem, IPackageInstallManager installManager)
     {
         _fileSystem = fileSystem;
         _dataFilePath = _fileSystem.Path.Combine(frontendApp.DataBasePath, "runInfo.json");
@@ -22,9 +23,11 @@ public class ExecutableManager : IExecutableManager
         _executables = GetDataFile(_dataFilePath);
         _runPath = _fileSystem.Path.Combine(frontendApp.DataBasePath, "run");
         _fileSystem.Directory.CreateDirectory(_runPath);
+
+        _installManager = installManager;
     }
 
-    public async Task LinkExecutableAsync(PackageMeta meta, string linkName, string from)
+    public async Task LinkExecutableAsync(PackageMeta meta, string linkName, string linkTarget)
     {
         var data = await _executables;
         if (_fileSystem.Path.GetInvalidFileNameChars().Any(linkName.Contains)
@@ -34,21 +37,25 @@ public class ExecutableManager : IExecutableManager
             throw new ArgumentException("Link name is invalid for a file name.", nameof(linkName));
         }
 
+        var packageRoot = await _installManager.GetInstalledPackageDirectoryAsync(meta);
+
+        // Set the link data if necessary.
         data.Remove(linkName);
         data.Add(linkName, new ExecutableEntry()
         {
             LinkName = linkName,
-            LinkTarget = from,
+            LinkTarget = linkTarget,
             PackageRef = meta.Id
         });
 
         var tempFileName = _fileSystem.Path.Combine(_runPath, _fileSystem.Path.GetRandomFileName());
-        var target = _fileSystem.Path.Combine(_runPath, linkName);
+        var linkFileName = _fileSystem.Path.Combine(_runPath, linkName);
+        var targetName = _fileSystem.Path.GetFullPath(linkTarget, packageRoot);
 
-        _fileSystem.File.CreateSymbolicLink(tempFileName, from);
+        _fileSystem.File.CreateSymbolicLink(tempFileName, targetName);
 
         // TODO Implement a better overwrite system
-        _fileSystem.File.Move(tempFileName, target, true);
+        _fileSystem.File.Move(tempFileName, linkFileName, true);
         await SaveDataFile();
     }
 

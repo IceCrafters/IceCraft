@@ -2,40 +2,54 @@ namespace IceCraft.Tests;
 
 using System.IO.Abstractions.TestingHelpers;
 using IceCraft.Core.Archive.Packaging;
+using IceCraft.Core.Installation;
 using IceCraft.Core.Installation.Execution;
 using IceCraft.Core.Platform;
 using Moq;
 
 public class ExecutableManagerTests
 {
+    #region Helpers
+    private static IPackageInstallManager GetInstallMock()
+    {
+        var mock = new Mock<IPackageInstallManager>();
+
+        mock.Setup(x => x.GetInstalledPackageDirectoryAsync(MockMeta))
+            .Returns(Task.FromResult("/icMock/packages/test/"));
+
+        return mock.Object;
+    }
+
+    private static readonly PackageMeta MockMeta = new()
+    {
+        Id = "test",
+        PluginInfo = new("test", "test"),
+        ReleaseDate = DateTime.MinValue,
+        Version = "0.0.0"
+    };
+    #endregion
+
     [Fact]
     public async Task LinkExecutableAsync_Creation()
     {
         // Arrange
         var app = new Mock<IFrontendApp>();
 
-        app.Setup(x => x.DataBasePath).Returns("/home/test/icecraft");
+        app.Setup(x => x.DataBasePath).Returns("/icMock");
 
         var mockFs = new MockFileSystem(new Dictionary<string, MockFileData>()
         {
-            { "/home/test/icecraft/runInfo.json", "{}" },
-            { "/home/test/icecraft/packages/test/test", new MockFileData([]) },
+            { "/icMock/runInfo.json", "{}" },
+            { "/icMock/packages/test/test", new MockFileData([]) },
         });
 
-        var exm = new ExecutableManager(app.Object, mockFs);
-        var packageMeta = new PackageMeta()
-        {
-            Id = "test",
-            PluginInfo = new("test", "test"),
-            ReleaseDate = DateTime.MinValue,
-            Version = "0.0.0"
-        };
+        var exm = new ExecutableManager(app.Object, mockFs, GetInstallMock());
 
         // Act
-        await exm.LinkExecutableAsync(packageMeta, "test", "/home/test/icecraft/packages/test/test");
+        await exm.LinkExecutableAsync(MockMeta, "test", "test");
 
         // Assert
-        Assert.True(mockFs.FileExists("/home/test/icecraft/run/test"));
+        Assert.True(mockFs.FileExists("/icMock/run/test"));
     }
 
     [Fact]
@@ -44,29 +58,22 @@ public class ExecutableManagerTests
         // Arrange
         var app = new Mock<IFrontendApp>();
 
-        app.Setup(x => x.DataBasePath).Returns("/home/test/icecraft");
+        app.Setup(x => x.DataBasePath).Returns("/icMock");
 
         var mockFs = new MockFileSystem(new Dictionary<string, MockFileData>()
         {
-            { "/home/test/icecraft/runInfo.json", "{\"test\":{\"LinkName\":\"test\",\"LinkTarget\":\"/home/test/icecraft/packages/test/test\",\"PackageRef\":\"test\"}}" },
-            { "/home/test/icecraft/packages/test/test", new MockFileData([]) }
+            { "/icMock/runInfo.json", "{\"test\":{\"LinkName\":\"test\",\"LinkTarget\":\"/icMock/packages/test/test\",\"PackageRef\":\"test\"}}" },
+            { "/icMock/packages/test/test", new MockFileData([]) }
         });
-        mockFs.AddDirectory("/home/test/icecraft/packages/run");
-        mockFs.File.CreateSymbolicLink("/home/test/icecraft/packages/run/test", "/home/test/icecraft/packages/test/test");
+        mockFs.AddDirectory("/icMock/packages/run");
+        mockFs.File.CreateSymbolicLink("/icMock/packages/run/test", "/icMock/packages/test/test");
 
-        var exm = new ExecutableManager(app.Object, mockFs);
-        var packageMeta = new PackageMeta()
-        {
-            Id = "test",
-            PluginInfo = new("test", "test"),
-            ReleaseDate = DateTime.MinValue,
-            Version = "0.0.0"
-        };
+        var exm = new ExecutableManager(app.Object, mockFs, GetInstallMock());
 
         // Act
         await exm.UnlinkExecutableAsync("test");
 
         // Assert
-        Assert.False(mockFs.FileExists("/home/test/icecraft/run/test"));
+        Assert.False(mockFs.FileExists("/icMock/run/test"));
     }
 }

@@ -57,8 +57,10 @@ public partial class PackageInstallManager : IPackageInstallManager
         var configurator = _serviceProvider.GetKeyedService<IPackageConfigurator>(meta.PluginInfo.ConfiguratorRef)
             ?? throw new ArgumentException($"Configurator '{meta.PluginInfo.ConfiguratorRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta));
 
+        _logger.LogInformation("Expanding package {Id}", meta.Id);
         await installer.InstallPackageAsync(artefactPath, pkgDir);
 
+        _logger.LogInformation("Configurating package {Id}", meta.Id);
         await configurator.ConfigurePackageAsync(pkgDir, meta);
 
         var database = await _databaseFactory.GetAsync();
@@ -68,6 +70,17 @@ public partial class PackageInstallManager : IPackageInstallManager
             State = InstallationState.Configured
         };
         database.Put(entry);
+    }
+
+    public async Task<string> GetInstalledPackageDirectoryAsync(PackageMeta meta)
+    {
+        var database = await _databaseFactory.GetAsync();
+        if (!database.ContainsMeta(meta))
+        {
+            throw new ArgumentException("The specified package was not installed.", nameof(meta));
+        }
+
+        return GetPackageDirectory(meta);
     }
 
     private string GetPackageDirectory(PackageMeta meta)
