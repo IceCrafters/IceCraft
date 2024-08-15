@@ -42,8 +42,10 @@ public class ExecutableManagerTests
             { "/icMock/runInfo.json", "{}" },
             { "/icMock/packages/test/test", new MockFileData([]) },
         });
+        mockFs.AddDirectory("/icMock/");
+        mockFs.AddDirectory("/icMock/run/");
 
-        var exm = new ExecutableManager(app.Object, mockFs, GetInstallMock());
+        var exm = new ExecutableManager(app.Object, mockFs, GetInstallMock(), Mock.Of<IExecutionScriptGenerator>());
 
         // Act
         await exm.LinkExecutableAsync(MockMeta, "test", "test");
@@ -68,7 +70,7 @@ public class ExecutableManagerTests
         mockFs.AddDirectory("/icMock/packages/run");
         mockFs.File.CreateSymbolicLink("/icMock/packages/run/test", "/icMock/packages/test/test");
 
-        var exm = new ExecutableManager(app.Object, mockFs, GetInstallMock());
+        var exm = new ExecutableManager(app.Object, mockFs, GetInstallMock(), Mock.Of<IExecutionScriptGenerator>());
 
         // Act
         await exm.UnlinkExecutableAsync("test");

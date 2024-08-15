@@ -12,7 +12,7 @@ public interface IExecutableManager
     /// <param name="meta">The package metadata. The related package must be installed.</param>
     /// <param name="linkName">The name of the link to create.</param>
     /// <param name="from">The path, relative to the package installation directory, to the file to link to.</param>
-    Task LinkExecutableAsync(PackageMeta meta, string linkName, string from);
+    Task LinkExecutableAsync(PackageMeta meta, string linkName, string from, EnvironmentVariableDictionary? variables = null);
 
     /// <summary>
     /// Deletes the link in the executables directory of the specified name.
