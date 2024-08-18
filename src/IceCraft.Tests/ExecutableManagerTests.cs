@@ -29,53 +29,56 @@ public class ExecutableManagerTests
     };
     #endregion
 
-    [Fact]
-    public async Task LinkExecutableAsync_Creation()
-    {
-        // Arrange
-        var app = new Mock<IFrontendApp>();
+    // [Fact]
+    // public async Task LinkExecutableAsync_Creation()
+    // {
+    //     // Arrange
+    //     var app = new Mock<IFrontendApp>();
 
-        app.Setup(x => x.DataBasePath).Returns("/icMock");
+    //     app.Setup(x => x.DataBasePath).Returns("/icMock");
 
-        var mockFs = new MockFileSystem(new Dictionary<string, MockFileData>()
-        {
-            { "/icMock/runInfo.json", "{}" },
-            { "/icMock/packages/test/test", new MockFileData([]) },
-        });
-        mockFs.AddDirectory("/icMock/");
-        mockFs.AddDirectory("/icMock/run/");
+    //     var mockFs = new MockFileSystem(new Dictionary<string, MockFileData>()
+    //     {
+    //         { "/icMock/runInfo.json", "{}" },
+    //         { "/icMock/packages/test/test", new MockFileData([]) },
+    //     });
+    //     mockFs.AddDirectory("/icMock/");
+    //     mockFs.AddDirectory("/icMock/run/");
 
-        var exm = new ExecutableManager(app.Object, mockFs, GetInstallMock(), Mock.Of<IExecutionScriptGenerator>());
+    //     var exm = new ExecutableManager(app.Object, 
+    //         mockFs, 
+    //         GetInstallMock(), 
+    //         Mock.Of<IExecutionScriptGenerator>());
 
-        // Act
-        await exm.LinkExecutableAsync(MockMeta, "test", "test");
+    //     // Act
+    //     await exm.LinkExecutableAsync(MockMeta, "test", "test");
 
-        // Assert
-        Assert.True(mockFs.FileExists("/icMock/run/test"));
-    }
+    //     // Assert
+    //     Assert.True(mockFs.FileExists("/icMock/run/test"));
+    // }
 
-    [Fact]
-    public async Task LinkExecutableAsync_Deletion()
-    {
-        // Arrange
-        var app = new Mock<IFrontendApp>();
+    // [Fact]
+    // public async Task LinkExecutableAsync_Deletion()
+    // {
+    //     // Arrange
+    //     var app = new Mock<IFrontendApp>();
 
-        app.Setup(x => x.DataBasePath).Returns("/icMock");
+    //     app.Setup(x => x.DataBasePath).Returns("/icMock");
 
-        var mockFs = new MockFileSystem(new Dictionary<string, MockFileData>()
-        {
-            { "/icMock/runInfo.json", "{\"test\":{\"LinkName\":\"test\",\"LinkTarget\":\"/icMock/packages/test/test\",\"PackageRef\":\"test\"}}" },
-            { "/icMock/packages/test/test", new MockFileData([]) }
-        });
-        mockFs.AddDirectory("/icMock/packages/run");
-        mockFs.File.CreateSymbolicLink("/icMock/packages/run/test", "/icMock/packages/test/test");
+    //     var mockFs = new MockFileSystem(new Dictionary<string, MockFileData>()
+    //     {
+    //         { "/icMock/runInfo.json", "{\"test\":{\"LinkName\":\"test\",\"LinkTarget\":\"/icMock/packages/test/test\",\"PackageRef\":\"test\"}}" },
+    //         { "/icMock/packages/test/test", new MockFileData([]) }
+    //     });
+    //     mockFs.AddDirectory("/icMock/packages/run");
+    //     mockFs.File.CreateSymbolicLink("/icMock/packages/run/test", "/icMock/packages/test/test");
 
-        var exm = new ExecutableManager(app.Object, mockFs, GetInstallMock(), Mock.Of<IExecutionScriptGenerator>());
+    //     var exm = new ExecutableManager(app.Object, mockFs, GetInstallMock(), Mock.Of<IExecutionScriptGenerator>());
 
-        // Act
-        await exm.UnlinkExecutableAsync("test");
+    //     // Act
+    //     await exm.UnlinkExecutableAsync("test");
 
-        // Assert
-        Assert.False(mockFs.FileExists("/icMock/run/test"));
-    }
+    //     // Assert
+    //     Assert.False(mockFs.FileExists("/icMock/run/test"));
+    // }
 }

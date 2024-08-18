@@ -16,7 +16,13 @@ public class AdoptiumConfigurator : IPackageConfigurator
 
     public async Task ConfigurePackageAsync(string installDir, PackageMeta meta)
     {
-        await _executableManager.LinkExecutableAsync(meta, "java", "bin/java");
-        await _executableManager.LinkExecutableAsync(meta, "javaw", "bin/javaw");
+        await _executableManager.RegisterAsync(meta, "java", "bin/java");
+        await _executableManager.RegisterAsync(meta, "javaw", "bin/javaw");
+    }
+
+    public async Task UnconfigurePackageAsync(string installDir, PackageMeta meta)
+    {
+        await _executableManager.UnregisterAsync(meta, "java");
+        await _executableManager.UnregisterAsync(meta, "javaw");
     }
 }

@@ -19,6 +19,7 @@ using IceCraft.Core.Installation.Storage;
 [JsonSerializable(typeof(IEnumerable<ArtefactMirrorInfo>))]
 [JsonSerializable(typeof(PackageInstallDatabaseFactory.ValueMap), TypeInfoPropertyName = "PackageInstallValueMap")]
 [JsonSerializable(typeof(Dictionary<string, ExecutableEntry>), TypeInfoPropertyName = "ExecutableDataFile")]
+[JsonSerializable(typeof(Dictionary<string, ExecutableInfo>), TypeInfoPropertyName = "ExecutableDataFile_v2")]
 internal partial class IceCraftCoreContext : JsonSerializerContext
 {
 }

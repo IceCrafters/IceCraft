@@ -6,9 +6,8 @@ using IceCraft.Core.Platform;
 
 public class ExecutionScriptTests
 {
-    private static readonly ExecutableEntry DummyEntry_NoArgs = new ExecutableEntry()
+    private static readonly ExecutableRegistrationEntry DummyEntry_NoArgs = new()
     {
-        LinkName = "test",
         LinkTarget = "test",
         PackageRef = "test"
     };
