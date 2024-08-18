@@ -5,6 +5,7 @@ using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Configuration;
 using IceCraft.Core.Platform;
+using IceCraft.Developer;
 using IceCraft.Frontend;
 using IceCraft.Frontend.Commands;
 using IceCraft.Repositories.Adoptium;
@@ -27,6 +28,10 @@ appServices
     .AddIceCraftDefaults()
     // Sources
     .AddAdoptiumSource();
+
+#if DEBUG
+DummyRepositorySource.AddDummyRepositorySource(appServices);
+#endif
 
 var registrar = new TypeRegistrar(appServices);
 

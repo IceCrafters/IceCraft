@@ -13,4 +13,6 @@ public interface IPackageInstallDatabase
     void Add(string key, InstalledPackageInfo info);
 
     void Put(InstalledPackageInfo info);
+
+    void Remove(string key);
 }

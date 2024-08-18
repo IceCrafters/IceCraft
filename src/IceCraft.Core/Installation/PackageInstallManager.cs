@@ -58,7 +58,7 @@ public partial class PackageInstallManager : IPackageInstallManager
             ?? throw new ArgumentException($"Configurator '{meta.PluginInfo.ConfiguratorRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta));
 
         _logger.LogInformation("Expanding package {Id}", meta.Id);
-        await installer.InstallPackageAsync(artefactPath, pkgDir);
+        await installer.ExpandPackageAsync(artefactPath, pkgDir);
 
         _logger.LogInformation("Configurating package {Id}", meta.Id);
         await configurator.ConfigurePackageAsync(pkgDir, meta);
@@ -91,5 +91,37 @@ public partial class PackageInstallManager : IPackageInstallManager
     private static string CleanPath(string path)
     {
         return path.Replace('.', '_');
+    }
+
+    public async Task UninstallAsync(PackageMeta meta)
+    {
+        var database = await _databaseFactory.GetAsync();
+        if (!database.ContainsMeta(meta))
+        {
+            throw new ArgumentException("No such package meta installed.", nameof(meta));
+        }
+
+        var configurator = _serviceProvider.GetRequiredKeyedService<IPackageConfigurator>(meta.PluginInfo.ConfiguratorRef);
+        var installer = _serviceProvider.GetRequiredKeyedService<IPackageInstaller>(meta.PluginInfo.InstallerRef);
+
+        var directory = GetPackageDirectory(meta);
+
+        _logger.LogInformation("Removing package");
+        await configurator.UnconfigurePackageAsync(directory, meta);
+        await installer.RemovePackageAsync(directory);
+
+        database.Remove(meta.Id);
+    }
+
+    public async Task<bool> IsInstalledAsync(string packageName)
+    {
+        var database = await _databaseFactory.GetAsync();
+        return database.ContainsKey(packageName);
+    }
+
+    public async Task<PackageMeta> GetMetaAsync(string packageName)
+    {
+        var database = await _databaseFactory.GetAsync();
+        return database[packageName].Metadata;
     }
 }

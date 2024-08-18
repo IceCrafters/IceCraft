@@ -8,4 +8,7 @@ public interface IPackageInstallManager
     Task InstallAsync(CachedPackageInfo packageInfo);
     Task InstallAsync(PackageMeta meta, string artefactPath);
     Task<string> GetInstalledPackageDirectoryAsync(PackageMeta meta);
+    Task UninstallAsync(PackageMeta meta);
+    Task<bool> IsInstalledAsync(string packageName);
+    Task<PackageMeta> GetMetaAsync(string packageName);
 }

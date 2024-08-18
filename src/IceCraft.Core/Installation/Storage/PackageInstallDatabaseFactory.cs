@@ -139,5 +139,10 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
         {
             this[info.Metadata.Id] = info;
         }
+
+        void IPackageInstallDatabase.Remove(string key)
+        {
+            this.Remove(key);
+        }
     }
 }
