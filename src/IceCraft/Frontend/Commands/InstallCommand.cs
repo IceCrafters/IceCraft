@@ -2,6 +2,7 @@ namespace IceCraft.Frontend.Commands;
 
 using System.ComponentModel;
 using IceCraft.Core.Archive.Indexing;
+using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Installation;
 using IceCraft.Core.Network;
@@ -45,6 +46,14 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
         var versionInfo = seriesInfo.Versions[selectedVersion];
         var meta = versionInfo.Metadata;
 
+        // Check if the package is already installed, and if the selected version matches.
+        // If all conditions above are true, do not need to do anything.
+        if (await _installManager.IsInstalledAsync(meta.Id)
+            && !await ComparePackageAsync(meta))
+        {
+            return 0;
+        }
+
         Log.Information("Beginning download");
         string? fileName = null;
 
@@ -63,6 +72,19 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
         await _installManager.InstallAsync(meta, fileName);
 
         return 0;
+    }
+
+    private async Task<bool> ComparePackageAsync(PackageMeta meta)
+    {
+        var installedMeta = await _installManager.GetMetaAsync(meta.Id);
+        if (installedMeta.Version != meta.Version)
+        {
+            return true;
+        }
+
+        Log.Information("Package {Id} ({Version}) is already installed.", meta.Id, meta.Version);
+
+        return false;
     }
 
     public class Settings : BaseSettings
