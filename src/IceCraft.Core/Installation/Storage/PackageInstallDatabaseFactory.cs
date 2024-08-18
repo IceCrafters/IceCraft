@@ -12,6 +12,8 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
 {
     private readonly ILogger<PackageInstallDatabaseFactory> _logger;
     private readonly IFrontendApp _frontend;
+    private readonly string _databasePath;
+    private readonly string _packagesPath;
 
     private ValueMap? _map;
 
@@ -20,6 +22,9 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
     {
         _logger = logger;
         _frontend = frontend;
+
+        _packagesPath = Path.Combine(_frontend.DataBasePath, PackageInstallManager.PackagePath);
+        _databasePath = Path.Combine(_packagesPath, "db.json");
     }
 
     public async Task<IPackageInstallDatabase> GetAsync()
@@ -68,6 +73,8 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
             return await CreateDatabaseFileAsync(filePath);
         }
 
+        _logger.LogTrace("{Count} packages currently installed", retVal.Count);
+
         return retVal;
     }
 
@@ -87,9 +94,30 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
         return retVal;
     }
 
-    public Task SaveAsync()
+    public async Task SaveAsync()
     {
-        throw new NotImplementedException();
+        await SaveAsync(_databasePath);
+    }
+
+    public async Task SaveAsync(string filePath)
+    {
+        _logger.LogInformation("Saving database");
+
+        if (_map == null)
+        {
+            await LoadDatabaseAsync(filePath);
+            return;
+        }
+
+        try
+        {
+            using var fileStream = File.Create(filePath);
+            await JsonSerializer.SerializeAsync(fileStream, _map, IceCraftCoreContext.Default.PackageInstallValueMap);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Failed to save installation database.", ex);
+        }
     }
 
     internal class ValueMap : InstalledPackageMap, IPackageInstallDatabase

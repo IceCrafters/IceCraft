@@ -89,20 +89,20 @@ public class DownloadManager : IDownloadManager
         return File.Create(path);
     }
 
-    public async Task<string> DownloadTemporaryArtefactAsync(CachedPackageInfo packageInfo)
+    public async Task<string> DownloadTemporaryArtefactAsync(CachedPackageInfo packageInfo, INetworkDownloadTask? downloadTask = null)
     {
          // Get the best mirror.
         _logger.LogInformation("Probing mirrors");
         var bestMirror = await _mirrorSearcher.GetBestMirrorAsync(packageInfo.Mirrors)
             ?? throw new InvalidOperationException("No best mirror can be found.");
 
-        return await DownloadTemporaryArtefactAsync(bestMirror);
+        return await DownloadTemporaryArtefactAsync(bestMirror, downloadTask);
     }
 
-    public async Task<string> DownloadTemporaryArtefactAsync(ArtefactMirrorInfo mirror)
+    public async Task<string> DownloadTemporaryArtefactAsync(ArtefactMirrorInfo mirror, INetworkDownloadTask? downloadTask = null)
     {
         await using var tempFile = CreateTemporaryPackageFile(out var path);
-            await DownloadAsync(mirror, tempFile);
+            await DownloadAsync(mirror, tempFile, downloadTask);
             return path;
     }
 
@@ -110,6 +110,6 @@ public class DownloadManager : IDownloadManager
     {
         await DownloadAsync(bestMirror.DownloadUri,
                     stream,
-                    null);
+                    downloadTask);
     }
 }

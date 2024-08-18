@@ -63,6 +63,7 @@ cmdApp.Configure(root =>
     });
 
     root.AddCommand<DownloadCommand>("download");
+    root.AddCommand<InstallCommand>("install");
     
     root.AddCommand<MirrorGetBestCommand>("best-mirror")
         .WithDescription("Tests for the best mirror for a given package");
