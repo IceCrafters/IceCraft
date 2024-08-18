@@ -37,14 +37,16 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
     {
         var index = new Dictionary<string, CachedPackageSeriesInfo>(manager.Count);
         var repos = await manager.GetRepositoriesAsync();
+        var repoCount = 0;
         
         foreach (var repo in repos)
         {
+            repoCount++;
             token?.ThrowIfCancellationRequested();
 
             index.EnsureCapacity(index.Count + repo.GetExpectedSeriesCount());
             var seriesList = repo.EnumerateSeries();
-            
+
             foreach (var series in seriesList)
             {
                 token?.ThrowIfCancellationRequested();
@@ -96,6 +98,8 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
                 });
             }
         }
+
+        _logger.LogInformation("{RepoCount} repositories indexed", repoCount);
 
         return index;
     }

@@ -1,5 +1,6 @@
 namespace IceCraft.Developer;
 
+using System;
 using System.Threading.Tasks;
 using IceCraft.Core.Archive;
 using IceCraft.Core.Archive.Providers;
@@ -18,9 +19,18 @@ public class DummyRepositorySource : IRepositorySource
         return Task.CompletedTask;
     }
 
+    private class Factory : IRepositorySourceFactory
+    {
+        public IRepositorySource CreateRepositorySource(IServiceProvider provider, out string name)
+        {
+            name = "dummy-test";
+            return new DummyRepositorySource();
+        }
+    }
+
     public static IServiceCollection AddDummyRepositorySource(IServiceCollection collection)
     {
-        return collection.AddKeyedSingleton<IRepositorySource, DummyRepositorySource>("dummy-test")
+        return collection.AddKeyedSingleton<IRepositorySourceFactory, Factory>(null)
             .AddKeyedSingleton<IPackageConfigurator, DummyPackageConfigurator>("dummy-test")
             .AddKeyedSingleton<IPackageInstaller, DummyPackageInstaller>("dummy-test");
     }

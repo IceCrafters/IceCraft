@@ -10,11 +10,18 @@ using Spectre.Console.Cli;
 
 [Description("Regenerate all package refs")]
 [UsedImplicitly(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature)]
-public class UpdateCommand : AsyncCommand<BaseSettings>
+public class UpdateCommand : AsyncCommand<UpdateCommand.Settings>
 {
+    public sealed class Settings : BaseSettings
+    {
+        [CommandOption("--index-only")]
+        [Description("Only reindex the packages but do not refresh the sources.")]
+        public bool IndexOnly { get; init; }
+    }
+
     private readonly IRepositorySourceManager _sourceManager;
     private readonly IPackageIndexer _indexer;
-    
+
     public UpdateCommand(IRepositorySourceManager sourceManager,
         IPackageIndexer indexer)
     {
@@ -22,23 +29,27 @@ public class UpdateCommand : AsyncCommand<BaseSettings>
         _indexer = indexer;
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context, BaseSettings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        var sourceNum = 0;
-
-        foreach (var source in _sourceManager.EnumerateSources())
+        if (!settings.IndexOnly)
         {
-            sourceNum++;
-            await source.RefreshAsync();
-        }
+            var sourceNum = 0;
 
-        Log.Information("Refreshed {SourceNum} sources", sourceNum);
+            foreach (var source in _sourceManager.EnumerateSources())
+            {
+                sourceNum++;
+                await source.RefreshAsync();
+            }
+
+            Log.Information("Refreshed {SourceNum} sources", sourceNum);
+        }
 
         // ReSharper disable once InvertIf
         // Justification: ICacheClearable is a special case
         if (_indexer is ICacheClearable clearable)
         {
             Log.Information("Updating packages index");
+
             clearable.ClearCache();
             await _indexer.IndexAsync(_sourceManager);
         }
