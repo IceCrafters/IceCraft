@@ -114,7 +114,22 @@ public partial class PackageInstallManager : IPackageInstallManager
         await configurator.UnconfigurePackageAsync(directory, meta);
         await installer.RemovePackageAsync(directory);
 
-        database.Remove(meta.Id);
+        try
+        {
+            if (Directory.Exists(directory))
+            {
+                Directory.Delete(directory);
+            }
+        }
+        catch (IOException ex)
+        {
+            _logger.LogWarning(ex, "IOException caught, retrying with recursive delete");
+            _logger.LogWarning("TO AUTHOR OF {Name}: did you forget to clean the directory?", installer.GetType().FullName);
+            Directory.Delete(directory, true);
+        }
+
+        database[meta.Id].Remove(meta.Version.ToString());
+        await _databaseFactory.SaveAsync();
     }
 
     public async Task<bool> IsInstalledAsync(string packageName)
@@ -134,5 +149,21 @@ public partial class PackageInstallManager : IPackageInstallManager
     {
         var database = await _databaseFactory.GetAsync();
         return database[packageName][version.ToString()].Metadata;
+    }
+
+    public async Task<PackageMeta?> TryGetMetaAsync(string packageName, SemVersion version)
+    {
+        var database = await _databaseFactory.GetAsync();
+        if (!database.TryGetValue(packageName, out var index))
+        {
+            return null;
+        }
+
+        if (!index!.TryGetValue(version.ToString(), out var result))
+        {
+            return null;
+        }
+
+        return result.Metadata;
     }
 }

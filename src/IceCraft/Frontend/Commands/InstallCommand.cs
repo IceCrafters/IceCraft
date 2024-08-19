@@ -16,19 +16,16 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
     private readonly IPackageInstallManager _installManager;
     private readonly IPackageIndexer _indexer;
     private readonly IRepositorySourceManager _sourceManager;
-    private readonly IMirrorSearcher _mirrorSearcher;
     private readonly IDownloadManager _downloadManager;
 
     public InstallCommand(IPackageInstallManager installManager,
         IPackageIndexer indexer,
         IRepositorySourceManager sourceManager,
-        IMirrorSearcher mirrorSearcher,
         IDownloadManager downloadManager)
     {
         _installManager = installManager;
         _indexer = indexer;
         _sourceManager = sourceManager;
-        _mirrorSearcher = mirrorSearcher;
         _downloadManager = downloadManager;
     }
 

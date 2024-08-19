@@ -1,5 +1,6 @@
 namespace IceCraft.Core.Installation.Storage;
 
+using System.Diagnostics.CodeAnalysis;
 using IceCraft.Core.Archive.Packaging;
 using Semver;
 
@@ -20,4 +21,5 @@ public interface IPackageInstallDatabase
     void Remove(string key, SemVersion version);
 
     Task MaintainAsync();
+    bool TryGetValue(string packageName, [NotNullWhen(true)] out PackageInstallationIndex? index);
 }

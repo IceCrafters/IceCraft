@@ -40,4 +40,5 @@ public interface IPackageInstallManager
     /// <returns>The created metadata.</returns>
     /// <exception cref="ArgumentException">No such package or version.</exception>
     Task<PackageMeta> GetMetaAsync(string packageName, SemVersion version);
+    Task<PackageMeta?> TryGetMetaAsync(string packageName, SemVersion version);
 }
