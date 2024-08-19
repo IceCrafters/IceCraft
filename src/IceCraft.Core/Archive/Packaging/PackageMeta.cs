@@ -24,4 +24,19 @@ public sealed record PackageMeta
     public required DateTime ReleaseDate { get; init; }
 
     public required PackagePluginInfo PluginInfo { get; init; }
+
+    /// <summary>
+    /// Gets a value indicating whether this package can have multiple versions installed into
+    /// the same IceCraft instance, side by side.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Common examples of packages that cannot exist side by side are packages that contain executables which
+    /// must be mapped via <see cref="Installation.Execution.IExecutableManager"/>.
+    /// </para>
+    /// <para>
+    /// It is recommended that only transient package dependencies use this mode.
+    /// </para>
+    /// </remarks>
+    public bool CanMultipleVersionsCoexist { get; init; }
 }

@@ -6,7 +6,7 @@ using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Platform;
 using IceCraft.Core.Serialization;
 using Microsoft.Extensions.Logging;
-using InstalledPackageMap = Dictionary<string, InstalledPackageInfo>;
+using InstalledPackageMap = Dictionary<string, PackageInstallationIndex>;
 
 public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
 {
@@ -25,6 +25,8 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
 
         _packagesPath = Path.Combine(_frontend.DataBasePath, PackageInstallManager.PackagePath);
         _databasePath = Path.Combine(_packagesPath, "db.json");
+
+        Directory.CreateDirectory(_packagesPath);
     }
 
     public async Task<IPackageInstallDatabase> GetAsync()
@@ -54,7 +56,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
         try
         {
             using var fileStream = File.OpenRead(filePath);
-            retVal = await JsonSerializer.DeserializeAsync(fileStream, 
+            retVal = await JsonSerializer.DeserializeAsync(fileStream,
                 IceCraftCoreContext.Default.PackageInstallValueMap);
         }
         catch (JsonException ex)
@@ -122,11 +124,17 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
 
     internal class ValueMap : InstalledPackageMap, IPackageInstallDatabase
     {
+        public InstalledPackageInfo this[string key, string version]
+        {
+            get => this[key][version];
+            set => this[key][version] = value;
+        }
+
         public ValueMap()
         {
         }
 
-        public ValueMap(IEnumerable<KeyValuePair<string, InstalledPackageInfo>> collection) : base(collection)
+        public ValueMap(IEnumerable<KeyValuePair<string, PackageInstallationIndex>> collection) : base(collection)
         {
         }
 
@@ -136,41 +144,100 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
 
         public bool ContainsMeta(PackageMeta meta)
         {
-            return TryGetValue(meta.Id, out var result)
-                && result.Metadata == meta;
+            return TryGetValue(meta.Id, out var index)
+                && index.TryGetValue(meta.Version, out var info)
+                && info.Metadata == meta;
         }
 
         public void Add(InstalledPackageInfo packageInfo)
         {
-            Add(packageInfo.Metadata.Id, packageInfo);
+            Add(packageInfo.Metadata.Id, packageInfo.Metadata.Version, packageInfo);
         }
 
         public bool TryGetValue(PackageMeta meta, out InstalledPackageInfo? result)
         {
-            if (!TryGetValue(meta.Id, out var info))
+            if (!TryGetValue(meta.Id, out var index))
             {
                 result = null;
                 return false;
             }
 
-            if (info.Metadata.Id != meta.Id)
+            if (!index.TryGetValue(meta.Version, out var verInfo))
             {
                 result = null;
                 return false;
             }
 
-            result = info;
+            if (verInfo.Metadata.Id != meta.Id
+                || verInfo.Metadata.Version != meta.Version)
+            {
+                result = null;
+                return false;
+            }
+
+            result = verInfo;
             return true;
         }
 
         public void Put(InstalledPackageInfo info)
         {
-            this[info.Metadata.Id] = info;
+            if (!this.TryGetValue(info.Metadata.Id, out var index))
+            {
+                index = [];
+                this.Add(info.Metadata.Id, index);
+            }
+
+            index[info.Metadata.Version] = info;
         }
 
         void IPackageInstallDatabase.Remove(string key)
         {
             this.Remove(key);
+        }
+
+        public void Add(string key, string version, InstalledPackageInfo info)
+        {
+            if (!this.TryGetValue(key, out var index))
+            {
+                index = [];
+                this.Add(key, index);
+            }
+
+            index.Add(version, info);
+        }
+
+        public void Remove(string key, string version)
+        {
+            if (!this.TryGetValue(key, out var index))
+            {
+                return;
+            }
+
+            index.Remove(version);
+        }
+
+        public async Task MaintainAsync()
+        {
+            var keysToDelete = new List<string>(Count / 2);
+
+            await Task.Run(() =>
+            {
+                foreach (var index in this)
+                {
+                    if (index.Value.Count == 0)
+                    {
+                        keysToDelete.Add(index.Key);
+                    }
+                }
+            });
+
+            await Task.Run(() =>
+            {
+                foreach (var key in keysToDelete)
+                {
+                    Remove(key);
+                }
+            });
         }
     }
 }

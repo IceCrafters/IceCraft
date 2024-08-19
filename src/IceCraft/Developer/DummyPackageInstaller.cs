@@ -7,7 +7,7 @@ public class DummyPackageInstaller : IPackageInstaller
 {
     public Task ExpandPackageAsync(string artefactFile, string targetDir)
     {
-        File.Move(artefactFile, Path.Combine(targetDir, "connecttest.txt"));
+        File.Move(artefactFile, Path.Combine(targetDir, "connecttest.txt"), true);
         return Task.CompletedTask;
     }
 

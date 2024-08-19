@@ -124,7 +124,8 @@ public partial class PackageInstallManager : IPackageInstallManager
 
     public async Task<PackageMeta> GetMetaAsync(string packageName)
     {
+        // TODO determine latest by semver
         var database = await _databaseFactory.GetAsync();
-        return database[packageName].Metadata;
+        return database[packageName].First().Value.Metadata;
     }
 }
