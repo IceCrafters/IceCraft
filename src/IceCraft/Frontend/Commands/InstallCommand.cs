@@ -53,16 +53,17 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
             throw new ArgumentException($"No such package series {settings.PackageName}", nameof(settings));
         }
 
-        // Parse user input, and store in specifiedVersion.
-        // Does not need to be that strict on user input since we all make mistakes.
-        SemVersion? specifiedVersion = null;
+        SemVersion? selectedVersion = null;
         if (!string.IsNullOrWhiteSpace(settings.Version))
         {
-            specifiedVersion = SemVersion.Parse(settings.Version, SemVersionStyles.Any);
+            // Parse user input, and store in specifiedVersion.
+            // Does not need to be that strict on user input since we all make mistakes.
+            selectedVersion = SemVersion.Parse(settings.Version, SemVersionStyles.Any);
         }
-
-        var selectedVersion = (specifiedVersion ?? seriesInfo.LatestVersion)
-            ?? throw new ArgumentException($"Package series {settings.PackageName} do not have a latest version. Please specify one.", nameof(settings));
+        else
+        {
+            selectedVersion = await Task.Run(seriesInfo.Versions.GetLatestSemVersion);
+        }
 
         var versionInfo = seriesInfo.Versions[selectedVersion.ToString()];
         var meta = versionInfo.Metadata;

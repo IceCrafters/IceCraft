@@ -19,6 +19,7 @@ public interface IPackageSeries
     
     Task<IEnumerable<IPackage>> EnumeratePackagesAsync();
 
+    [Obsolete("Compare semantic versioning instead. This interface may return null.")]
     Task<SemVersion?> GetLatestVersionIdAsync();
 
     Task<int> GetExpectedPackageCountAsync();

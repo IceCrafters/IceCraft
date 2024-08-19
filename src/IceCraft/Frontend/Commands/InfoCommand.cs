@@ -49,7 +49,7 @@ public class InfoCommand : AsyncCommand<InfoCommand.Settings>
             return -2;
         }
 
-        var latestId = result.LatestVersion;
+        var latestId = await Task.Run(result.Versions.GetLatestSemVersion);;
 
         if (latestId == null
             || !result.Versions.TryGetValue(latestId.ToString(), out var latest))

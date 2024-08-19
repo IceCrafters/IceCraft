@@ -3,6 +3,7 @@ using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Network;
 using IceCraft.Core.Platform;
+using Semver;
 using Serilog;
 using Spectre.Console.Cli;
 
@@ -33,13 +34,8 @@ public class MirrorGetBestCommand : AsyncCommand<MirrorGetBestCommand.Settings>
             return -2;
         }
 
-        var latestId = result.LatestVersion;
-        if (latestId == null ||
-            !result.Versions.TryGetValue(latestId.ToString(), out var versionInfo))
-        {
-            Log.Warning("Cannot acquire latest version. Try specifying a version.");
-            return -2;
-        }
+        var selectedVersion = await Task.Run(result.Versions.GetLatestSemVersion);
+        var versionInfo = result.Versions[selectedVersion.ToString()];
 
         var bestMirror = await _searcher.GetBestMirrorAsync(versionInfo.Mirrors);
         if (bestMirror == null)

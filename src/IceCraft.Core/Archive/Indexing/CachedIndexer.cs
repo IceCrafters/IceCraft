@@ -50,7 +50,6 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
             foreach (var series in seriesList)
             {
                 token?.ThrowIfCancellationRequested();
-                var latestVersion = await series.GetLatestVersionIdAsync();
                 var expectedCount = await series.GetExpectedPackageCountAsync();
 
                 _logger.LogInformation("Indexing series {Name} with {ExpectedCount} packages", series.Name, expectedCount);
@@ -94,7 +93,6 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
                 {
                     Name = series.Name,
                     Versions = versions,
-                    LatestVersion = latestVersion
                 });
             }
         }

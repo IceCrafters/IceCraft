@@ -56,24 +56,21 @@ public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
             return -2;
         }
 
-        // Parse user input, and store in specifiedVersion.
-        // Does not need to be that strict on user input since we all make mistakes.
-        SemVersion? specifiedVersion = null;
+        SemVersion? selectedVersion = null;
         if (!string.IsNullOrWhiteSpace(settings.Version))
         {
-            specifiedVersion = SemVersion.Parse(settings.Version, SemVersionStyles.Any);
+            // Parse user input, and store in specifiedVersion.
+            // Does not need to be that strict on user input since we all make mistakes.
+            selectedVersion = SemVersion.Parse(settings.Version, SemVersionStyles.Any);
+        }
+        else
+        {
+            selectedVersion = await Task.Run(result.Versions.GetLatestSemVersion);
         }
 
-        var targetVersion = specifiedVersion ?? result.LatestVersion;
-        if (targetVersion == null)
+        if (!result.Versions.TryGetValue(selectedVersion.ToString(), out var versionInfo))
         {
-            Log.Error("Package series {PackageId} does not have latest version. Please specify a version.", settings.Package);
-            return -2;
-        }
-        
-        if (!result.Versions.TryGetValue(targetVersion.ToString(), out var versionInfo))
-        {
-            Log.Error("Version {TargetVersion} not found for package series {PackageId}", targetVersion, settings.Package);
+            Log.Error("Version {TargetVersion} not found for package series {PackageId}", selectedVersion, settings.Package);
             return -2;
         }
 
