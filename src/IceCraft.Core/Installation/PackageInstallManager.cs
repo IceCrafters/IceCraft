@@ -7,6 +7,7 @@ using IceCraft.Core.Network;
 using IceCraft.Core.Platform;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Semver;
 
 public partial class PackageInstallManager : IPackageInstallManager
 {
@@ -88,7 +89,7 @@ public partial class PackageInstallManager : IPackageInstallManager
 
     private string GetPackageDirectory(PackageMeta meta)
     {
-        return Path.Combine(_packagesPath, CleanPath(meta.Id), CleanPath(meta.Version));
+        return Path.Combine(_packagesPath, CleanPath(meta.Id), CleanPath(meta.Version.ToString()));
     }
 
     private static string CleanPath(string path)
@@ -122,10 +123,16 @@ public partial class PackageInstallManager : IPackageInstallManager
         return database.ContainsKey(packageName);
     }
 
-    public async Task<PackageMeta> GetMetaAsync(string packageName)
+    public async Task<PackageMeta> GetLatestMetaAsync(string packageName)
     {
         // TODO determine latest by semver
         var database = await _databaseFactory.GetAsync();
         return database[packageName].First().Value.Metadata;
+    }
+
+    public async Task<PackageMeta> GetMetaAsync(string packageName, SemVersion version)
+    {
+        var database = await _databaseFactory.GetAsync();
+        return database[packageName][version.ToString()].Metadata;
     }
 }

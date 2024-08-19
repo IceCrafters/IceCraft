@@ -52,7 +52,7 @@ public class InfoCommand : AsyncCommand<InfoCommand.Settings>
         var latestId = result.LatestVersion;
 
         if (latestId == null
-            || !result.Versions.TryGetValue(latestId, out var latest))
+            || !result.Versions.TryGetValue(latestId.ToString(), out var latest))
         {
             Log.Warning("Package did not specify latest version");
             return 0;

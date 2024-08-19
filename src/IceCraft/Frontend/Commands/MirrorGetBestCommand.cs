@@ -35,7 +35,7 @@ public class MirrorGetBestCommand : AsyncCommand<MirrorGetBestCommand.Settings>
 
         var latestId = result.LatestVersion;
         if (latestId == null ||
-            !result.Versions.TryGetValue(latestId, out var versionInfo))
+            !result.Versions.TryGetValue(latestId.ToString(), out var versionInfo))
         {
             Log.Warning("Cannot acquire latest version. Try specifying a version.");
             return -2;

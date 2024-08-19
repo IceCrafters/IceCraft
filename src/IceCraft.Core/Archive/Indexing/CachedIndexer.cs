@@ -82,7 +82,7 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
                         continue;
                     }
 
-                    versions.Add(pkgMeta.Version, new CachedPackageInfo
+                    versions.Add(pkgMeta.Version.ToString(), new CachedPackageInfo
                     {
                         Metadata = pkgMeta,
                         Artefact = remoteArtefact,

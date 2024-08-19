@@ -1,6 +1,9 @@
 ﻿namespace IceCraft.Core.Archive.Packaging;
 
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
+using IceCraft.Core.Serialization;
+using Semver;
 
 public sealed record PackageMeta
 {
@@ -9,7 +12,7 @@ public sealed record PackageMeta
     }
 
     [SetsRequiredMembers]
-    public PackageMeta(string id, string version, DateTime releaseDate, PackagePluginInfo pluginInfo)
+    public PackageMeta(string id, SemVersion version, DateTime releaseDate, PackagePluginInfo pluginInfo)
     {
         Id = id;
         Version = version;
@@ -19,7 +22,8 @@ public sealed record PackageMeta
 
     public required string Id { get; init; }
 
-    public required string Version { get; init; }
+    [JsonConverter(typeof(SemVersionConverter))]
+    public required SemVersion Version { get; init; }
 
     public required DateTime ReleaseDate { get; init; }
 

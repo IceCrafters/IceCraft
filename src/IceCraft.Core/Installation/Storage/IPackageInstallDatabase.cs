@@ -1,6 +1,7 @@
 namespace IceCraft.Core.Installation.Storage;
 
 using IceCraft.Core.Archive.Packaging;
+using Semver;
 
 public interface IPackageInstallDatabase
 {
@@ -11,12 +12,12 @@ public interface IPackageInstallDatabase
     bool ContainsMeta(PackageMeta meta);
 
     void Add(InstalledPackageInfo info);
-    void Add(string key, string version, InstalledPackageInfo info);
+    void Add(string key, SemVersion version, InstalledPackageInfo info);
 
     void Put(InstalledPackageInfo info);
 
     void Remove(string key);
-    void Remove(string key, string version);
+    void Remove(string key, SemVersion version);
 
     Task MaintainAsync();
 }

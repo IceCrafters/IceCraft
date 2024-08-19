@@ -1,5 +1,7 @@
 ﻿namespace IceCraft.Core.Archive;
 
+using Semver;
+
 /// <summary>
 /// Represents a series of packages under the same ID but of different versions.
 /// </summary>
@@ -17,7 +19,7 @@ public interface IPackageSeries
     
     Task<IEnumerable<IPackage>> EnumeratePackagesAsync();
 
-    Task<string?> GetLatestVersionIdAsync();
+    Task<SemVersion?> GetLatestVersionIdAsync();
 
     Task<int> GetExpectedPackageCountAsync();
 

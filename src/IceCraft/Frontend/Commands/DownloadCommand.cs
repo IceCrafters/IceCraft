@@ -7,6 +7,7 @@ using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Network;
+using Semver;
 using Serilog;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -29,6 +30,18 @@ public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
         _mirrorSearcher = mirrorSearcher;
     }
 
+    public override ValidationResult Validate(CommandContext context, Settings settings)
+    {
+        if (!string.IsNullOrWhiteSpace(settings.Version)
+             // Does not need to be that strict on user input since we all make mistakes.
+             && !SemVersion.TryParse(settings.Version, SemVersionStyles.Any, out _))
+        {
+            return ValidationResult.Error("Invalid semantic version");
+        }
+
+        return base.Validate(context, settings);
+    }
+
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         Log.Information("Indexing packages");
@@ -43,14 +56,22 @@ public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
             return -2;
         }
 
-        var targetVersion = settings.Version ?? result.LatestVersion;
-        if (string.IsNullOrEmpty(targetVersion))
+        // Parse user input, and store in specifiedVersion.
+        // Does not need to be that strict on user input since we all make mistakes.
+        SemVersion? specifiedVersion = null;
+        if (!string.IsNullOrWhiteSpace(settings.Version))
+        {
+            specifiedVersion = SemVersion.Parse(settings.Version, SemVersionStyles.Any);
+        }
+
+        var targetVersion = specifiedVersion ?? result.LatestVersion;
+        if (targetVersion == null)
         {
             Log.Error("Package series {PackageId} does not have latest version. Please specify a version.", settings.Package);
             return -2;
         }
         
-        if (!result.Versions.TryGetValue(targetVersion, out var versionInfo))
+        if (!result.Versions.TryGetValue(targetVersion.ToString(), out var versionInfo))
         {
             Log.Error("Version {TargetVersion} not found for package series {PackageId}", targetVersion, settings.Package);
             return -2;

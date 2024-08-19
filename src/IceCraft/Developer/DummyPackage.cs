@@ -4,14 +4,17 @@ using System.Collections.Generic;
 using IceCraft.Core.Archive;
 using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Packaging;
+using Semver;
 
 public class DummyPackage : IPackage
 {
     private readonly DummyPackageSeries _series;
+    private readonly SemVersion _version;
 
-    public DummyPackage(DummyPackageSeries series)
+    public DummyPackage(DummyPackageSeries series, SemVersion version)
     {
         _series = series;
+        _version = version;
     }
 
     public IPackageSeries Series => _series;
@@ -33,7 +36,7 @@ public class DummyPackage : IPackage
             Id = "dummy-test",
             PluginInfo = new PackagePluginInfo("dummy-test", "dummy-test"),
             ReleaseDate = DateTime.MinValue,
-            Version = "0.1.0+dummy"
+            Version = _version
         };
     }
 

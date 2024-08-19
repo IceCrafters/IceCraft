@@ -7,6 +7,7 @@ using IceCraft.Core.Archive;
 using IceCraft.Core.Caching;
 using IceCraft.Repositories.Adoptium.Models;
 using Microsoft.Extensions.Logging;
+using Semver;
 
 public class AdoptiumPackageSeries : IPackageSeries
 {
@@ -50,7 +51,7 @@ public class AdoptiumPackageSeries : IPackageSeries
 
         return all
             .Select(x => {
-                return new AdoptiumPackage(this, x, _logger, latest != null && x.VersionData?.Semver == latest);
+                return new AdoptiumPackage(this, x, _logger, latest != null && x.VersionData != null && SemVersion.Parse(x.VersionData.Semver, SemVersionStyles.Strict) == latest);
             });
     }
 
@@ -101,7 +102,7 @@ public class AdoptiumPackageSeries : IPackageSeries
                 => x is { Binary: not null }));
     }
 
-    public async Task<string?> GetLatestVersionIdAsync()
+    public async Task<SemVersion?> GetLatestVersionIdAsync()
     {
         var view = await GetLatestAssetView();
         if (view is not { Version: not null })
@@ -110,6 +111,6 @@ public class AdoptiumPackageSeries : IPackageSeries
             return null;
         }
 
-        return view.Version.Semver;
+        return SemVersion.Parse(view.Version.Semver, SemVersionStyles.Strict);
     }
 }

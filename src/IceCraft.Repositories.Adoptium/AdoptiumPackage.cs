@@ -6,6 +6,7 @@ using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Packaging;
 using IceCraft.Repositories.Adoptium.Models;
 using Microsoft.Extensions.Logging;
+using Semver;
 
 public class AdoptiumPackage : IPackage
 {
@@ -41,8 +42,19 @@ public class AdoptiumPackage : IPackage
     {
         var asset = _asset;
 
+        SemVersion version;
+        if (asset.VersionData != null
+            && SemVersion.TryParse(asset.VersionData.Semver, SemVersionStyles.Strict, out var semVer))
+        {
+            version = semVer;
+        }
+        else
+        {
+            version = new SemVersion(0, 0, 0, null, [asset.ReleaseName]);
+        }
+
         return new PackageMeta(_series.Name,
-            version: (asset.VersionData?.Semver) ?? (asset.ReleaseName),
+            version: version,
             releaseDate: asset.Timestamp ?? asset.UpdatedAt ?? DateTime.MinValue,
             pluginInfo: new PackagePluginInfo(installerRef: "adoptium", configuratorRef: "adoptium"));
     }

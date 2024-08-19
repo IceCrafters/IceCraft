@@ -185,7 +185,7 @@ public class ExecutableManager : IExecutableManager
         var data = await _executables;
 
         using var stream = _fileSystem.File.Create(_dataFilePath);
-        await JsonSerializer.SerializeAsync(stream, data, IceCraftCoreContext.Default.ExecutableDataFile);
+        await JsonSerializer.SerializeAsync(stream, data, IceCraftCoreContext.Default.ExecutableDataFile_v2);
     }
     #endregion
 }

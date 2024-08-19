@@ -6,6 +6,7 @@ using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Installation;
 using IceCraft.Core.Network;
+using Semver;
 using Serilog;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -31,6 +32,18 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
         _downloadManager = downloadManager;
     }
 
+    public override ValidationResult Validate(CommandContext context, Settings settings)
+    {
+        if (!string.IsNullOrWhiteSpace(settings.Version)
+             // Does not need to be that strict on user input since we all make mistakes.
+             && !SemVersion.TryParse(settings.Version, SemVersionStyles.Any, out _))
+        {
+            return ValidationResult.Error("Invalid semantic version");
+        }
+
+        return base.Validate(context, settings);
+    }
+
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         Log.Information("Indexing remote packages");
@@ -40,10 +53,18 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
             throw new ArgumentException($"No such package series {settings.PackageName}", nameof(settings));
         }
 
-        var selectedVersion = (settings.Version ?? seriesInfo.LatestVersion)
+        // Parse user input, and store in specifiedVersion.
+        // Does not need to be that strict on user input since we all make mistakes.
+        SemVersion? specifiedVersion = null;
+        if (!string.IsNullOrWhiteSpace(settings.Version))
+        {
+            specifiedVersion = SemVersion.Parse(settings.Version, SemVersionStyles.Any);
+        }
+
+        var selectedVersion = (specifiedVersion ?? seriesInfo.LatestVersion)
             ?? throw new ArgumentException($"Package series {settings.PackageName} do not have a latest version. Please specify one.", nameof(settings));
 
-        var versionInfo = seriesInfo.Versions[selectedVersion];
+        var versionInfo = seriesInfo.Versions[selectedVersion.ToString()];
         var meta = versionInfo.Metadata;
 
         // Check if the package is already installed, and if the selected version matches.
@@ -76,7 +97,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
 
     private async Task<bool> ComparePackageAsync(PackageMeta meta)
     {
-        var installedMeta = await _installManager.GetMetaAsync(meta.Id);
+        var installedMeta = await _installManager.GetLatestMetaAsync(meta.Id);
         if (installedMeta.Version != meta.Version)
         {
             return true;

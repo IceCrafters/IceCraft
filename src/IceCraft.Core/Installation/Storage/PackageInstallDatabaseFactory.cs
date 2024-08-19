@@ -6,6 +6,7 @@ using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Platform;
 using IceCraft.Core.Serialization;
 using Microsoft.Extensions.Logging;
+using Semver;
 using InstalledPackageMap = Dictionary<string, PackageInstallationIndex>;
 
 public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
@@ -145,7 +146,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
         public bool ContainsMeta(PackageMeta meta)
         {
             return TryGetValue(meta.Id, out var index)
-                && index.TryGetValue(meta.Version, out var info)
+                && index.TryGetValue(meta.Version.ToString(), out var info)
                 && info.Metadata == meta;
         }
 
@@ -162,7 +163,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
                 return false;
             }
 
-            if (!index.TryGetValue(meta.Version, out var verInfo))
+            if (!index.TryGetValue(meta.Version.ToString(), out var verInfo))
             {
                 result = null;
                 return false;
@@ -187,7 +188,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
                 this.Add(info.Metadata.Id, index);
             }
 
-            index[info.Metadata.Version] = info;
+            index[info.Metadata.Version.ToString()] = info;
         }
 
         void IPackageInstallDatabase.Remove(string key)
@@ -195,7 +196,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
             this.Remove(key);
         }
 
-        public void Add(string key, string version, InstalledPackageInfo info)
+        public void Add(string key, SemVersion version, InstalledPackageInfo info)
         {
             if (!this.TryGetValue(key, out var index))
             {
@@ -203,17 +204,17 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
                 this.Add(key, index);
             }
 
-            index.Add(version, info);
+            index.Add(version.ToString(), info);
         }
 
-        public void Remove(string key, string version)
+        public void Remove(string key, SemVersion version)
         {
             if (!this.TryGetValue(key, out var index))
             {
                 return;
             }
 
-            index.Remove(version);
+            index.Remove(version.ToString());
         }
 
         public async Task MaintainAsync()
