@@ -1,6 +1,5 @@
 namespace IceCraft.Frontend.Commands;
 
-using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using IceCraft.Core.Archive.Artefacts;
@@ -65,7 +64,7 @@ public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
         }
         else
         {
-            selectedVersion = await Task.Run(result.Versions.GetLatestSemVersion);
+            selectedVersion = await Task.Run(() => result.Versions.GetLatestSemVersion(settings.IncludePrerelease));
         }
 
         if (!result.Versions.TryGetValue(selectedVersion.ToString(), out var versionInfo))
@@ -171,5 +170,9 @@ public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
         [CommandOption("-v|--version")]
         [Description("The target version. If not specified, the latest one is downloaded.")]
         public string? Version { get; init; }
+
+        [CommandOption("-P|--include-prerelease")]
+        [Description("Whether to include prerelease when getting the latest version. Does not affect '--version'.")]
+        public bool IncludePrerelease { get; init; }
     }
 }

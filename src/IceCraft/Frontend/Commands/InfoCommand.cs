@@ -49,7 +49,7 @@ public class InfoCommand : AsyncCommand<InfoCommand.Settings>
             return -2;
         }
 
-        var latestId = await Task.Run(result.Versions.GetLatestSemVersion);;
+        var latestId = await Task.Run(() => result.Versions.GetLatestSemVersion(settings.IncludePrerelease));
 
         if (latestId == null
             || !result.Versions.TryGetValue(latestId.ToString(), out var latest))
@@ -75,5 +75,9 @@ public class InfoCommand : AsyncCommand<InfoCommand.Settings>
         [CommandOption("-s|--source")]
         [Description("The source to inspect package from.")]
         public string? Source { get; init; }
+
+        [CommandOption("-P|--include-prerelease")]
+        [Description("Whether to include prerelease when getting the latest version. Does not affect '--version'.")]
+        public bool IncludePrerelease { get; init; }
     }
 }

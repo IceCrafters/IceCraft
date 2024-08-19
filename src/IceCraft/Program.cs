@@ -62,6 +62,11 @@ cmdApp.Configure(root =>
         cache.AddCommand<MaintainCacheCommand>("maintain");
     });
 
+    root.AddBranch<BaseSettings>("package", package =>
+    {
+        package.AddCommand<PackageListCommand>("list");
+    });
+
     root.AddCommand<DownloadCommand>("download");
     root.AddCommand<InstallCommand>("install");
     

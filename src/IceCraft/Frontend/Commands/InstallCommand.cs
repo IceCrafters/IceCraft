@@ -62,7 +62,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
         }
         else
         {
-            selectedVersion = await Task.Run(seriesInfo.Versions.GetLatestSemVersion);
+            selectedVersion = await Task.Run(() => seriesInfo.Versions.GetLatestSemVersion(settings.IncludePrerelease));
         }
 
         var versionInfo = seriesInfo.Versions[selectedVersion.ToString()];
@@ -118,5 +118,9 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
         [CommandOption("-v|--version")]
         [Description("Version to install. If unspecified, the latest one is installed.")]
         public string? Version { get; init; }
+
+        [CommandOption("-P|--include-prerelease")]
+        [Description("Whether to include prerelease when getting the latest version. Does not affect '--version'.")]
+        public bool IncludePrerelease { get; init; }
     }
 }

@@ -1,4 +1,6 @@
 namespace IceCraft.Frontend.Commands;
+
+using System.ComponentModel;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Network;
@@ -34,7 +36,7 @@ public class MirrorGetBestCommand : AsyncCommand<MirrorGetBestCommand.Settings>
             return -2;
         }
 
-        var selectedVersion = await Task.Run(result.Versions.GetLatestSemVersion);
+        var selectedVersion = await Task.Run(() => result.Versions.GetLatestSemVersion(settings.IncludePrerelease));
         var versionInfo = result.Versions[selectedVersion.ToString()];
 
         var bestMirror = await _searcher.GetBestMirrorAsync(versionInfo.Mirrors);
@@ -52,5 +54,9 @@ public class MirrorGetBestCommand : AsyncCommand<MirrorGetBestCommand.Settings>
     {
         [CommandArgument(0, "<PACKAGE>")]
         public required string PackageSeries { get; init; }
+
+        [CommandOption("-P|--include-prerelease")]
+        [Description("Whether to include prerelease versions")]
+        public bool IncludePrerelease { get; init; }
     }
 }
