@@ -14,13 +14,11 @@ public static class AdoptiumMirrors
         var artefact = (release.Binaries?.FirstOrDefault(x => x is { Package.Checksum: not null }))
             ?? throw new NotSupportedException("Asset does not contain binary asset");
 
-        return new()
+        return new ArtefactMirrorInfo
         {
             Name = "github",
             IsOrigin = true,
-            DownloadUri = artefact.Package!.Link,
-            Checksum = artefact.Package!.Checksum!,
-            ChecksumType = "sha256"
+            DownloadUri = artefact.Package!.Link
         };
     }
 
@@ -65,12 +63,10 @@ public static class AdoptiumMirrors
         var tunaUrl = GetTunaMirrorUrl(release, type, urlRoot);
         if (tunaUrl != null)
         {
-            list.Add(new ArtefactMirrorInfo()
+            list.Add(new ArtefactMirrorInfo
             {
                 Name = name,
-                DownloadUri = new Uri(tunaUrl),
-                Checksum = checksum,
-                ChecksumType = "sha256"
+                DownloadUri = new Uri(tunaUrl)
             });
         }
     }
@@ -83,7 +79,7 @@ public static class AdoptiumMirrors
         }
 
         var artefact = release.Binaries?.FirstOrDefault();
-        if (artefact == null || artefact.Package == null)
+        if (artefact?.Package == null)
         {
             return null;
         }

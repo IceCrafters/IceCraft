@@ -19,7 +19,9 @@ public sealed record ArtefactMirrorInfo
     /// </summary>
     public bool IsOrigin { get; init; }
 
-    public required string Checksum { get; init; }
+    [Obsolete("Use RemoteArtefact.ChecksumType instead.")]
+    public string? Checksum { get; init; }
 
-    public required string ChecksumType { get; init; }
+    [Obsolete("Use RemoteArtefact.ChecksumType instead.")]
+    public string? ChecksumType { get; init; }
 }

@@ -122,10 +122,12 @@ public class DownloadManager : IDownloadManager
         var bestMirror = await _mirrorSearcher.GetBestMirrorAsync(packageInfo.Mirrors)
                          ?? throw new InvalidOperationException("No best mirror can be found.");
 
-        return await DownloadTemporaryArtefactSecureAsync(bestMirror, downloadTask);
+        return await DownloadTemporaryArtefactSecureAsync(packageInfo.Artefact, bestMirror, downloadTask);
     }
 
-    public async Task<string> DownloadTemporaryArtefactSecureAsync(ArtefactMirrorInfo mirror, INetworkDownloadTask? downloadTask = null)
+    public async Task<string> DownloadTemporaryArtefactSecureAsync(RemoteArtefact artefact,
+        ArtefactMirrorInfo mirror, 
+        INetworkDownloadTask? downloadTask = null)
     {
         var tempStream = CreateTemporaryPackageFile(out var path);
         await using (var tempFile = tempStream)
@@ -134,9 +136,9 @@ public class DownloadManager : IDownloadManager
         }
 
         // ReSharper disable once InvertIf
-        if (!await _checksumRunner.ValidateLocal(mirror, path))
+        if (!await _checksumRunner.ValidateLocal(artefact, path))
         {
-            _logger.LogTrace("Remote hash: {Checksum}", mirror.Checksum);
+            _logger.LogTrace("Remote hash: {Checksum}", artefact.Checksum);
             throw new KnownException("Artefact hash mismatches downloaded file.");
         }
 

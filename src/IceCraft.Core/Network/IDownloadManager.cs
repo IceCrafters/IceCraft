@@ -27,10 +27,12 @@ public interface IDownloadManager
     /// Downloads an artefact from the best mirror to a temporary location, and validates its hash. Throws <see cref="KnownException"/>
     /// if hash mismatches.
     /// </summary>
+    /// <param name="artefact">The artefact information describing the package to be downloaded.</param>
     /// <param name="mirror">The package to download.</param>
     /// <param name="downloadTask">The progress reporting task to report to.</param>
     /// <returns>The path where the downloaded file is located.</returns>
     /// <exception cref="KnownException">Failed to validate artefact.</exception>
-    Task<string> DownloadTemporaryArtefactSecureAsync(ArtefactMirrorInfo mirror,
+    Task<string> DownloadTemporaryArtefactSecureAsync(RemoteArtefact artefact,
+        ArtefactMirrorInfo mirror,
         INetworkDownloadTask? downloadTask = null);
 }

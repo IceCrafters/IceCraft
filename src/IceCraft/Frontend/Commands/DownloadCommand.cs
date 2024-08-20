@@ -6,6 +6,7 @@ using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Network;
+using IceCraft.Core.Util;
 using JetBrains.Annotations;
 using Semver;
 using Serilog;
@@ -82,40 +83,8 @@ public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
             return await MirrorDownload(settings.Target, bestMirror);
         }
 
-        Log.Warning("Downloading from old artefact system");
-
-        // Probe for the target directory.
-        string targetPath;
-        var localFileName = Path.GetFileName(versionInfo.Artefact.DownloadUri.LocalPath);
-        if (string.IsNullOrWhiteSpace(settings.Target))
-        {
-            Log.Debug("download: Using current directory");
-            targetPath = Path.Combine(Directory.GetCurrentDirectory(), localFileName);
-        }
-        else if (Directory.Exists(settings.Target))
-        {
-            Log.Debug("download: Using specified directory name");
-            targetPath = Path.Combine(settings.Target, localFileName);
-        }
-        else
-        {
-            Log.Debug("download: Using specified file name");
-            targetPath = settings.Target;
-        }
-
-        Log.Debug("download: Downloading to {TargetPath}", targetPath);
-
-        await AnsiConsole.Progress()
-            .StartAsync(async ctx =>
-            {
-                var task = ctx.AddTask("Download");
-
-                await _downloadManager.DownloadAsync(versionInfo.Artefact.DownloadUri,
-                    targetPath,
-                    new SpectreDownloadTask(task));
-            });
-        
-        return 0;
+        Log.Fatal("No best mirror available");
+        return 1;
     }
 
     private async Task<int> MirrorDownload(string? destination, ArtefactMirrorInfo bestMirror)

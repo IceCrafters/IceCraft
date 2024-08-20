@@ -12,12 +12,14 @@ public sealed record RemoteArtefact
     {
     }
 
-    public required Uri DownloadUri { get; init; }
-    public string? Checksum { get; init; }
+    [Obsolete("Artefacts will be downloaded from mirrors.")]
+    public Uri? DownloadUri { get; init; }
+    
+    public required string Checksum { get; init; }
     public required string ChecksumType { get; init; }
 
     private string GetDebuggerDisplay()
     {
-        return $"RemoteArtefact{{DownloadUri={DownloadUri},Checksum={Checksum},Validator=(is {ChecksumType.GetType()})}}";
+        return $"RemoteArtefact{{Checksum={Checksum},Validator=(is {ChecksumType.GetType()})}}";
     }
 }

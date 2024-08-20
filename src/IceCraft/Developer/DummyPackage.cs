@@ -21,9 +21,8 @@ public class DummyPackage : IPackage
 
     public RemoteArtefact GetArtefact()
     {
-        return new RemoteArtefact()
+        return new RemoteArtefact
         {
-            DownloadUri = new Uri("http://www.msftconnecttest.com/connecttest.txt"),
             ChecksumType = "sha256",
             Checksum = "5e9a7996fe94d7be10595d7133748760bf8348198b71b7a50fd8affaa980ac61"
         };
@@ -42,13 +41,14 @@ public class DummyPackage : IPackage
 
     public IEnumerable<ArtefactMirrorInfo>? GetMirrors()
     {
-        return [new ArtefactMirrorInfo()
-        {
-            DownloadUri = new Uri("http://www.msftconnecttest.com/connecttest.txt"),
-            ChecksumType = "sha256",
-            Checksum = "5e9a7996fe94d7be10595d7133748760bf8348198b71b7a50fd8affaa980ac61",
-            Name = "main",
-            IsOrigin = true
-        }];
+        return
+        [
+            new ArtefactMirrorInfo
+            {
+                DownloadUri = new Uri("http://www.msftconnecttest.com/connecttest.txt"),
+                Name = "main",
+                IsOrigin = true
+            }
+        ];
     }
 }

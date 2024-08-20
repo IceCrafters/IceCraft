@@ -30,9 +30,13 @@ public class AdoptiumPackage : IPackage
         var binary = (_asset.Binaries?.FirstOrDefault(x => x.Package is { Checksum: not null }))
             ?? throw new NotSupportedException("Asset does not contain binary asset");
 
+        if (binary.Package is not {Checksum: not null})
+        {
+            throw new NotSupportedException("Asset does not contain verifiable checksum");
+        }
+        
         return new RemoteArtefact
         {
-            DownloadUri = binary.Package!.Link,
             Checksum = binary.Package!.Checksum,
             ChecksumType = "sha256"
         };
