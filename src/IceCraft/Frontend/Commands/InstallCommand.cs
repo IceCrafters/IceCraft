@@ -81,7 +81,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
             .StartAsync(async x =>
             {
                 var task = x.AddTask("Download");
-                fileName = await _downloadManager.DownloadTemporaryArtefactAsync(versionInfo, new SpectreDownloadTask(task));
+                fileName = await _downloadManager.DownloadTemporaryArtefactSecureAsync(versionInfo, new SpectreDownloadTask(task));
             });
 
         if (string.IsNullOrEmpty(fileName))

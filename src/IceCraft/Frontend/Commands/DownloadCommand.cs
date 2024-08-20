@@ -6,6 +6,7 @@ using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Network;
+using JetBrains.Annotations;
 using Semver;
 using Serilog;
 using Spectre.Console;
@@ -152,27 +153,32 @@ public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
         
         return 0;
     }
-
+    
     public class Settings : BaseSettings
     {
         [CommandArgument(0, "<PACKAGE>")]
         [Description("The package series to download artefact of.")]
+        [UsedImplicitly]
         public required string Package { get; init; }
 
         [CommandArgument(1, "[TARGET]")]
         [Description("The target path. If not specified, download to the current working directory. Can specify either file name or directory name.")]
+        [UsedImplicitly]
         public string? Target { get; init; }
 
         [CommandOption("-s|--source")]
         [Description("Gets the source to use.")]
+        [UsedImplicitly]
         public string? Source { get; init; }
 
         [CommandOption("-v|--version")]
         [Description("The target version. If not specified, the latest one is downloaded.")]
+        [UsedImplicitly]
         public string? Version { get; init; }
 
         [CommandOption("-P|--include-prerelease")]
         [Description("Whether to include prerelease when getting the latest version. Does not affect '--version'.")]
+        [UsedImplicitly]
         public bool IncludePrerelease { get; init; }
     }
 }
