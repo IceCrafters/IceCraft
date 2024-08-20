@@ -5,6 +5,7 @@ using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Installation.Storage;
 using IceCraft.Core.Network;
 using IceCraft.Core.Platform;
+using IceCraft.Core.Util;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Semver;
@@ -60,18 +61,37 @@ public partial class PackageInstallManager : IPackageInstallManager
 
         Directory.CreateDirectory(pkgDir);
 
-        _logger.LogInformation("Expanding package {Id}", meta.Id);
-        await installer.ExpandPackageAsync(artefactPath, pkgDir);
-
-        _logger.LogInformation("Configurating package {Id}", meta.Id);
-        await configurator.ConfigurePackageAsync(pkgDir, meta);
-
         var database = await _databaseFactory.GetAsync();
         var entry = new InstalledPackageInfo()
         {
             Metadata = meta,
-            State = InstallationState.Configured
+            State = InstallationState.Expanded
         };
+        
+        _logger.LogInformation("Expanding package {Id}", meta.Id);
+        try
+        {
+            await installer.ExpandPackageAsync(artefactPath, pkgDir);
+        }
+        catch (Exception ex)
+        {
+            throw new KnownException("Failed to expand package", ex);
+        }
+
+        _logger.LogInformation("Setting up package {Id}", meta.Id);
+        try
+        {
+            await configurator.ConfigurePackageAsync(pkgDir, meta);
+        }
+        catch (Exception ex)
+        {
+            // Save the fact that the package is expanded but couldn't be set up.
+            entry.State = InstallationState.Expanded;
+            database.Put(entry);
+            
+            throw new KnownException("Failed to set up package", ex);
+        }
+        
         database.Put(entry);
         await _databaseFactory.SaveAsync();
     }

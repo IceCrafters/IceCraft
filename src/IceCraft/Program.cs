@@ -5,6 +5,7 @@ using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Configuration;
 using IceCraft.Core.Platform;
+using IceCraft.Core.Util;
 using IceCraft.Developer;
 using IceCraft.Frontend;
 using IceCraft.Frontend.Commands;
@@ -76,19 +77,24 @@ cmdApp.Configure(root =>
 
     root.SetExceptionHandler((ex, _) =>
     {
-        if (ex is CommandRuntimeException cex)
+        switch (ex)
         {
-            if (cex.InnerException != null)
-            {
+            case CommandRuntimeException { InnerException: not null }:
                 Log.Fatal(ex, "Failed to set up application");
                 return;
-            }
-
-            AnsiConsole.MarkupLineInterpolated($"[red][bold]IceCraft: {cex.Message}[/][/]");
-            return;
+            case CommandRuntimeException cex:
+                AnsiConsole.MarkupLineInterpolated($"[red][bold]IceCraft: {cex.Message}[/][/]");
+                return;
+            // Known exceptions are errors that are expected to occur unlike Unknown error which
+            // something is terribly wrong.
+            case KnownException kex:
+                AnsiConsole.MarkupLineInterpolated($"[red][bold]IceCraft: {kex.Message}[/][/]");
+                Log.Verbose(kex, "Details:");
+                return;
+            default:
+                Log.Fatal(ex, "Unknown error occurred");
+                break;
         }
-
-        Log.Fatal(ex, "Unknown error occurred");
     });
 
     root.SetInterceptor(new LogInterceptor());
