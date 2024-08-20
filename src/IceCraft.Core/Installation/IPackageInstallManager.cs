@@ -1,5 +1,6 @@
 namespace IceCraft.Core.Installation;
 
+using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Installation.Storage;
@@ -31,6 +32,8 @@ public interface IPackageInstallManager
     /// <param name="version">The version of the package.</param>
     /// <returns><see langword="true"/> if installed; otherwise, <see langword="false"/>.</returns>
     Task<bool> IsInstalledAsync(string packageName, string version);
+
+    Task<bool> IsInstalledAsync(DependencyReference dependency);
 
     /// <summary>
     /// Gets the <see cref="PackageMeta"/> instance that describes the metadata of the latest

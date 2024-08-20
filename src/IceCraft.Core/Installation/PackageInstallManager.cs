@@ -1,5 +1,6 @@
 namespace IceCraft.Core.Installation;
 
+using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Installation.Storage;
@@ -164,6 +165,14 @@ public partial class PackageInstallManager : IPackageInstallManager
 
         return database.TryGetValue(packageName, out var index)
                && index.ContainsKey(version);
+    }
+
+    public async Task<bool> IsInstalledAsync(DependencyReference dependency)
+    {
+        var database = await _databaseFactory.GetAsync();
+        
+        return database.TryGetValue(dependency.PackageId, out var index)
+               && index.Values.Any(x => dependency.VersionRange.Contains(x.Metadata.Version));
     }
 
     public async Task<PackageMeta?> GetLatestMetaOrDefaultAsync(string packageName)

@@ -1,6 +1,7 @@
 namespace IceCraft.Core;
 
 using IceCraft.Core.Archive.Checksums;
+using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Installation;
@@ -13,7 +14,7 @@ public static class IceCraftDependencyExtensions
 {
     public static IServiceCollection AddIceCraftDefaults(this IServiceCollection services)
     {
-        return services.AddIceCraftHashers()
+        return services.AddChecksumValidators()
             .AddIceCraftServices();
     }
 
@@ -26,10 +27,11 @@ public static class IceCraftDependencyExtensions
             .AddSingleton<IPackageIndexer, CachedIndexer>()
             .AddSingleton<IPackageInstallDatabaseFactory, PackageInstallDatabaseFactory>()
             .AddSingleton<IPackageInstallManager, PackageInstallManager>()
-            .AddSingleton<IExecutableManager, ExecutableManager>();
+            .AddSingleton<IExecutableManager, ExecutableManager>()
+            .AddSingleton<IDependencyResolver, DependencyResolver>();
     }
 
-    public static IServiceCollection AddIceCraftHashers(this IServiceCollection services)
+    public static IServiceCollection AddChecksumValidators(this IServiceCollection services)
     {
         return services.AddKeyedSingleton<IChecksumValidator, Sha256ChecksumValidator>("sha256");
     }
