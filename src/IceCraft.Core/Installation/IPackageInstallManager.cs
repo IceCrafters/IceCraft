@@ -2,6 +2,7 @@ namespace IceCraft.Core.Installation;
 
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Packaging;
+using IceCraft.Core.Installation.Storage;
 using Semver;
 
 public interface IPackageInstallManager
@@ -22,6 +23,14 @@ public interface IPackageInstallManager
     /// <param name="packageName">The name of the package.</param>
     /// <returns><see langword="true"/> if installed; otherwise, <see langword="false"/>.</returns>
     Task<bool> IsInstalledAsync(string packageName);
+    
+    /// <summary>
+    /// Determines whether at least one version of the specified package is installed.
+    /// </summary>
+    /// <param name="packageName">The name of the package.</param>
+    /// <param name="version">The version of the package.</param>
+    /// <returns><see langword="true"/> if installed; otherwise, <see langword="false"/>.</returns>
+    Task<bool> IsInstalledAsync(string packageName, string version);
 
     /// <summary>
     /// Gets the <see cref="PackageMeta"/> instance that describes the metadata of the latest
@@ -29,7 +38,7 @@ public interface IPackageInstallManager
     /// </summary>
     /// <param name="packageName">The name of the package to get metadata from.</param>
     /// <returns>The created metadata.</returns>
-    Task<PackageMeta> GetLatestMetaAsync(string packageName);
+    Task<PackageMeta?> GetLatestMetaOrDefaultAsync(string packageName);
 
     /// <summary>
     /// Gets the <see cref="PackageMeta"/> instance that describes the metadata of the specified
@@ -41,4 +50,6 @@ public interface IPackageInstallManager
     /// <exception cref="ArgumentException">No such package or version.</exception>
     Task<PackageMeta> GetMetaAsync(string packageName, SemVersion version);
     Task<PackageMeta?> TryGetMetaAsync(string packageName, SemVersion version);
+    
+    Task<PackageInstallationIndex?> GetIndexOrDefaultAsync(string metaId);
 }

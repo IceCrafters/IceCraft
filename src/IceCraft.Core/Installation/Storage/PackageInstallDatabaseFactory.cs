@@ -240,5 +240,15 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
                 }
             });
         }
+
+        public IEnumerable<string> EnumerateKeys()
+        {
+            return Keys;
+        }
+
+        public PackageInstallationIndex? GetValueOrDefault(string packageId)
+        {
+            return CollectionExtensions.GetValueOrDefault(this, packageId);
+        }
     }
 }

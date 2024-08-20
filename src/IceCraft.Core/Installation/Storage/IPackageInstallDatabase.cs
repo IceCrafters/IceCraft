@@ -22,4 +22,8 @@ public interface IPackageInstallDatabase
 
     Task MaintainAsync();
     bool TryGetValue(string packageName, [NotNullWhen(true)] out PackageInstallationIndex? index);
+
+    IEnumerable<string> EnumerateKeys();
+    
+    PackageInstallationIndex? GetValueOrDefault(string packageId);
 }

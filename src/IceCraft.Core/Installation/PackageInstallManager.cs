@@ -158,11 +158,19 @@ public partial class PackageInstallManager : IPackageInstallManager
         return database.ContainsKey(packageName);
     }
 
-    public async Task<PackageMeta> GetLatestMetaAsync(string packageName)
+    public async Task<bool> IsInstalledAsync(string packageName, string version)
+    {
+        var database = await _databaseFactory.GetAsync();
+
+        return database.TryGetValue(packageName, out var index)
+               && index.ContainsKey(version);
+    }
+
+    public async Task<PackageMeta?> GetLatestMetaOrDefaultAsync(string packageName)
     {
         // TODO determine latest by semver
         var database = await _databaseFactory.GetAsync();
-        return database[packageName].First().Value.Metadata;
+        return database[packageName].FirstOrDefault().Value?.Metadata;
     }
 
     public async Task<PackageMeta> GetMetaAsync(string packageName, SemVersion version)
@@ -185,5 +193,12 @@ public partial class PackageInstallManager : IPackageInstallManager
         }
 
         return result.Metadata;
+    }
+
+    public async Task<PackageInstallationIndex?> GetIndexOrDefaultAsync(string metaId)
+    {
+        var database = await _databaseFactory.GetAsync();
+
+        return database.GetValueOrDefault(metaId);
     }
 }

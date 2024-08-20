@@ -50,7 +50,7 @@ public class UninstallCommand : AsyncCommand<UninstallCommand.Settings>
         }
         else
         {
-            selectedVersion = await _installManager.GetLatestMetaAsync(settings.PackageName);
+            selectedVersion = await _installManager.GetLatestMetaOrDefaultAsync(settings.PackageName);
         }
 
         await _installManager.UninstallAsync(selectedVersion);

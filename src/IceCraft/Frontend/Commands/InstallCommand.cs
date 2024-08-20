@@ -6,11 +6,13 @@ using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Installation;
 using IceCraft.Core.Network;
+using JetBrains.Annotations;
 using Semver;
 using Serilog;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
+[UsedImplicitly]
 public class InstallCommand : AsyncCommand<InstallCommand.Settings>
 {
     private readonly IPackageInstallManager _installManager;
@@ -95,15 +97,14 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
 
     private async Task<bool> ComparePackageAsync(PackageMeta meta)
     {
-        var installedMeta = await _installManager.GetLatestMetaAsync(meta.Id);
-        if (installedMeta.Version != meta.Version)
+        // ReSharper disable once InvertIf
+        if (await _installManager.IsInstalledAsync(meta.Id, meta.Version.ToString()))
         {
-            return true;
+            Log.Information("Package {Id} ({Version}) is already installed.", meta.Id, meta.Version);
+            return false;
         }
 
-        Log.Information("Package {Id} ({Version}) is already installed.", meta.Id, meta.Version);
-
-        return false;
+        return true;
     }
 
     public class Settings : BaseSettings
