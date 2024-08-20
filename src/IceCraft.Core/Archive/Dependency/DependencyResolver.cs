@@ -36,42 +36,33 @@ public class DependencyResolver : IDependencyResolver
     {
         // The dependency tree trunk.
         var depTrunk = new HashSet<PackageMeta>(meta.Dependencies?.Count ?? 10);
+        var resolvingStack = new Stack<PackageMeta>();
+        resolvingStack.Push(meta);
         
-        // The collection of all dependency tree branches.
-        var depBranches = new List<HashSet<PackageMeta>>(meta.Dependencies?.Count ?? 10);
-
-        // Resolve the dependencies at trunk level.
-        await ResolveDependencies(meta, index, depTrunk);
-
         // Step 1: generate dependency trees for all dependencies.
         await Task.Run(async () =>
         {
-            foreach (var dependency in depTrunk)
+            while (resolvingStack.Count != 0)
             {
-                if (dependency.Dependencies == null || dependency.Dependencies.Count == 0)
+                var package = resolvingStack.Pop();
+                if (package.Dependencies == null || package.Dependencies.Count == 0)
                 {
                     continue;
                 }
-
-                // Create a dependency tree for the current dependency, and resolve dependencies
-                // into this dependency tree.
-                var depBranch = new HashSet<PackageMeta>(dependency.Dependencies.Count);
-
-                await ResolveTree(dependency, index, depBranch);
                 
-                // Expand here so we don't do it later in Step 2.
-                depTrunk.EnsureCapacity(depTrunk.Count + depBranch.Count);
-                depBranches.Add(depBranch);
-            }
-        });
-
-        // Step 2: merge all dependency trees in to the trunk.
-        await Task.Run(() =>
-        {
-            foreach (var entry in 
-                     depBranches.SelectMany(branch => branch))
-            {
-                depTrunk.Add(entry);
+                var deps = ResolveDependencies(package, index);
+                
+                // Add into dependency trunk and push the dependency package into the resolving
+                // stack.
+                await Task.Run(async () =>
+                {
+                    depTrunk.EnsureCapacity(package.Dependencies.Count);
+                    await foreach (var dependency in deps)
+                    {
+                        resolvingStack.Push(dependency);
+                        depTrunk.Add(dependency);
+                    }
+                });
             }
         });
         
@@ -102,16 +93,11 @@ public class DependencyResolver : IDependencyResolver
         });
     }
 
-    public async Task ResolveDependencies(PackageMeta meta, PackageIndex index, ISet<PackageMeta> listToAppend)
+    public async IAsyncEnumerable<PackageMeta> ResolveDependencies(PackageMeta meta, PackageIndex index)
     {
         if (meta.Dependencies == null)
         {
-            return;
-        }
-
-        if (listToAppend is HashSet<PackageMeta> expandableSet)
-        {
-            expandableSet.EnsureCapacity(expandableSet.Count + meta.Dependencies.Count);
+            yield break;
         }
 
         foreach (var dependency in meta.Dependencies)
@@ -146,7 +132,7 @@ public class DependencyResolver : IDependencyResolver
                 throw DependencyException.Unsatisfied(dependency);
             }
 
-            listToAppend.Add(depMeta);
+            yield return depMeta;
         }
     }
 }
