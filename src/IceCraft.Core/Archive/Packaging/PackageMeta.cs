@@ -2,6 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
+using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Serialization;
 using Semver;
 
@@ -12,12 +13,17 @@ public sealed record PackageMeta
     }
 
     [SetsRequiredMembers]
-    public PackageMeta(string id, SemVersion version, DateTime releaseDate, PackagePluginInfo pluginInfo)
+    public PackageMeta(string id, 
+        SemVersion version, 
+        DateTime releaseDate, 
+        PackagePluginInfo pluginInfo,
+        DependencyCollection? dependencies = null)
     {
         Id = id;
         Version = version;
         ReleaseDate = releaseDate;
         PluginInfo = pluginInfo;
+        Dependencies = dependencies;
     }
 
     public required string Id { get; init; }
@@ -28,6 +34,8 @@ public sealed record PackageMeta
     public required DateTime ReleaseDate { get; init; }
 
     public required PackagePluginInfo PluginInfo { get; init; }
+    
+    public DependencyCollection? Dependencies { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether this package can have multiple versions installed into
