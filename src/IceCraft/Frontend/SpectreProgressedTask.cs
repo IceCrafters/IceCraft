@@ -30,4 +30,9 @@ public class SpectreProgressedTask : IProgressedTask
     {
         _progressTask.IsIndeterminate = true;
     }
+
+    public void SetText(string text)
+    {
+        _progressTask.Description = text;
+    }
 }

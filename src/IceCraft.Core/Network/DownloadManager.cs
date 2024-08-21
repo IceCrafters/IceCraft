@@ -19,8 +19,8 @@ public class DownloadManager : IDownloadManager
     private readonly IMirrorSearcher _mirrorSearcher;
     private readonly IChecksumRunner _checksumRunner;
 
-    public DownloadManager(IFrontendApp frontendApp, 
-        ILogger<DownloadManager> logger, 
+    public DownloadManager(IFrontendApp frontendApp,
+        ILogger<DownloadManager> logger,
         IMirrorSearcher mirrorSearcher,
         IChecksumRunner checksumRunner)
     {
@@ -43,22 +43,68 @@ public class DownloadManager : IDownloadManager
         _checksumRunner = checksumRunner;
     }
 
-    public async Task DownloadAsync(Uri from, string toFile, INetworkDownloadTask? task = null)
+    #region Display Helpers
+
+    private const double Megabyte = 1024 * 1024;
+    private const double Kilobyte = 1024;
+
+    private static string GetUserReadableSize(double size)
+    {
+        if (size >= Megabyte)
+        {
+            return $"{size / Megabyte:N3} MiB";
+        }
+
+        if (size >= Kilobyte)
+        {
+            return $"{size / Kilobyte:N3} KiB";
+        }
+
+        return $"{size:N3} B";
+    }
+
+    private static string GetUserReadableSpeed(double bps)
+    {
+        if (bps >= Megabyte)
+        {
+            return $"{bps / Megabyte:N3} MiB/s";
+        }
+
+        if (bps >= Kilobyte)
+        {
+            return $"{bps / Kilobyte:N3} KiB/s";
+        }
+
+        return $"{bps:N3} B/s";
+    }
+
+    private static void UpdateSpeed(IProgressedTask? task, string? fileName, double bps, long totalBytesToReceive, long receivedBytes)
+    {
+        if (task == null)
+        {
+            return;
+        }
+
+        task.SetText(fileName == null
+        ? $"{GetUserReadableSize(receivedBytes)}/{GetUserReadableSize(totalBytesToReceive)} - {GetUserReadableSpeed(bps)}"
+        : $"{fileName} | {GetUserReadableSize(receivedBytes)}/{GetUserReadableSize(totalBytesToReceive)} - {GetUserReadableSpeed(bps)}");
+        
+    }
+
+    #endregion
+
+    public async Task DownloadAsync(Uri from, string toFile, IProgressedTask? task = null, string? fileName = null)
     {
         var downloader = new DownloadService(_downloadConfig);
+
         downloader.DownloadProgressChanged += (sender, args) =>
         {
             task?.SetDefinitePrecentage(args.ProgressPercentage);
-            task?.UpdateSpeed(args.BytesPerSecondSpeed, args.TotalBytesToReceive, args.ReceivedBytesSize);
+            UpdateSpeed(task, fileName, args.BytesPerSecondSpeed, args.TotalBytesToReceive, args.ReceivedBytesSize);
         };
 
-        downloader.DownloadFileCompleted += (sender, args) =>
-        {
-            task?.Complete();
-        };
-
-        await downloader.DownloadFileTaskAsync(from.ToString(), 
-            toFile, 
+        await downloader.DownloadFileTaskAsync(from.ToString(),
+            toFile,
             _frontendApp.GetCancellationToken());
 
         if (downloader.IsCancelled)
@@ -67,21 +113,16 @@ public class DownloadManager : IDownloadManager
         }
     }
 
-    public async Task DownloadAsync(Uri from, Stream toStream, INetworkDownloadTask? task = null)
+    public async Task DownloadAsync(Uri from, Stream toStream, IProgressedTask? task = null, string? fileName = null)
     {
         var downloader = new DownloadService(_downloadConfig);
         downloader.DownloadProgressChanged += (sender, args) =>
         {
             task?.SetDefinitePrecentage(args.ProgressPercentage);
-            task?.UpdateSpeed(args.BytesPerSecondSpeed, args.TotalBytesToReceive, args.ReceivedBytesSize);
+            UpdateSpeed(task, fileName, args.BytesPerSecondSpeed, args.TotalBytesToReceive, args.ReceivedBytesSize);
         };
 
-        downloader.DownloadFileCompleted += (sender, args) =>
-        {
-            task?.Complete();
-        };
-
-        using var stream = await downloader.DownloadFileTaskAsync(from.ToString(), 
+        using var stream = await downloader.DownloadFileTaskAsync(from.ToString(),
             _frontendApp.GetCancellationToken());
         await stream.CopyToAsync(toStream);
 
@@ -91,48 +132,49 @@ public class DownloadManager : IDownloadManager
         }
     }
 
-        private static FileStream CreateTemporaryPackageFile(out string path)
+    private static FileStream CreateTemporaryPackageFile(out string path)
     {
         var temporaryName = Path.GetRandomFileName();
         path = Path.Combine(Path.GetTempPath(), temporaryName);
         return File.Create(path);
     }
 
-    public async Task<string> DownloadTemporaryArtefactAsync(CachedPackageInfo packageInfo, INetworkDownloadTask? downloadTask = null)
+    public async Task<string> DownloadTemporaryArtefactAsync(CachedPackageInfo packageInfo, IProgressedTask? downloadTask = null, string? fileName = null)
     {
-         // Get the best mirror.
+        // Get the best mirror.
         _logger.LogInformation("Probing mirrors");
         var bestMirror = await _mirrorSearcher.GetBestMirrorAsync(packageInfo.Mirrors)
             ?? throw new InvalidOperationException("No best mirror can be found.");
 
-        return await DownloadTemporaryArtefactAsync(bestMirror, downloadTask);
+        return await DownloadTemporaryArtefactAsync(bestMirror, downloadTask, fileName);
     }
 
-    public async Task<string> DownloadTemporaryArtefactAsync(ArtefactMirrorInfo mirror, INetworkDownloadTask? downloadTask = null)
+    public async Task<string> DownloadTemporaryArtefactAsync(ArtefactMirrorInfo mirror, IProgressedTask? downloadTask = null, string? fileName = null)
     {
         await using var tempFile = CreateTemporaryPackageFile(out var path);
-            await DownloadAsync(mirror, tempFile, downloadTask);
-            return path;
+        await DownloadAsync(mirror, tempFile, downloadTask, fileName);
+        return path;
     }
 
-    public async Task<string> DownloadTemporaryArtefactSecureAsync(CachedPackageInfo packageInfo, INetworkDownloadTask? downloadTask = null)
+    public async Task<string> DownloadTemporaryArtefactSecureAsync(CachedPackageInfo packageInfo, IProgressedTask? downloadTask = null, string? fileName = null)
     {
         // Get the best mirror.
         _logger.LogInformation("Probing mirrors");
         var bestMirror = await _mirrorSearcher.GetBestMirrorAsync(packageInfo.Mirrors)
                          ?? throw new InvalidOperationException("No best mirror can be found.");
 
-        return await DownloadTemporaryArtefactSecureAsync(packageInfo.Artefact, bestMirror, downloadTask);
+        return await DownloadTemporaryArtefactSecureAsync(packageInfo.Artefact, bestMirror, downloadTask, fileName);
     }
 
     public async Task<string> DownloadTemporaryArtefactSecureAsync(RemoteArtefact artefact,
-        ArtefactMirrorInfo mirror, 
-        INetworkDownloadTask? downloadTask = null)
+        ArtefactMirrorInfo mirror,
+        IProgressedTask? downloadTask = null,
+        string? fileName = null)
     {
         var tempStream = CreateTemporaryPackageFile(out var path);
         await using (var tempFile = tempStream)
         {
-            await DownloadAsync(mirror, tempFile, downloadTask);
+            await DownloadAsync(mirror, tempFile, downloadTask, fileName);
         }
 
         // ReSharper disable once InvertIf
@@ -145,11 +187,14 @@ public class DownloadManager : IDownloadManager
         return path;
     }
 
-    public async Task DownloadAsync(ArtefactMirrorInfo bestMirror, Stream stream,
-        INetworkDownloadTask? downloadTask = null)
+    public async Task DownloadAsync(ArtefactMirrorInfo bestMirror, 
+        Stream stream,
+        IProgressedTask? downloadTask = null,
+        string? fileName = null)
     {
         await DownloadAsync(bestMirror.DownloadUri,
             stream,
-            downloadTask);
+            downloadTask,
+            fileName);
     }
 }

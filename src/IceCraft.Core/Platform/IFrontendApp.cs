@@ -14,5 +14,7 @@ public interface IFrontendApp
     CancellationToken GetCancellationToken();
 
     Task DoProgressedTaskAsync(string description, Func<IProgressedTask, Task> action);
+
+    [Obsolete("Use DoProgessedTaskAsync instead.")]
     Task DoDownloadTaskAsync(Func<INetworkDownloadTask, Task> action);
 }

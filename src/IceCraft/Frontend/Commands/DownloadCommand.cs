@@ -117,7 +117,7 @@ public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
 
                 await _downloadManager.DownloadAsync(bestMirror.DownloadUri,
                     targetPath,
-                    new SpectreDownloadTask(task));
+                    new SpectreProgressedTask(task));
             });
         
         return 0;

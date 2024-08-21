@@ -41,16 +41,16 @@ public class UninstallCommand : AsyncCommand<UninstallCommand.Settings>
         {
             var semver = SemVersion.Parse(settings.Version, SemVersionStyles.Any);
             selectedVersion = await _installManager.TryGetMetaAsync(settings.PackageName, semver);
-
-            if (selectedVersion == null)
-            {
-                Log.Fatal("Version {Version} for package {PackageName} not found", settings.Version, settings.PackageName);
-                return -2;
-            }
         }
         else
         {
             selectedVersion = await _installManager.GetLatestMetaOrDefaultAsync(settings.PackageName);
+        }
+        
+        if (selectedVersion == null)
+        {
+            Log.Fatal("Version {Version} for package {PackageName} not found", settings.Version, settings.PackageName);
+            return -2;
         }
 
         await _installManager.UninstallAsync(selectedVersion);
