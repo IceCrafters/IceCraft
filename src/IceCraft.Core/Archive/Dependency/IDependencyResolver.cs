@@ -6,14 +6,10 @@ using IceCraft.Core.Archive.Packaging;
 public interface IDependencyResolver
 {
     /// <summary>
-    /// Resolves an entire tree of all dependencies.
+    /// Resolves an entire tree of all dependencies, and appends the resolved dependencies into the specified
+    /// set top-down (i.e. all entries flattened and inserted in a visually top-to-down order if dependencies
+    /// are represented in trees).
     /// </summary>
-    /// <remarks>
-    /// <para>
-    /// Implementations of this method will likely use recursion. If the dependency tree has too many branches,
-    /// the stack may overflow.
-    /// </para>
-    /// </remarks>
     /// <param name="meta">The package to resolve dependencies for.</param>
     /// <param name="index">The package index to resolve dependencies from.</param>
     /// <param name="setToAppend">The set to append dependencies from. A growable list like <see cref="HashSet{T}"/> is recommended.</param>
