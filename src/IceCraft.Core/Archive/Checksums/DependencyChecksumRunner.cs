@@ -11,6 +11,7 @@ public class DependencyChecksumRunner : IChecksumRunner
     private readonly IServiceProvider _provider;
     private readonly ILogger _logger;
     private readonly IManagerConfiguration _config;
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
 
     public DependencyChecksumRunner(IServiceProvider provider,
         IManagerConfiguration config,
@@ -28,7 +29,6 @@ public class DependencyChecksumRunner : IChecksumRunner
             _logger.LogError("File does not exist or is not a file, unable to validate checksum");
             return false;
         }
-
         await using var stream = File.OpenRead(file);
         return await ValidateLocal(artefact, stream);
     }
@@ -63,10 +63,12 @@ public class DependencyChecksumRunner : IChecksumRunner
 
         byte[] checkCode;
 
+        await _semaphore.WaitAsync();
         await using (var stream = File.OpenRead(file))
         {
             checkCode = await validator.GetChecksumBinaryAsync(stream);
         }
+        _semaphore.Release();
 
         var fileChecksum = validator.GetChecksumString(checkCode);
         return validator.CompareChecksum(fileChecksum, artefact.Checksum);
