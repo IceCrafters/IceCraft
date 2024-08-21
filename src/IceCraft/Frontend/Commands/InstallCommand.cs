@@ -1,6 +1,8 @@
 namespace IceCraft.Frontend.Commands;
 
 using System.ComponentModel;
+using IceCraft.Core.Archive.Artefacts;
+using IceCraft.Core.Archive.Checksums;
 using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Packaging;
@@ -24,13 +26,22 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
     private readonly IDownloadManager _downloadManager;
     private readonly IDependencyResolver _dependencyResolver;
     private readonly IFrontendApp _frontend;
+    private readonly IChecksumRunner _checksumRunner;
+
+    private readonly record struct QueuedDownloadTask
+    {
+        internal required Task<string> Task { get; init; }
+        internal required RemoteArtefact ArtefactInfo { get; init; }
+        internal required PackageMeta Metadata { get; init; }
+    }
 
     public InstallCommand(IPackageInstallManager installManager,
         IPackageIndexer indexer,
         IRepositorySourceManager sourceManager,
         IDownloadManager downloadManager,
         IDependencyResolver dependencyResolver,
-        IFrontendApp frontend)
+        IFrontendApp frontend,
+        IChecksumRunner checksumRunner)
     {
         _installManager = installManager;
         _indexer = indexer;
@@ -38,6 +49,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
         _downloadManager = downloadManager;
         _dependencyResolver = dependencyResolver;
         _frontend = frontend;
+        _checksumRunner = checksumRunner;
     }
 
     public override ValidationResult Validate(CommandContext context, Settings settings)
@@ -54,10 +66,9 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        // Step 1
+        // Step 1: Index
         CachedPackageSeriesInfo? seriesInfo = null;
         SemVersion? selectedVersion = null;
-        CachedPackageInfo? versionInfo = null;
         PackageMeta? meta = null;
         PackageIndex? index = null;
         HashSet<PackageMeta> allPackagesSet = [];
@@ -86,7 +97,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
                     selectedVersion = await Task.Run(() => seriesInfo!.Versions.GetLatestSemVersion(settings.IncludePrerelease));
                 }
 
-                versionInfo = seriesInfo.Versions[selectedVersion.ToString()];
+                var versionInfo = seriesInfo.Versions[selectedVersion.ToString()];
                 meta = versionInfo.Metadata;
 
                 // Check if the package is already installed, and if the selected version matches.
@@ -112,30 +123,65 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
             return 0;
         }
 
-        // TODO implement multidownload
-        throw new NotImplementedException();
-
         Log.Information("Beginning download");
-        string? fileName = null;
 
-        // TODO origin & questionable
+        // Step 3: download artefacts
+
+        QueuedDownloadTask[] artefactTasks = [];
         await AnsiConsole.Progress()
             .HideCompleted(true)
             .StartAsync(async x =>
             {
-                var task = x.AddTask("Download");
-                fileName = await _downloadManager.DownloadTemporaryArtefactSecureAsync(versionInfo!,
-                    new SpectreProgressedTask(task),
-                    $"{meta!.Id} {meta.Version}");
+                var artefactList = new List<QueuedDownloadTask>(allPackagesSet.Count);
+
+                foreach (var package in allPackagesSet)
+                {
+                    var task = x.AddTask(package.Id);
+                    var versionInfo = index!.GetPackageInfo(package);
+
+                    artefactList.Add(new QueuedDownloadTask()
+                    {
+                        Task = _downloadManager.DownloadTemporaryArtefactAsync(versionInfo,
+                            new SpectreProgressedTask(task),
+                            $"{meta!.Id} {meta.Version}"),
+                        Metadata = package,
+                        ArtefactInfo = versionInfo.Artefact
+                    });
+                }
+
+                artefactTasks = [.. artefactList];
+
+                await Task.WhenAll(artefactTasks.Select(x => x.Task)).ConfigureAwait(false);
             });
 
-        if (string.IsNullOrEmpty(fileName))
-        {
-            throw new InvalidOperationException("Failed to acquire artefact: Unable to get temporary artefact path.");
-        }
-        await _installManager.InstallAsync(meta, fileName);
+        // Step 4: install artefacts
+
+        await AnsiConsole.Status()
+            .StartAsync("Installing packages",
+            async context =>
+            {
+                await _installManager.BulkInstallAsync(ValidateAndInsertInternalAsync(context, artefactTasks), 
+                    artefactTasks.Length);
+            });
 
         return 0;
+    }
+
+    private async IAsyncEnumerable<KeyValuePair<PackageMeta, string>> ValidateAndInsertInternalAsync(StatusContext status,
+        IEnumerable<QueuedDownloadTask> tasks)
+    {
+        foreach (var task in tasks)
+        {
+            status.Status($"Installing package {task.Metadata.Id}");
+
+            var path = await task.Task;
+            if (!await _checksumRunner.ValidateLocal(task.ArtefactInfo, path))
+            {
+                Log.Verbose("Remote hash: {Checksum}", task.ArtefactInfo.Checksum);
+                throw new KnownException("Artefact hash mismatches downloaded file.");
+            }
+            yield return new KeyValuePair<PackageMeta, string>(task.Metadata, path);
+        }
     }
 
     private async Task<bool> ComparePackageAsync(PackageMeta meta)

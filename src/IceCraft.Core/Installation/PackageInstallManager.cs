@@ -23,7 +23,7 @@ public partial class PackageInstallManager : IPackageInstallManager
 
     private readonly string _packagesPath;
 
-    public PackageInstallManager(ILogger<PackageInstallManager> logger, 
+    public PackageInstallManager(ILogger<PackageInstallManager> logger,
         IFrontendApp frontend,
         IDownloadManager downloadManager,
         IServiceProvider serviceProvider,
@@ -43,16 +43,99 @@ public partial class PackageInstallManager : IPackageInstallManager
         Directory.CreateDirectory(_packagesPath);
     }
 
+    public async Task BulkInstallAsync(IAsyncEnumerable<KeyValuePair<PackageMeta, string>> packages,
+        int expectedCount)
+    {
+        // Key   : Meta 
+        // Value : Expanded directory
+        var dictionary = new Dictionary<PackageMeta, string>(expectedCount);
+
+        var database = await _databaseFactory.GetAsync();
+
+        // Configure and expand package.
+        await foreach (var package in packages)
+        {
+            var meta = package.Key;
+            var artefactPath = package.Value;
+
+            var entry = new InstalledPackageInfo()
+            {
+                Metadata = meta,
+                State = InstallationState.Expanded
+            };
+
+            var installer = _serviceProvider.GetKeyedService<IPackageInstaller>(meta.PluginInfo.InstallerRef)
+                ?? throw new ArgumentException($"Installer '{meta.PluginInfo.InstallerRef}' not found for package '{meta.Id}' '{meta.Version}'.");
+            var pkgDir = GetPackageDirectory(meta);
+
+            // Expand package.
+            Directory.CreateDirectory(pkgDir);
+            _logger.LogInformation("Expanding package {Id}", meta.Id);
+            try
+            {
+                await installer.ExpandPackageAsync(artefactPath, pkgDir);
+            }
+            catch (Exception ex)
+            {
+                throw new KnownException("Failed to expand package", ex);
+            }
+
+            database.Put(entry);
+            dictionary.Add(meta, pkgDir);
+        }
+
+        await _databaseFactory.SaveAsync();
+
+        // Configure package.
+        // DependencyResolver resolves dependencies top-down, and thus the most safe way is to
+        // do installations in reverse.
+        foreach (var package in dictionary.Reverse())
+        {
+            var meta = package.Key;
+            var configurator = _serviceProvider.GetKeyedService<IPackageConfigurator>(meta.PluginInfo.ConfiguratorRef)
+                ?? throw new ArgumentException($"Configurator '{meta.PluginInfo.ConfiguratorRef}' not found for package '{meta.Id}' '{meta.Version}'.");
+
+            var entry = new InstalledPackageInfo()
+            {
+                Metadata = meta,
+                State = InstallationState.Configured
+            };
+
+            _logger.LogInformation("Setting up package {Id}", meta.Id);
+            try
+            {
+                await configurator.ConfigurePackageAsync(package.Value, meta);
+            }
+            catch (Exception ex)
+            {
+                // Save the fact that the package is expanded but couldn't be set up.
+                entry.State = InstallationState.Expanded;
+                database.Put(entry);
+
+                throw new KnownException("Failed to set up package", ex);
+            }
+
+            database.Put(entry);
+        }
+
+        await _databaseFactory.SaveAsync();
+    }
+
     public async Task InstallAsync(CachedPackageInfo packageInfo)
     {
         var meta = packageInfo.Metadata;
         var tempFilePath = await _downloadManager.DownloadTemporaryArtefactAsync(packageInfo);
-        // TODO validate package.
-        // TODO dependencies.
         await InstallAsync(meta, tempFilePath);
     }
 
     public async Task InstallAsync(PackageMeta meta, string artefactPath)
+    {
+        var database = await _databaseFactory.GetAsync();
+        await InternalInstallAsync(database, meta, artefactPath);
+        await _databaseFactory.SaveAsync();
+    }
+
+    private async Task InternalInstallAsync(IPackageInstallDatabase database, PackageMeta meta, string artefactPath)
     {
         var pkgDir = GetPackageDirectory(meta);
         var installer = _serviceProvider.GetKeyedService<IPackageInstaller>(meta.PluginInfo.InstallerRef)
@@ -62,13 +145,12 @@ public partial class PackageInstallManager : IPackageInstallManager
 
         Directory.CreateDirectory(pkgDir);
 
-        var database = await _databaseFactory.GetAsync();
         var entry = new InstalledPackageInfo()
         {
             Metadata = meta,
             State = InstallationState.Expanded
         };
-        
+
         _logger.LogInformation("Expanding package {Id}", meta.Id);
         try
         {
@@ -89,12 +171,12 @@ public partial class PackageInstallManager : IPackageInstallManager
             // Save the fact that the package is expanded but couldn't be set up.
             entry.State = InstallationState.Expanded;
             database.Put(entry);
-            
+
             throw new KnownException("Failed to set up package", ex);
         }
-        
+
+        entry.State = InstallationState.Configured;
         database.Put(entry);
-        await _databaseFactory.SaveAsync();
     }
 
     public async Task<string> GetInstalledPackageDirectoryAsync(PackageMeta meta)
@@ -170,7 +252,7 @@ public partial class PackageInstallManager : IPackageInstallManager
     public async Task<bool> IsInstalledAsync(DependencyReference dependency)
     {
         var database = await _databaseFactory.GetAsync();
-        
+
         return database.TryGetValue(dependency.PackageId, out var index)
                && index.Values.Any(x => dependency.VersionRange.Contains(x.Metadata.Version));
     }
