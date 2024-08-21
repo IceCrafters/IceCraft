@@ -3,6 +3,7 @@ namespace IceCraft.Developer;
 using System.Collections.Generic;
 using IceCraft.Core.Archive;
 using IceCraft.Core.Archive.Artefacts;
+using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Packaging;
 using Semver;
 
@@ -10,11 +11,15 @@ public class DummyPackage : IPackage
 {
     private readonly DummyPackageSeries _series;
     private readonly SemVersion _version;
+    private readonly DependencyCollection? _dependencyCollection;
+    private readonly string _name;
 
-    public DummyPackage(DummyPackageSeries series, SemVersion version)
+    public DummyPackage(string name, DummyPackageSeries series, SemVersion version, DependencyCollection? dependencyCollection)
     {
+        _name = name;
         _series = series;
         _version = version;
+        _dependencyCollection = dependencyCollection;
     }
 
     public IPackageSeries Series => _series;
@@ -32,10 +37,11 @@ public class DummyPackage : IPackage
     {
         return new PackageMeta()
         {
-            Id = "dummy-test",
+            Id = _name,
             PluginInfo = new PackagePluginInfo("dummy-test", "dummy-test"),
             ReleaseDate = DateTime.MinValue,
-            Version = _version
+            Version = _version,
+            Dependencies = _dependencyCollection
         };
     }
 

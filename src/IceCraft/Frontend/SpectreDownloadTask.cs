@@ -3,6 +3,7 @@ using System;
 using IceCraft.Core.Network;
 using Spectre.Console;
 
+[Obsolete("Use SpectreProgressedTask instead.")]
 public class SpectreDownloadTask : INetworkDownloadTask
 {
     private const double Megabyte = 1024 * 1024;

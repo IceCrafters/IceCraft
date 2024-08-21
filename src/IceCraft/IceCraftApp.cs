@@ -90,6 +90,7 @@ internal class IceCraftApp : IFrontendApp
         });
     }
 
+    [Obsolete("Use DoProgressedTaskAsync instead.")]
     public async Task DoDownloadTaskAsync(Func<INetworkDownloadTask, Task> action)
     {
          var progress = AnsiConsole.Progress();

@@ -85,6 +85,8 @@ cmdApp.Configure(root =>
             case CommandRuntimeException cex:
                 AnsiConsole.MarkupLineInterpolated($"[red][bold]IceCraft: {cex.Message}[/][/]");
                 return;
+            case OperationCanceledException:
+                return;
             // Known exceptions are errors that are expected to occur unlike Unknown error which
             // something is terribly wrong.
             case KnownException kex:
