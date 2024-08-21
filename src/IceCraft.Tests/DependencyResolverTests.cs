@@ -31,9 +31,139 @@ public class DependencyResolverTests
                     .AddXunit(outputHelper);
                 // Add other loggers, e.g.: AddConsole, AddDebug, etc.
             });
+
     }
     
-    [Fact]
+    [Fact(Timeout = 3000)]
+    public async Task Tree_Circular_Deep_ToRoot()
+    {
+        // Arrange
+        #region An index with 5 layers of dependencies
+        var targetPackage = new PackageMeta("target", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo,
+            [new DependencyReference("dep_1", SemVersionRange.Parse("0.1.0"))]);
+        var dep1 = new PackageMeta("dep_1", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo,
+            [new DependencyReference("dep_2", SemVersionRange.Parse("0.1.0"))]);
+        var dep2 = new PackageMeta("dep_2", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo,
+            [new DependencyReference("dep_3", SemVersionRange.Parse("0.1.0"))]);
+        var dep3 = new PackageMeta("dep_3", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo,
+            [new DependencyReference("dep_4", SemVersionRange.Parse("0.1.0"))]);
+        var dep4 = new PackageMeta("dep_4", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo,
+            [new DependencyReference("target", SemVersionRange.Parse("0.1.0"))]);
+        
+        var index = new PackageIndexBuilder()
+            .WithPackage(dep1, MockArtefact)
+            .WithPackage(dep2, MockArtefact)
+            .WithPackage(dep3, MockArtefact)
+            .WithPackage(dep4, MockArtefact)
+            .WithPackage(targetPackage,
+                MockArtefact)
+            .Build();
+        #endregion
+
+        var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
+            _loggerFactory.CreateLogger<DependencyResolver>());
+        var hashSet = new HashSet<PackageMeta>();
+
+        // Act
+        var exception = await Record.ExceptionAsync(async () 
+            => await resolver.ResolveTree(targetPackage, index, hashSet));
+
+        // Assert
+        Assert.IsType<DependencyException>(exception);
+    }
+
+     [Fact(Timeout = 3000)]
+    public async Task Tree_Circular_Deep_InBetween()
+    {
+        // Arrange
+        #region An index with 5 layers of dependencies
+        var targetPackage = new PackageMeta("target", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo,
+            [new DependencyReference("dep_1", SemVersionRange.Parse("0.1.0"))]);
+        var dep1 = new PackageMeta("dep_1", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo,
+            [new DependencyReference("dep_2", SemVersionRange.Parse("0.1.0"))]);
+        var dep2 = new PackageMeta("dep_2", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo,
+            [new DependencyReference("dep_3", SemVersionRange.Parse("0.1.0"))]);
+        var dep3 = new PackageMeta("dep_3", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo,
+            [new DependencyReference("dep_4", SemVersionRange.Parse("0.1.0"))]);
+        var dep4 = new PackageMeta("dep_4", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo,
+            [new DependencyReference("dep_2", SemVersionRange.Parse("0.1.0"))]);
+        
+        var index = new PackageIndexBuilder()
+            .WithPackage(dep1, MockArtefact)
+            .WithPackage(dep2, MockArtefact)
+            .WithPackage(dep3, MockArtefact)
+            .WithPackage(dep4, MockArtefact)
+            .WithPackage(targetPackage,
+                MockArtefact)
+            .Build();
+        #endregion
+
+        var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
+            _loggerFactory.CreateLogger<DependencyResolver>());
+        var hashSet = new HashSet<PackageMeta>();
+
+        // Act
+        var exception = await Record.ExceptionAsync(async () 
+            => await resolver.ResolveTree(targetPackage, index, hashSet));
+
+        // Assert
+        Assert.IsType<DependencyException>(exception);
+    }
+
+    [Fact(Timeout = 3000)]
+    public async Task Tree_Circular_Shallow()
+    {
+        // Arrange
+        #region An index with target and dep_1 referencing each other
+        var targetPackage = new PackageMeta("target", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo,
+            [new DependencyReference("dep_1", SemVersionRange.Parse("0.1.0"))]);
+        var dep1 = new PackageMeta("dep_1", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo,
+            [new DependencyReference("target", SemVersionRange.Parse("0.1.0"))]);
+
+        var index = new PackageIndexBuilder()
+            .WithPackage(dep1, MockArtefact)
+            .WithPackage(targetPackage,
+                MockArtefact)
+            .Build();
+        #endregion
+
+        var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
+            _loggerFactory.CreateLogger<DependencyResolver>());
+        var hashSet = new HashSet<PackageMeta>();
+
+        // Act
+        var exception = await Record.ExceptionAsync(async () 
+            => await resolver.ResolveTree(targetPackage, index, hashSet));
+
+        // Assert
+        Assert.IsType<DependencyException>(exception);
+    }
+
+    [Fact(Timeout = 5000)]
     public async Task Recursive_FiveLayers()
     {
         // Arrange
@@ -86,5 +216,52 @@ public class DependencyResolverTests
         
         // Assert
         Assert.Equal(expectedList, hashSet);
+    }
+
+    [Fact(Timeout = 3000)]
+    public async Task Tree_Complex_ParentToParent()
+    {
+        // Arrange
+        #region An index with 5 layers of dependencies
+        var targetPackage = new PackageMeta("target", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo,
+            [new DependencyReference("dep_1", SemVersionRange.Parse("0.1.0"))]);
+        var dep1 = new PackageMeta("dep_1", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo,
+            [new DependencyReference("dep_2", SemVersionRange.Parse("0.1.0"))]);
+        var dep2 = new PackageMeta("dep_2", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo,
+            [new DependencyReference("dep_3", SemVersionRange.Parse("0.1.0"))]);
+        var dep3 = new PackageMeta("dep_3", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo);
+        var dep4 = new PackageMeta("dep_4", new SemVersion(0, 1, 0),
+            DateTime.MinValue,
+            MockPluginInfo,
+            [new DependencyReference("dep_1", SemVersionRange.Parse("0.1.0"))]);
+        
+        var index = new PackageIndexBuilder()
+            .WithPackage(dep1, MockArtefact)
+            .WithPackage(dep2, MockArtefact)
+            .WithPackage(dep3, MockArtefact)
+            .WithPackage(dep4, MockArtefact)
+            .WithPackage(targetPackage,
+                MockArtefact)
+            .Build();
+        #endregion
+
+        var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
+            _loggerFactory.CreateLogger<DependencyResolver>());
+        var hashSet = new HashSet<PackageMeta>();
+
+        // Act
+        var exception = await Record.ExceptionAsync(async () 
+            => await resolver.ResolveTree(targetPackage, index, hashSet));
+
+        // Assert
+        Assert.Null(exception);
     }
 }

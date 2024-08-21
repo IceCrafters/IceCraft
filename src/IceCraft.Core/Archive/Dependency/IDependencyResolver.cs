@@ -18,12 +18,15 @@ public interface IDependencyResolver
     /// <param name="index">The package index to resolve dependencies from.</param>
     /// <param name="setToAppend">The set to append dependencies from. A growable list like <see cref="HashSet{T}"/> is recommended.</param>
     /// <exception cref="DependencyException">Dependency is either invalid or cannot be satisfied.</exception>
-    Task ResolveTree(PackageMeta meta, PackageIndex index, ISet<PackageMeta> setToAppend);
+    /// <exception cref="OperationCanceledException">Operation is cancelled.</exception>
+    Task ResolveTree(PackageMeta meta, PackageIndex index, ISet<PackageMeta> setToAppend, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Resolves a single layer of dependencies.
     /// </summary>
     /// <param name="meta">The package to resolve dependencies for.</param>
     /// <param name="index">The package index to resolve dependencies from.</param>
-    IAsyncEnumerable<PackageMeta> ResolveDependencies(PackageMeta meta, PackageIndex index);
+    /// <exception cref="DependencyException">Dependency is either invalid or cannot be satisfied.</exception>
+    /// <exception cref="OperationCanceledException">Operation is cancelled.</exception>
+    IAsyncEnumerable<PackageMeta> ResolveDependencies(PackageMeta meta, PackageIndex index, CancellationToken cancellationToken = default);
 }
