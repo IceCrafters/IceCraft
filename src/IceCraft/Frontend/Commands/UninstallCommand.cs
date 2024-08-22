@@ -3,19 +3,26 @@ namespace IceCraft.Frontend.Commands;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using IceCraft.Core.Archive.Packaging;
+using IceCraft.Core.Caching;
 using IceCraft.Core.Installation;
+using IceCraft.Core.Installation.Analysis;
+using JetBrains.Annotations;
 using Semver;
 using Serilog;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
+[UsedImplicitly]
 public class UninstallCommand : AsyncCommand<UninstallCommand.Settings>
 {
     private readonly IPackageInstallManager _installManager;
+    private readonly IDependencyMapper _dependencyMapper;
 
-    public UninstallCommand(IPackageInstallManager installManager)
+    public UninstallCommand(IPackageInstallManager installManager,
+        IDependencyMapper dependencyMapper)
     {
         _installManager = installManager;
+        _dependencyMapper = dependencyMapper;
     }
 
     public override ValidationResult Validate(CommandContext context, Settings settings)
@@ -36,7 +43,7 @@ public class UninstallCommand : AsyncCommand<UninstallCommand.Settings>
             return -1;
         }
 
-        PackageMeta? selectedVersion = null;
+        PackageMeta? selectedVersion;
         if (settings.Version != null)
         {
             var semver = SemVersion.Parse(settings.Version, SemVersionStyles.Any);
@@ -54,17 +61,31 @@ public class UninstallCommand : AsyncCommand<UninstallCommand.Settings>
         }
 
         await _installManager.UninstallAsync(selectedVersion);
+        
+        await AnsiConsole.Status()
+            .StartAsync("Evaluating dependency information",
+                async _ =>
+                {
+                    if (_dependencyMapper is ICacheClearable clearable)
+                    {
+                        clearable.ClearCache();
+                    }
+                    await _dependencyMapper.MapDependenciesCached();
+                });
         return 0;
     }
 
+    [UsedImplicitly]
     public sealed class Settings : BaseSettings
     {
         [CommandArgument(0, "<PACKAGE>")]
         [Description("The package to uninstall")]
+        [UsedImplicitly]
         public required string PackageName { get; init; }
 
         [CommandOption("-v|--version")]
         [Description("The version to uninstall")]
+        [UsedImplicitly]
         public string? Version { get; init; }
     }
 }

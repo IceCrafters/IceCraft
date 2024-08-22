@@ -7,11 +7,14 @@ using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Archive.Repositories;
+using IceCraft.Core.Caching;
 using IceCraft.Core.Installation;
+using IceCraft.Core.Installation.Analysis;
 using IceCraft.Core.Network;
 using IceCraft.Core.Platform;
 using IceCraft.Core.Util;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 using Semver;
 using Serilog;
 using Spectre.Console;
@@ -27,6 +30,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
     private readonly IDependencyResolver _dependencyResolver;
     private readonly IFrontendApp _frontend;
     private readonly IChecksumRunner _checksumRunner;
+    private readonly IDependencyMapper _dependencyMapper;
 
     private readonly record struct QueuedDownloadTask
     {
@@ -35,21 +39,16 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
         internal required PackageMeta Metadata { get; init; }
     }
 
-    public InstallCommand(IPackageInstallManager installManager,
-        IPackageIndexer indexer,
-        IRepositorySourceManager sourceManager,
-        IDownloadManager downloadManager,
-        IDependencyResolver dependencyResolver,
-        IFrontendApp frontend,
-        IChecksumRunner checksumRunner)
+    public InstallCommand(IServiceProvider serviceProvider)
     {
-        _installManager = installManager;
-        _indexer = indexer;
-        _sourceManager = sourceManager;
-        _downloadManager = downloadManager;
-        _dependencyResolver = dependencyResolver;
-        _frontend = frontend;
-        _checksumRunner = checksumRunner;
+        _installManager = serviceProvider.GetRequiredService<IPackageInstallManager>();
+        _indexer = serviceProvider.GetRequiredService<IPackageIndexer>();
+        _sourceManager = serviceProvider.GetRequiredService<IRepositorySourceManager>();
+        _downloadManager = serviceProvider.GetRequiredService<IDownloadManager>();
+        _dependencyResolver = serviceProvider.GetRequiredService<IDependencyResolver>();
+        _frontend = serviceProvider.GetRequiredService<IFrontendApp>();
+        _checksumRunner = serviceProvider.GetRequiredService<IChecksumRunner>();
+        _dependencyMapper = serviceProvider.GetRequiredService<IDependencyMapper>();
     }
 
     public override ValidationResult Validate(CommandContext context, Settings settings)
@@ -67,25 +66,24 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         // Step 1: Index
-        CachedPackageSeriesInfo? seriesInfo = null;
-        SemVersion? selectedVersion = null;
+        SemVersion? selectedVersion;
         PackageMeta? meta = null;
         PackageIndex? index = null;
         HashSet<PackageMeta> allPackagesSet = [];
 
         await AnsiConsole.Status()
             .StartAsync("Indexing remote packages",
-            async context =>
+            async ctx =>
             {
                 // STEP: Index remote packages
                 index = await _indexer.IndexAsync(_sourceManager);
-                if (!index.TryGetValue(settings.PackageName, out seriesInfo))
+                if (!index.TryGetValue(settings.PackageName, out var seriesInfo))
                 {
                     throw new KnownException($"No such package series {settings.PackageName}");
                 }
 
                 // STEP: Select version
-                context.Status("Acquiring version information");
+                ctx.Status("Acquiring version information");
                 if (!string.IsNullOrWhiteSpace(settings.Version))
                 {
                     // Parse user input, and store in specifiedVersion.
@@ -94,7 +92,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
                 }
                 else
                 {
-                    selectedVersion = await Task.Run(() => seriesInfo!.Versions.GetLatestSemVersion(settings.IncludePrerelease));
+                    selectedVersion = await Task.Run(() => seriesInfo.Versions.GetLatestSemVersion(settings.IncludePrerelease));
                 }
 
                 var versionInfo = seriesInfo.Versions[selectedVersion.ToString()];
@@ -109,7 +107,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
                 }
 
                 // STEP: Resolve all dependencies.
-                context.Status("Resolving dependencies");
+                ctx.Status("Resolving dependencies");
                 allPackagesSet.Add(meta);
                 await _dependencyResolver.ResolveTree(meta, index!, allPackagesSet, _frontend.GetCancellationToken());
             });
@@ -130,24 +128,20 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
         QueuedDownloadTask[] artefactTasks = [];
         await AnsiConsole.Progress()
             .HideCompleted(true)
-            .StartAsync(async x =>
+            .StartAsync(async ctx =>
             {
                 var artefactList = new List<QueuedDownloadTask>(allPackagesSet.Count);
-
-                foreach (var package in allPackagesSet)
-                {
-                    var task = x.AddTask(package.Id);
-                    var versionInfo = index!.GetPackageInfo(package);
-
-                    artefactList.Add(new QueuedDownloadTask()
+                artefactList.AddRange(from package in allPackagesSet 
+                    let task = ctx.AddTask(package.Id) 
+                    let versionInfo = index!.GetPackageInfo(package) 
+                    select new QueuedDownloadTask
                     {
-                        Task = _downloadManager.DownloadTemporaryArtefactAsync(versionInfo,
-                            new SpectreProgressedTask(task),
-                            $"{meta!.Id} {meta.Version}"),
-                        Metadata = package,
+                        Task = _downloadManager.DownloadTemporaryArtefactAsync(versionInfo, 
+                            new SpectreProgressedTask(task), 
+                            $"{meta!.Id} {meta.Version}"), 
+                        Metadata = package, 
                         ArtefactInfo = versionInfo.Artefact
                     });
-                }
 
                 artefactTasks = [.. artefactList];
 
@@ -158,11 +152,24 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
 
         await AnsiConsole.Status()
             .StartAsync("Installing packages",
-            async context =>
+            async ctx =>
             {
-                await _installManager.BulkInstallAsync(ValidateAndInsertInternalAsync(context, artefactTasks), 
+                await _installManager.BulkInstallAsync(ValidateAndInsertInternalAsync(ctx, artefactTasks), 
                     artefactTasks.Length);
             });
+        
+        // Step 5: remap dependencies
+
+        await AnsiConsole.Status()
+            .StartAsync("Evaluating dependency information",
+                async _ =>
+                {
+                    if (_dependencyMapper is ICacheClearable clearable)
+                    {
+                        clearable.ClearCache();
+                    }
+                    await _dependencyMapper.MapDependenciesCached();
+                });
 
         return 0;
     }
@@ -196,18 +203,22 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
         return true;
     }
 
+    [UsedImplicitly]
     public class Settings : BaseSettings
     {
         [CommandArgument(0, "<PACKAGE>")]
         [Description("Package to install.")]
+        [UsedImplicitly]
         public required string PackageName { get; init; }
 
         [CommandOption("-v|--version")]
         [Description("Version to install. If unspecified, the latest one is installed.")]
+        [UsedImplicitly]
         public string? Version { get; init; }
 
         [CommandOption("-P|--include-prerelease")]
         [Description("Whether to include prerelease when getting the latest version. Does not affect '--version'.")]
+        [UsedImplicitly]
         public bool IncludePrerelease { get; init; }
     }
 }

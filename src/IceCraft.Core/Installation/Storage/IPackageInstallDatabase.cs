@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using IceCraft.Core.Archive.Packaging;
 using Semver;
 
-public interface IPackageInstallDatabase
+public interface IPackageInstallDatabase : IEnumerable<KeyValuePair<string, PackageInstallationIndex>>
 {
     PackageInstallationIndex this[string key] { get; set; }
     InstalledPackageInfo this[string key, string version] { get; set; }
@@ -24,6 +24,13 @@ public interface IPackageInstallDatabase
     bool TryGetValue(string packageName, [NotNullWhen(true)] out PackageInstallationIndex? index);
 
     IEnumerable<string> EnumerateKeys();
+
+    IEnumerable<PackageMeta> EnumeratePackages();
     
     PackageInstallationIndex? GetValueOrDefault(string packageId);
+    
+    /// <summary>
+    /// Gets the total number of package indices currently contained in the database.
+    /// </summary>
+    int Count { get; }
 }

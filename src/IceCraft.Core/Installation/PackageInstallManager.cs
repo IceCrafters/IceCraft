@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Semver;
 
-public partial class PackageInstallManager : IPackageInstallManager
+public class PackageInstallManager : IPackageInstallManager
 {
     public const string PackagePath = "packages";
 
@@ -36,9 +36,10 @@ public partial class PackageInstallManager : IPackageInstallManager
         _databaseFactory = databaseFactory;
 
         _packagesPath = Path.Combine(frontend.DataBasePath, "packages");
+        CreateDirectories();
     }
 
-    public void CreateDirectories()
+    private void CreateDirectories()
     {
         Directory.CreateDirectory(_packagesPath);
     }
@@ -53,11 +54,8 @@ public partial class PackageInstallManager : IPackageInstallManager
         var database = await _databaseFactory.GetAsync();
 
         // Configure and expand package.
-        await foreach (var package in packages)
+        await foreach (var (meta, artefactPath) in packages)
         {
-            var meta = package.Key;
-            var artefactPath = package.Value;
-
             var entry = new InstalledPackageInfo()
             {
                 Metadata = meta,
@@ -89,11 +87,10 @@ public partial class PackageInstallManager : IPackageInstallManager
         // Configure package.
         // DependencyResolver resolves dependencies top-down, and thus the most safe way is to
         // do installations in reverse.
-        foreach (var package in dictionary.Reverse())
+        foreach (var (meta, value) in dictionary.Reverse())
         {
-            var meta = package.Key;
             var configurator = _serviceProvider.GetKeyedService<IPackageConfigurator>(meta.PluginInfo.ConfiguratorRef)
-                ?? throw new ArgumentException($"Configurator '{meta.PluginInfo.ConfiguratorRef}' not found for package '{meta.Id}' '{meta.Version}'.");
+                               ?? throw new ArgumentException($"Configurator '{meta.PluginInfo.ConfiguratorRef}' not found for package '{meta.Id}' '{meta.Version}'.");
 
             var entry = new InstalledPackageInfo()
             {
@@ -104,7 +101,7 @@ public partial class PackageInstallManager : IPackageInstallManager
             _logger.LogInformation("Setting up package {Id}", meta.Id);
             try
             {
-                await configurator.ConfigurePackageAsync(package.Value, meta);
+                await configurator.ConfigurePackageAsync(value, meta);
             }
             catch (Exception ex)
             {

@@ -246,6 +246,13 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
             return Keys;
         }
 
+        public IEnumerable<PackageMeta> EnumeratePackages()
+        {
+            return this.SelectMany(index => index.Value)
+                .Select(package => package.Value.Metadata)
+                .AsParallel();
+        }
+
         public PackageInstallationIndex? GetValueOrDefault(string packageId)
         {
             return CollectionExtensions.GetValueOrDefault(this, packageId);

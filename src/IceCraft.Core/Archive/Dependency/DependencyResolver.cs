@@ -188,14 +188,8 @@ public class DependencyResolver : IDependencyResolver
             }
 
             // Selects the latest version from an entire list of package metas that satisfies the condition.
-            var depMeta = await Task.Run(() =>
-                seriesInfo.Versions.Values
-                    .Select(x => x.Metadata)
-                    .Where(x => dependency.VersionRange.Contains(x.Version))
-                    .AsParallel()
-                    .WithCancellation(cancellationToken)
-                    .MaxBy(x => x.Version, SemVersion.SortOrderComparer)
-                 ?? throw DependencyException.Unsatisfied(dependency));
+            var depMeta = await SelectBestPackageDependency(seriesInfo.Versions.Values.Select(x => x.Metadata)
+                , dependency, cancellationToken);
 
             if (depMeta.Dependencies?.Any(x => x.PackageId == meta.Id) == true)
             {
@@ -204,5 +198,18 @@ public class DependencyResolver : IDependencyResolver
 
             yield return depMeta;
         }
+    }
+
+    internal static async Task<PackageMeta> SelectBestPackageDependency(IEnumerable<PackageMeta> metas, 
+        DependencyReference dependency, 
+        CancellationToken cancellationToken)
+    {
+        return await Task.Run(() =>
+            metas
+                .Where(x => dependency.VersionRange.Contains(x.Version))
+                .AsParallel()
+                .WithCancellation(cancellationToken)
+                .MaxBy(x => x.Version, SemVersion.SortOrderComparer)
+            ?? throw DependencyException.Unsatisfied(dependency), cancellationToken);
     }
 }

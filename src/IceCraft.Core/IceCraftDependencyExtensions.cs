@@ -5,6 +5,7 @@ using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Installation;
+using IceCraft.Core.Installation.Analysis;
 using IceCraft.Core.Installation.Execution;
 using IceCraft.Core.Installation.Storage;
 using IceCraft.Core.Network;
@@ -28,7 +29,8 @@ public static class IceCraftDependencyExtensions
             .AddSingleton<IPackageInstallDatabaseFactory, PackageInstallDatabaseFactory>()
             .AddSingleton<IPackageInstallManager, PackageInstallManager>()
             .AddSingleton<IExecutableManager, ExecutableManager>()
-            .AddSingleton<IDependencyResolver, DependencyResolver>();
+            .AddSingleton<IDependencyResolver, DependencyResolver>()
+            .AddSingleton<IDependencyMapper, DependencyMapper>();
     }
 
     public static IServiceCollection AddChecksumValidators(this IServiceCollection services)
