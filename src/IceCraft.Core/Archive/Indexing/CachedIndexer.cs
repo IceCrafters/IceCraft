@@ -45,9 +45,8 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
             token?.ThrowIfCancellationRequested();
 
             index.EnsureCapacity(index.Count + repo.GetExpectedSeriesCount());
-            var seriesList = repo.EnumerateSeries();
 
-            foreach (var series in seriesList)
+            foreach (var series in repo.EnumerateSeries())
             {
                 token?.ThrowIfCancellationRequested();
                 var expectedCount = await series.GetExpectedPackageCountAsync();
@@ -58,8 +57,7 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
                 var versions = new Dictionary<string, CachedPackageInfo>(
                     expectedCount);
 
-                var pkgInfos = await series.EnumeratePackagesAsync();
-                foreach (var pkg in pkgInfos)
+                await foreach (var pkg in series.EnumeratePackagesAsync())
                 {
                     token?.ThrowIfCancellationRequested();
                     // Go through everything.

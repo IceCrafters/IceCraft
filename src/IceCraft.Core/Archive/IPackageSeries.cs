@@ -17,7 +17,7 @@ public interface IPackageSeries
     [Obsolete("Unsupported. Get latest ID and index instead.")]
     Task<IPackage?> GetLatestAsync();
     
-    Task<IEnumerable<IPackage>> EnumeratePackagesAsync();
+    IAsyncEnumerable<IPackage> EnumeratePackagesAsync();
 
     [Obsolete("Compare semantic versioning instead. This interface may return null.")]
     Task<SemVersion?> GetLatestVersionIdAsync();
@@ -26,8 +26,7 @@ public interface IPackageSeries
 
     async Task EnumeratePackagesAsync(Action<IPackage> consumer)
     {
-        var enumerable = await EnumeratePackagesAsync();
-        foreach (var x in enumerable)
+        await foreach (var x in EnumeratePackagesAsync())
         {
             consumer(x);
         }

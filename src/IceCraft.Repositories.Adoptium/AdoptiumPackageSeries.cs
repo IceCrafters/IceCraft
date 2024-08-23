@@ -28,7 +28,7 @@ public class AdoptiumPackageSeries : IPackageSeries
 
     public string Type { get; }
 
-    public async Task<IEnumerable<IPackage>> EnumeratePackagesAsync()
+    public async IAsyncEnumerable<IPackage> EnumeratePackagesAsync()
     {
         var latest = await GetLatestVersionIdAsync();
 
@@ -36,7 +36,7 @@ public class AdoptiumPackageSeries : IPackageSeries
         {
             _logger.LogWarning("Architecture not supported");
             // Architecture not supported.
-            return [];
+            yield break;
         }
         var all = await GetAllAssetViewsAsync();
 
@@ -46,13 +46,18 @@ public class AdoptiumPackageSeries : IPackageSeries
             // Malformed upstream
             _logger.LogWarning("Adoptium API returned no valid versions conforming to required pattern");
             _logger.LogWarning("Not providing packages");
-            return [];
+            yield break;
         }
 
-        return all
-            .Select(x => {
-                return new AdoptiumPackage(this, x, _logger, latest != null && x.VersionData != null && SemVersion.Parse(x.VersionData.Semver, SemVersionStyles.Strict) == latest);
-            });
+        foreach (var release in all)
+        {
+            yield return new AdoptiumPackage(this, 
+                release, 
+                _logger, 
+                latest != null 
+                    && release.VersionData != null 
+                    && SemVersion.Parse(release.VersionData.Semver, SemVersionStyles.Strict) == latest); ;
+        }
     }
 
     private async Task<IEnumerable<AdoptiumBinaryRelease>?> GetAllAssetViewsAsync()
