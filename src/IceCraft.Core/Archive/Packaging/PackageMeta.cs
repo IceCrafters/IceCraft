@@ -37,6 +37,8 @@ public sealed record PackageMeta
     
     public DependencyCollection? Dependencies { get; init; }
 
+    public IDictionary<string, string>? AdditionalMetadata { get; init; }
+
     /// <summary>
     /// Gets a value indicating whether this package can have multiple versions installed into
     /// the same IceCraft instance, side by side.

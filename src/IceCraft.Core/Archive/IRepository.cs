@@ -14,6 +14,6 @@ public interface IRepository
     /// </summary>
     /// <returns>An enumerable for the series.</returns>
     IEnumerable<IPackageSeries> EnumerateSeries();
-
+    
     int GetExpectedSeriesCount();
 }
