@@ -35,6 +35,7 @@ public static class IceCraftDependencyExtensions
 
     public static IServiceCollection AddChecksumValidators(this IServiceCollection services)
     {
-        return services.AddKeyedSingleton<IChecksumValidator, Sha256ChecksumValidator>("sha256");
+        return services.AddKeyedSingleton<IChecksumValidator, Sha256ChecksumValidator>("sha256")
+            .AddKeyedSingleton<IChecksumValidator, Sha512ChecksumValidator>("sha512");
     }
 }
