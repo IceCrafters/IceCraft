@@ -69,7 +69,7 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
                     dependency,
                     default);
                 
-                entry.Dependencies.Add(new DependencyMapReference(best.Id,
+                entry.Dependencies.Add(new PackageReference(best.Id,
                     best.Version));
             }
             

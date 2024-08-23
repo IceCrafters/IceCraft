@@ -93,11 +93,17 @@ internal class IceCraftApp : IFrontendApp
     [Obsolete("Use DoProgressedTaskAsync instead.")]
     public async Task DoDownloadTaskAsync(Func<INetworkDownloadTask, Task> action)
     {
-         var progress = AnsiConsole.Progress();
+        var progress = AnsiConsole.Progress();
         await progress.StartAsync(async (context) =>
         {
             var task = context.AddTask("Download");
             await action.Invoke(new SpectreDownloadTask(task));
         });
+    }
+
+    public async Task DoStatusTaskAsync(string initialStatus, Func<IStatusReporter, Task> action)
+    {
+        await AnsiConsole.Status()
+            .StartAsync(initialStatus, async ctx => await action(new SpectreStatusReporter(ctx)));
     }
 }

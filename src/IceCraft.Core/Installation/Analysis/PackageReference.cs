@@ -10,10 +10,10 @@ using Semver;
 /// Points to a package stored in the installation database which full <see cref="PackageMeta"/>
 /// can be acquired through relevant methods in <see cref="IPackageInstallManager"/>.
 /// </summary>
-public readonly record struct DependencyMapReference
+public readonly record struct PackageReference
 {
     [SetsRequiredMembers]
-    public DependencyMapReference(string package, SemVersion version)
+    public PackageReference(string package, SemVersion version)
     {
         PackageId = package;
         PackageVersion = version;

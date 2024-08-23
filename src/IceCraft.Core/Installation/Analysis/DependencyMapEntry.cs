@@ -18,5 +18,5 @@ public sealed record DependencyMapEntry
     [JsonConverter(typeof(SemVersionConverter))]
     public required SemVersion Version { get; init; }
 
-    public IList<DependencyMapReference> Dependencies { get; } = [];
+    public IList<PackageReference> Dependencies { get; } = [];
 }

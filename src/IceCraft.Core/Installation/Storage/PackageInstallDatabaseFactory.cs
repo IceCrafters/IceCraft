@@ -3,6 +3,7 @@ namespace IceCraft.Core.Installation.Storage;
 using System;
 using System.Text.Json;
 using IceCraft.Core.Archive.Packaging;
+using IceCraft.Core.Installation.Analysis;
 using IceCraft.Core.Platform;
 using IceCraft.Core.Serialization;
 using Microsoft.Extensions.Logging;
@@ -102,6 +103,47 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
         await SaveAsync(_databasePath);
     }
 
+    public async Task MaintainAndSaveAsync()
+    {
+        _ = await GetAsync();
+        var showHint = false;
+        foreach (var (key, packageInfo) in 
+                 _map!.SelectMany(x => x.Value))
+        {
+            // ReSharper disable once InvertIf
+            if (packageInfo.State == InstallationState.Configured)
+            {
+                if (!packageInfo.ProvidedBy.HasValue)
+                {
+                    _logger.LogWarning("Virtual package {Id} ({Version}) is provided by nobody", 
+                        packageInfo.Metadata.Id,
+                        packageInfo.Metadata.Version);
+                    showHint = true;
+                }
+                else
+                {
+                    var info = _map!.GetValueOrDefault(packageInfo.ProvidedBy.Value);
+                    if (info == null)
+                    {
+                        _logger.LogWarning("Virtual package {Id} ({Version}) were provided by {PackageId} ({PackageVersion}) but the latter no longer exists",
+                            packageInfo.Metadata.Id,
+                            packageInfo.Metadata.Version,
+                            packageInfo.ProvidedBy.Value.PackageId,
+                            packageInfo.ProvidedBy.Value.PackageVersion);
+                        showHint = true;
+                    }
+                }
+            }
+        }
+
+        if (showHint)
+        {
+            _logger.LogInformation("HINT: Use 'IceCraft auto-remove' to remove orphaned virtual packages.");
+        }
+
+        await SaveAsync();
+    }
+
     public async Task SaveAsync(string filePath)
     {
         _logger.LogInformation("Saving database");
@@ -114,7 +156,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
 
         try
         {
-            using var fileStream = File.Create(filePath);
+            await using var fileStream = File.Create(filePath);
             await JsonSerializer.SerializeAsync(fileStream, _map, IceCraftCoreContext.Default.PackageInstallValueMap);
         }
         catch (Exception ex)
@@ -256,6 +298,13 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
         public PackageInstallationIndex? GetValueOrDefault(string packageId)
         {
             return CollectionExtensions.GetValueOrDefault(this, packageId);
+        }
+
+        public InstalledPackageInfo? GetValueOrDefault(PackageReference reference)
+        {
+            var index = GetValueOrDefault(reference.PackageId);
+
+            return index?.GetValueOrDefault(reference.PackageVersion.ToString());
         }
     }
 }

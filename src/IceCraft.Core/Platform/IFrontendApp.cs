@@ -15,6 +15,8 @@ public interface IFrontendApp
 
     Task DoProgressedTaskAsync(string description, Func<IProgressedTask, Task> action);
 
-    [Obsolete("Use DoProgessedTaskAsync instead.")]
+    [Obsolete("Use DoProgressedTaskAsync instead.")]
     Task DoDownloadTaskAsync(Func<INetworkDownloadTask, Task> action);
+
+    Task DoStatusTaskAsync(string initialStatus, Func<IStatusReporter, Task> action);
 }

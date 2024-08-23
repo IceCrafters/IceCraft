@@ -13,5 +13,10 @@ public enum InstallationState
     /// <summary>
     /// Package is fully configured.
     /// </summary>
-    Configured
+    Configured,
+    /// <summary>
+    /// Package is a virtual package. Implies that <see cref="InstalledPackageInfo.ProvidedBy"/> has a
+    /// valid value.
+    /// </summary>
+    Virtual
 }

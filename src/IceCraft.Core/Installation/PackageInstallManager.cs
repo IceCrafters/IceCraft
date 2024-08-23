@@ -3,6 +3,7 @@ namespace IceCraft.Core.Installation;
 using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Packaging;
+using IceCraft.Core.Installation.Analysis;
 using IceCraft.Core.Installation.Storage;
 using IceCraft.Core.Network;
 using IceCraft.Core.Platform;
@@ -288,5 +289,19 @@ public class PackageInstallManager : IPackageInstallManager
         var database = await _databaseFactory.GetAsync();
 
         return database.GetValueOrDefault(metaId);
+    }
+
+    public async Task RegisterVirtualPackageAsync(PackageMeta virtualMeta, PackageReference origin)
+    {
+        var database = await _databaseFactory.GetAsync();
+        
+        database.Put(new InstalledPackageInfo()
+        {
+           Metadata = virtualMeta,
+           State = InstallationState.Virtual,
+           ProvidedBy = origin
+        });
+
+        await _databaseFactory.MaintainAndSaveAsync();
     }
 }

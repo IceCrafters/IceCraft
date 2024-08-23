@@ -3,6 +3,7 @@ namespace IceCraft.Core.Installation;
 using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Packaging;
+using IceCraft.Core.Installation.Analysis;
 using IceCraft.Core.Installation.Storage;
 using Semver;
 
@@ -51,11 +52,13 @@ public interface IPackageInstallManager
     /// installed version of a given package.
     /// </summary>
     /// <param name="packageName">The name of the package to get metadata for.</param>
-    /// <param name="version">The version of the package to get matadata for.</param>
+    /// <param name="version">The version of the package to get metadata for.</param>
     /// <returns>The created metadata.</returns>
     /// <exception cref="ArgumentException">No such package or version.</exception>
     Task<PackageMeta> GetMetaAsync(string packageName, SemVersion version);
     Task<PackageMeta?> TryGetMetaAsync(string packageName, SemVersion version);
     
     Task<PackageInstallationIndex?> GetIndexOrDefaultAsync(string metaId);
+
+    Task RegisterVirtualPackageAsync(PackageMeta virtualMeta, PackageReference origin);
 }

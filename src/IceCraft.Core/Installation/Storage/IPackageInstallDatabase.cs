@@ -2,6 +2,7 @@ namespace IceCraft.Core.Installation.Storage;
 
 using System.Diagnostics.CodeAnalysis;
 using IceCraft.Core.Archive.Packaging;
+using IceCraft.Core.Installation.Analysis;
 using Semver;
 
 public interface IPackageInstallDatabase : IEnumerable<KeyValuePair<string, PackageInstallationIndex>>
@@ -28,6 +29,8 @@ public interface IPackageInstallDatabase : IEnumerable<KeyValuePair<string, Pack
     IEnumerable<PackageMeta> EnumeratePackages();
     
     PackageInstallationIndex? GetValueOrDefault(string packageId);
+
+    InstalledPackageInfo? GetValueOrDefault(PackageReference reference);
     
     /// <summary>
     /// Gets the total number of package indices currently contained in the database.
