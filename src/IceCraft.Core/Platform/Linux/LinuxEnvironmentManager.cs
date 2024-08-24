@@ -36,7 +36,9 @@ public class LinuxEnvironmentManager : IEnvironmentManager
     [
         ".bash_profile",
         ".bash_login",
-        ".profile"
+        ".profile",
+        ".bashrc",
+        ".zshrc"
     ];
 
     public LinuxEnvironmentManager(IFrontendApp frontend)
@@ -119,6 +121,8 @@ public class LinuxEnvironmentManager : IEnvironmentManager
         {
             writer.WriteLine($"export {key}='{value}'");
         }
+        
+        writer.Flush();
     }
 
     private static bool DoesImportLineExist(string filePath)
@@ -132,16 +136,18 @@ public class LinuxEnvironmentManager : IEnvironmentManager
         var writer = new StreamWriter(pathScript);
         writer.WriteLine("# This script is auto-generated.");
         writer.WriteLine("# Changes to contents WILL BE LOST if this file is refreshed.");
-        writer.Write("export PATH='");
+        writer.Write("export PATH=\"$PATH");
 
         foreach (var line in File.ReadLines(_pathFile))
         {
-            writer.Write(line);
             writer.Write(':');
+            writer.Write(line);
         }
         
-        writer.WriteLine('\'');
+        writer.WriteLine('"');
         writer.WriteLine();
+
+        writer.Flush();
     }
 
     public void AddUserGlobalPathFromHome(string relativeToHome)
