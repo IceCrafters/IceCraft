@@ -112,7 +112,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
                  _map!.SelectMany(x => x.Value))
         {
             // ReSharper disable once InvertIf
-            if (packageInfo.State == InstallationState.Configured)
+            if (packageInfo.State == InstallationState.Virtual)
             {
                 if (!packageInfo.ProvidedBy.HasValue)
                 {
