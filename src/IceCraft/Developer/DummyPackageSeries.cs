@@ -16,11 +16,6 @@ public class DummyPackageSeries : IPackageSeries
         Name = name;
     }
 
-    public Task<IEnumerable<IPackage>> EnumeratePackagesAsync()
-    {
-        return Task.FromResult(_packages.Select(x => (IPackage)x.Build(this)));
-    }
-
     public Task<int> GetExpectedPackageCountAsync()
     {
         return Task.FromResult(_packages.Length);
@@ -29,6 +24,15 @@ public class DummyPackageSeries : IPackageSeries
     public Task<IPackage?> GetLatestAsync()
     {
         return Task.FromResult<IPackage?>(null);
+    }
+
+    public IEnumerable<IPackage> EnumeratePackages(CancellationToken cancellationToken = default)
+    {
+        foreach (var package in _packages)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return package.Build(this);
+        }
     }
 
     public Task<SemVersion?> GetLatestVersionIdAsync()

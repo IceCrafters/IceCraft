@@ -24,16 +24,17 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
     }
 
     public async Task<PackageIndex> IndexAsync(IRepositorySourceManager manager,
-        CancellationToken? token = null)
+        CancellationToken cancellationToken = default)
     {
         var dict = await _cacheStorage.RollJsonAsync(PackageIndexStorage, 
-            async () => await GenerateNewIndex(manager, token),
+            async () => await GenerateNewIndex(manager, cancellationToken),
             IceCraftCoreContext.Default.BasePackageIndex_v0_1);
 
         return new PackageIndex(dict);
     }
 
-    private async Task<Dictionary<string, CachedPackageSeriesInfo>> GenerateNewIndex(IRepositorySourceManager manager, CancellationToken? token = null)
+    private async Task<Dictionary<string, CachedPackageSeriesInfo>> GenerateNewIndex(IRepositorySourceManager manager, 
+        CancellationToken cancellationToken = default)
     {
         var index = new Dictionary<string, CachedPackageSeriesInfo>(manager.Count);
         var repos = await manager.GetRepositoriesAsync();
@@ -42,13 +43,13 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
         foreach (var repo in repos)
         {
             repoCount++;
-            token?.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
 
             index.EnsureCapacity(index.Count + repo.GetExpectedSeriesCount());
 
             foreach (var series in repo.EnumerateSeries())
             {
-                token?.ThrowIfCancellationRequested();
+                cancellationToken.ThrowIfCancellationRequested();
                 var expectedCount = await series.GetExpectedPackageCountAsync();
 
                 _logger.LogInformation("Indexing series {Name} with {ExpectedCount} packages", series.Name, expectedCount);
@@ -57,34 +58,15 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
                 var versions = new Dictionary<string, CachedPackageInfo>(
                     expectedCount);
 
-                await foreach (var pkg in series.EnumeratePackagesAsync())
+                if (series is AsyncPackageSeries asyncSeries)
                 {
-                    token?.ThrowIfCancellationRequested();
-                    // Go through everything.
-                    var pkgMeta = pkg.GetMeta();
-                    _logger.LogTrace("Indexing version {Version}", pkgMeta.Version);
-
-                    RemoteArtefact remoteArtefact;
-                    IEnumerable<ArtefactMirrorInfo>? mirrors;
-
-                    token?.ThrowIfCancellationRequested();
-                    try
-                    {
-                        remoteArtefact = pkg.GetArtefact();
-                        mirrors = pkg.GetMirrors();
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Failed to index package {Id} {Version}", pkgMeta.Id, pkgMeta.Version);
-                        continue;
-                    }
-
-                    versions.Add(pkgMeta.Version.ToString(), new CachedPackageInfo
-                    {
-                        Metadata = pkgMeta,
-                        Artefact = remoteArtefact,
-                        Mirrors = mirrors
-                    });
+                    await IterateSeriesInternalAsync(asyncSeries, versions, cancellationToken);
+                }
+                else
+                {
+                    // This can well be IO bound
+                    // TODO make this not IO bound
+                    IterateSeriesInternal(series, versions, cancellationToken);
                 }
 
                 index.Add(series.Name, new CachedPackageSeriesInfo
@@ -103,5 +85,75 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
     public void ClearCache()
     {
         _cacheStorage.DeleteObject(PackageIndexStorage);
+    }
+
+    private void IterateSeriesInternal(IPackageSeries series,
+        IDictionary<string, CachedPackageInfo> versions,
+        CancellationToken cancellationToken = default)
+    {
+        foreach (var package in series.EnumeratePackages(cancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            // Go through everything.
+            var pkgMeta = package.GetMeta();
+            _logger.LogTrace("Indexing version {Version}", pkgMeta.Version);
+
+            RemoteArtefact remoteArtefact;
+            IEnumerable<ArtefactMirrorInfo>? mirrors;
+
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                remoteArtefact = package.GetArtefact();
+                mirrors = package.GetMirrors();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to index package {Id} {Version}", pkgMeta.Id, pkgMeta.Version);
+                continue;
+            }
+
+            versions.Add(pkgMeta.Version.ToString(), new CachedPackageInfo
+            {
+                Metadata = pkgMeta,
+                Artefact = remoteArtefact,
+                Mirrors = mirrors
+            });
+        }
+    }
+    
+    private async Task IterateSeriesInternalAsync(AsyncPackageSeries series,
+        IDictionary<string, CachedPackageInfo> versions,
+        CancellationToken cancellationToken = default)
+    {
+        await foreach (var package in series.EnumeratePackagesAsync(cancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            // Go through everything.
+            var pkgMeta = package.GetMeta();
+            _logger.LogTrace("Indexing version {Version}", pkgMeta.Version);
+
+            RemoteArtefact remoteArtefact;
+            IEnumerable<ArtefactMirrorInfo>? mirrors;
+
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                remoteArtefact = package.GetArtefact();
+                mirrors = package.GetMirrors();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to index package {Id} {Version}", pkgMeta.Id, pkgMeta.Version);
+                continue;
+            }
+
+            versions.Add(pkgMeta.Version.ToString(), new CachedPackageInfo
+            {
+                Metadata = pkgMeta,
+                Artefact = remoteArtefact,
+                Mirrors = mirrors
+            });
+        }
     }
 }

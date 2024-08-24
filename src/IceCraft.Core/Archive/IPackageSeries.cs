@@ -16,17 +16,17 @@ public interface IPackageSeries
 
     [Obsolete("Unsupported. Get latest ID and index instead.")]
     Task<IPackage?> GetLatestAsync();
-    
-    IAsyncEnumerable<IPackage> EnumeratePackagesAsync();
+
+    IEnumerable<IPackage> EnumeratePackages(CancellationToken cancellationToken = default);
 
     [Obsolete("Compare semantic versioning instead. This interface may return null.")]
     Task<SemVersion?> GetLatestVersionIdAsync();
 
     Task<int> GetExpectedPackageCountAsync();
 
-    async Task EnumeratePackagesAsync(Action<IPackage> consumer)
+    async Task EnumeratePackages(Action<IPackage> consumer)
     {
-        await foreach (var x in EnumeratePackagesAsync())
+        foreach (var x in EnumeratePackages())
         {
             consumer(x);
         }

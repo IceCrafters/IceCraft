@@ -1,15 +1,17 @@
 ﻿namespace IceCraft.Repositories.Adoptium;
 
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using IceCraft.Core.Archive;
+using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
 using IceCraft.Repositories.Adoptium.Models;
 using Microsoft.Extensions.Logging;
 using Semver;
 
-public class AdoptiumPackageSeries : IPackageSeries
+public class AdoptiumPackageSeries : AsyncPackageSeries
 {
     private readonly int _majorVersion;
     private readonly AdoptiumRepository _repository;
@@ -24,11 +26,11 @@ public class AdoptiumPackageSeries : IPackageSeries
         _logger = logger;
     }
 
-    public string Name { get; }
+    public override string Name { get; }
 
     public string Type { get; }
 
-    public async IAsyncEnumerable<IPackage> EnumeratePackagesAsync()
+    public override async IAsyncEnumerable<IPackage> EnumeratePackagesAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var latest = await GetLatestVersionIdAsync();
 
@@ -38,6 +40,7 @@ public class AdoptiumPackageSeries : IPackageSeries
             // Architecture not supported.
             yield break;
         }
+        // TODO make this not IO bound
         var all = await GetAllAssetViewsAsync();
 
         // ReSharper disable once InvertIf
@@ -51,12 +54,13 @@ public class AdoptiumPackageSeries : IPackageSeries
 
         foreach (var release in all)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             yield return new AdoptiumPackage(this, 
                 release, 
                 _logger, 
                 latest != null 
                     && release.VersionData != null 
-                    && SemVersion.Parse(release.VersionData.Semver, SemVersionStyles.Strict) == latest); ;
+                    && SemVersion.Parse(release.VersionData.Semver, SemVersionStyles.Strict) == latest);
         }
     }
 
@@ -71,13 +75,13 @@ public class AdoptiumPackageSeries : IPackageSeries
             AdoptiumApiClient.GetOs()));
     }
 
-    public async Task<int> GetExpectedPackageCountAsync()
+    public override async Task<int> GetExpectedPackageCountAsync()
     {
         var views = await GetAllAssetViewsAsync();
         return views?.Count() ?? 0;
     }
 
-    public Task<IPackage?> GetLatestAsync()
+    public override Task<IPackage?> GetLatestAsync()
     {
         _logger.LogWarning("Unsupported API call GetLatestAsync");
         return Task.FromResult<IPackage?>(null);
@@ -107,7 +111,7 @@ public class AdoptiumPackageSeries : IPackageSeries
                 => x is { Binary: not null }));
     }
 
-    public async Task<SemVersion?> GetLatestVersionIdAsync()
+    public override async Task<SemVersion?> GetLatestVersionIdAsync()
     {
         var view = await GetLatestAssetView();
         if (view is not { Version: not null })

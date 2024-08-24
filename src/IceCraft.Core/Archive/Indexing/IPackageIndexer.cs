@@ -4,5 +4,5 @@ using IceCraft.Core.Archive.Repositories;
 
 public interface IPackageIndexer
 {
-    Task<PackageIndex> IndexAsync(IRepositorySourceManager manager, CancellationToken? token = null);
+    Task<PackageIndex> IndexAsync(IRepositorySourceManager manager, CancellationToken cancellationToken = default);
 }
