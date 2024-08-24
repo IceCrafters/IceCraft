@@ -112,7 +112,7 @@ public class ExecutableManager : IExecutableManager
     public async Task<bool> UnlinkExecutableAsync(string linkName)
     {
         var data = await _executables;
-        if (!data.ContainsKey(linkName))
+        if (!data.TryGetValue(linkName, out var execInfo))
         {
             return false;
         }
@@ -123,7 +123,7 @@ public class ExecutableManager : IExecutableManager
             _fileSystem.File.Delete(target);
         }
 
-        data.Remove(linkName);
+        execInfo.Current = null;
         await SaveDataFile();
         return true;
     }
@@ -132,13 +132,13 @@ public class ExecutableManager : IExecutableManager
     {
         var info = await GetInfo(linkName);
         info.Registrations.Remove(meta.Id);
-        if (info.Current?.PackageRef == linkName)
+        if (info.Current?.PackageRef == meta.Id)
         {
             await UnlinkExecutableAsync(linkName);
             info.Current = null;
         }
 
-
+        await SaveDataFile();
     }
 
     #region Data File Management
