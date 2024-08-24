@@ -1,8 +1,13 @@
-# IceCraft
+<h1 style="text-align: center;"><img src="assets/logo.svg"/><br />IceCraft</h1>
 
-IceCraft is a "syndicate source" package manager - that is, instead of a single central source or multiple sources of same format, it relies on extensions fetching from various public APIs and maybe even VCS endpoints and translate them to be accepted through a standard interface. Thus, no manual maintainence is needed as long as upstream is up to date.
+IceCraft is a package manager that is powered by: 
+
+- A framework for managing installation and lifetime of packages, and various caches and artefacts
+- Various extensions directly consumes various metadata APIs
 
 ## Building
+
+IceCraft currently requires .NET SDK **8.0** to build. You can get it [here](https://dot.net).
 
 To produce your regular release build run `build.sh` / `build.cmd`. These should cover most use cases.
 
