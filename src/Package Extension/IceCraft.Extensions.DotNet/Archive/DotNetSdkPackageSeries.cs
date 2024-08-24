@@ -36,7 +36,7 @@ public class DotNetSdkPackageSeries : AsyncPackageSeries
                 continue;
             }
 
-            var releaseFile = release.Files
+            var releaseFile = sdk.Files
                 .First(x => x.Rid == selfRid);
 
             yield return new DotNetSdkPackage(sdk,

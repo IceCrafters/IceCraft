@@ -32,6 +32,23 @@ public class DotNetSdkPackage : IPackage
         };
     }
 
+    private static SemVersion GetSemanticVersion(ReleaseVersion releaseVersion)
+    {
+        string[] metaArray = !string.IsNullOrEmpty(releaseVersion.BuildMetadata)
+            ? [releaseVersion.BuildMetadata]
+            : [];
+        
+        string[] preReleaseArray = !string.IsNullOrEmpty(releaseVersion.Prerelease)
+            ? [releaseVersion.Prerelease.Replace('.', '-')]
+            : [];
+        
+        return new SemVersion(releaseVersion.Major,
+            releaseVersion.Minor,
+            releaseVersion.Patch,
+            preReleaseArray,
+            metaArray);
+    }
+    
     public PackageMeta GetMeta()
     {
         var version = _sdkRelease.Version;
@@ -40,7 +57,7 @@ public class DotNetSdkPackage : IPackage
         return new PackageMeta()
         {
             Id = _series.Name,
-            Version = new SemVersion(version.Major, version.Minor, version.Patch),
+            Version = GetSemanticVersion(version),
             PluginInfo = new PackagePluginInfo("dotnet-sdk", "dotnet-sdk"),
             ReleaseDate = _sdkRelease.Release.ReleaseDate,
             AdditionalMetadata = new Dictionary<string, string>
