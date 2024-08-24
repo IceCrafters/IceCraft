@@ -11,6 +11,9 @@ public interface IDownloadManager
     Task DownloadAsync(Uri from, Stream toStream, IProgressedTask? downloadTask = null, string? fileName = null);
     Task DownloadAsync(ArtefactMirrorInfo fromMirror, Stream toStream, IProgressedTask? downloadTask = null, string? fileName = null);
 
+    Task DownloadAsync(CachedPackageInfo packageInfo, Stream to, IProgressedTask? downloadTask = null,
+        string? fileName = null);
+    
     Task<string> DownloadTemporaryArtefactAsync(CachedPackageInfo packageInfo, IProgressedTask? downloadTask = null, string? fileName = null);
     Task<string> DownloadTemporaryArtefactAsync(ArtefactMirrorInfo mirror, IProgressedTask? downloadTask = null, string? fileName = null);
 

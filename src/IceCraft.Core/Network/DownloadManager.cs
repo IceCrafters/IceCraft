@@ -92,7 +92,8 @@ public class DownloadManager : IDownloadManager
     }
 
     #endregion
-
+    
+    
     public async Task DownloadAsync(Uri from, string toFile, IProgressedTask? task = null, string? fileName = null)
     {
         var downloader = new DownloadService(_downloadConfig);
@@ -189,6 +190,16 @@ public class DownloadManager : IDownloadManager
         }
 
         return path;
+    }
+    
+    public async Task DownloadAsync(CachedPackageInfo packageInfo, Stream to, IProgressedTask? downloadTask = null, string? fileName = null)
+    {
+        // Get the best mirror.
+        _logger.LogInformation("Probing mirrors");
+        var bestMirror = await _mirrorSearcher.GetBestMirrorAsync(packageInfo.Mirrors)
+                         ?? throw new InvalidOperationException("No best mirror can be found.");
+
+        await DownloadAsync(bestMirror, to, downloadTask, fileName);
     }
 
     public async Task DownloadAsync(ArtefactMirrorInfo bestMirror, 

@@ -1,5 +1,6 @@
 namespace IceCraft.Core;
 
+using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Checksums;
 using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Indexing;
@@ -27,7 +28,8 @@ public static class IceCraftDependencyExtensions
     {
         if (OperatingSystem.IsLinux())
         {
-            return services.AddSingleton<IEnvironmentManager, LinuxEnvironmentManager>();
+            return services.AddSingleton<IEnvironmentManager, LinuxEnvironmentManager>()
+                .AddSingleton<IExecutionScriptGenerator, PosixExecutionScriptGenerator>();
         }
 
         // ReSharper disable once ConvertIfStatementToReturnStatement
@@ -52,7 +54,8 @@ public static class IceCraftDependencyExtensions
             .AddSingleton<IDependencyResolver, DependencyResolver>()
             .AddSingleton<IDependencyMapper, DependencyMapper>()
             .AddKeyedSingleton<IPackageInstaller, VirtualInstaller>("virtual")
-            .AddKeyedSingleton<IPackageConfigurator, VirtualConfigurator>("virtual");
+            .AddKeyedSingleton<IPackageConfigurator, VirtualConfigurator>("virtual")
+            .AddSingleton<IArtefactManager, ArtefactManager>();
     }
 
     public static IServiceCollection AddChecksumValidators(this IServiceCollection services)

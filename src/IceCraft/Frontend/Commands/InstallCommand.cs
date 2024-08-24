@@ -31,12 +31,15 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
     private readonly IFrontendApp _frontend;
     private readonly IChecksumRunner _checksumRunner;
     private readonly IDependencyMapper _dependencyMapper;
+    private readonly IArtefactManager _artefactManager;
 
     private readonly record struct QueuedDownloadTask
     {
-        internal required Task<string> Task { get; init; }
+        internal required Task Task { get; init; }
         internal required RemoteArtefact ArtefactInfo { get; init; }
         internal required PackageMeta Metadata { get; init; }
+        internal required string Objective { get; init; }
+        internal Stream? Stream { get; init; }
     }
 
     public InstallCommand(IServiceProvider serviceProvider)
@@ -49,13 +52,14 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
         _frontend = serviceProvider.GetRequiredService<IFrontendApp>();
         _checksumRunner = serviceProvider.GetRequiredService<IChecksumRunner>();
         _dependencyMapper = serviceProvider.GetRequiredService<IDependencyMapper>();
+        _artefactManager = serviceProvider.GetRequiredService<IArtefactManager>();
     }
 
     public override ValidationResult Validate(CommandContext context, Settings settings)
     {
         if (!string.IsNullOrWhiteSpace(settings.Version)
-             // Does not need to be that strict on user input since we all make mistakes.
-             && !SemVersion.TryParse(settings.Version, SemVersionStyles.Any, out _))
+            // Does not need to be that strict on user input since we all make mistakes.
+            && !SemVersion.TryParse(settings.Version, SemVersionStyles.Any, out _))
         {
             return ValidationResult.Error("Invalid semantic version");
         }
@@ -65,6 +69,9 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
+        Log.Information("Cleaning up artefacts");
+        _artefactManager.CleanArtefacts();
+        
         // Step 1: Index
         SemVersion? selectedVersion;
         PackageMeta? meta = null;
@@ -73,44 +80,46 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
 
         await AnsiConsole.Status()
             .StartAsync("Indexing remote packages",
-            async ctx =>
-            {
-                // STEP: Index remote packages
-                index = await _indexer.IndexAsync(_sourceManager);
-                if (!index.TryGetValue(settings.PackageName, out var seriesInfo))
+                async ctx =>
                 {
-                    throw new KnownException($"No such package series {settings.PackageName}");
-                }
+                    // STEP: Index remote packages
+                    index = await _indexer.IndexAsync(_sourceManager);
+                    if (!index.TryGetValue(settings.PackageName, out var seriesInfo))
+                    {
+                        throw new KnownException($"No such package series {settings.PackageName}");
+                    }
 
-                // STEP: Select version
-                ctx.Status("Acquiring version information");
-                if (!string.IsNullOrWhiteSpace(settings.Version))
-                {
-                    // Parse user input, and store in specifiedVersion.
-                    // Does not need to be that strict on user input since we all make mistakes.
-                    selectedVersion = SemVersion.Parse(settings.Version, SemVersionStyles.Any);
-                }
-                else
-                {
-                    selectedVersion = await Task.Run(() => seriesInfo.Versions.GetLatestSemVersion(settings.IncludePrerelease));
-                }
+                    // STEP: Select version
+                    ctx.Status("Acquiring version information");
+                    if (!string.IsNullOrWhiteSpace(settings.Version))
+                    {
+                        // Parse user input, and store in specifiedVersion.
+                        // Does not need to be that strict on user input since we all make mistakes.
+                        selectedVersion = SemVersion.Parse(settings.Version, SemVersionStyles.Any);
+                    }
+                    else
+                    {
+                        selectedVersion = await Task.Run(() =>
+                            seriesInfo.Versions.GetLatestSemVersion(settings.IncludePrerelease));
+                    }
 
-                var versionInfo = seriesInfo.Versions[selectedVersion.ToString()];
-                meta = versionInfo.Metadata;
+                    var versionInfo = seriesInfo.Versions[selectedVersion.ToString()];
+                    meta = versionInfo.Metadata;
 
-                // Check if the package is already installed, and if the selected version matches.
-                // If all conditions above are true, do not need to do anything.
-                if (await _installManager.IsInstalledAsync(meta!.Id)
-                    && !await ComparePackageAsync(meta))
-                {
-                    throw new OperationCanceledException();
-                }
+                    // Check if the package is already installed, and if the selected version matches.
+                    // If all conditions above are true, do not need to do anything.
+                    if (await _installManager.IsInstalledAsync(meta!.Id)
+                        && !await ComparePackageAsync(meta))
+                    {
+                        throw new OperationCanceledException();
+                    }
 
-                // STEP: Resolve all dependencies.
-                ctx.Status("Resolving dependencies");
-                allPackagesSet.Add(meta);
-                await _dependencyResolver.ResolveTree(meta, index!, allPackagesSet, _frontend.GetCancellationToken());
-            });
+                    // STEP: Resolve all dependencies.
+                    ctx.Status("Resolving dependencies");
+                    allPackagesSet.Add(meta);
+                    await _dependencyResolver.ResolveTree(meta, index!, allPackagesSet,
+                        _frontend.GetCancellationToken());
+                });
 
         // Step 2: Confirmation
         AnsiConsole.MarkupLineInterpolated($":star: Total {allPackagesSet.Count} packages");
@@ -131,18 +140,44 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
             .StartAsync(async ctx =>
             {
                 var artefactList = new List<QueuedDownloadTask>(allPackagesSet.Count);
-                artefactList.AddRange(from package in allPackagesSet 
-                    let task = ctx.AddTask(package.Id) 
-                    let versionInfo = index!.GetPackageInfo(package) 
-                    select new QueuedDownloadTask
-                    {
-                        Task = _downloadManager.DownloadTemporaryArtefactAsync(versionInfo, 
-                            new SpectreProgressedTask(task), 
-                            $"{meta!.Id} {meta.Version}"), 
-                        Metadata = package, 
-                        ArtefactInfo = versionInfo.Artefact
-                    });
+                foreach (var package in allPackagesSet)
+                {
+                    var packageInfo = index!.GetPackageInfo(package);
 
+                    // Detect existing artefacts.
+                    var artefactFile = await _artefactManager.GetSafeArtefactPathAsync(packageInfo.Artefact);
+                    if (artefactFile != null)
+                    {
+                        artefactList.Add(new QueuedDownloadTask()
+                            {
+                                Task = Task.CompletedTask,
+                                ArtefactInfo = packageInfo.Artefact,
+                                Metadata = packageInfo.Metadata,
+                                Objective = artefactFile
+                            }
+                        );
+
+                        continue;
+                    }
+
+                    // Download new artefact.
+                    var task = ctx.AddTask(package.Id);
+                    var stream = _artefactManager.CreateArtefact(packageInfo.Artefact);
+
+                    artefactList.Add(new QueuedDownloadTask()
+                        {
+                            Task = _downloadManager.DownloadAsync(packageInfo, 
+                                stream, 
+                                new SpectreProgressedTask(task),
+                                $"{meta!.Id} {meta.Version}"),
+                            ArtefactInfo = packageInfo.Artefact,
+                            Metadata = packageInfo.Metadata,
+                            Objective = _artefactManager.GetArtefactPath(packageInfo.Artefact),
+                            Stream = stream
+                        }
+                    );
+                }
+                
                 artefactTasks = [.. artefactList];
 
                 await Task.WhenAll(artefactTasks.Select(x => x.Task)).ConfigureAwait(false);
@@ -152,12 +187,12 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
 
         await AnsiConsole.Status()
             .StartAsync("Installing packages",
-            async ctx =>
-            {
-                await _installManager.BulkInstallAsync(ValidateAndInsertInternalAsync(ctx, artefactTasks), 
-                    artefactTasks.Length);
-            });
-        
+                async ctx =>
+                {
+                    await _installManager.BulkInstallAsync(ValidateAndInsertInternalAsync(ctx, artefactTasks),
+                        artefactTasks.Length);
+                });
+
         // Step 5: remap dependencies
 
         await AnsiConsole.Status()
@@ -168,25 +203,33 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
                     {
                         clearable.ClearCache();
                     }
+
                     await _dependencyMapper.MapDependenciesCached();
                 });
 
         return 0;
     }
 
-    private async IAsyncEnumerable<KeyValuePair<PackageMeta, string>> ValidateAndInsertInternalAsync(StatusContext status,
+    private async IAsyncEnumerable<KeyValuePair<PackageMeta, string>> ValidateAndInsertInternalAsync(
+        StatusContext status,
         IEnumerable<QueuedDownloadTask> tasks)
     {
         foreach (var task in tasks)
         {
             status.Status($"Installing package {task.Metadata.Id}");
+            
+            if (task.Stream != null)
+            {
+                await task.Stream.DisposeAsync();
+            }
 
-            var path = await task.Task;
+            var path = task.Objective;
             if (!await _checksumRunner.ValidateLocal(task.ArtefactInfo, path))
             {
                 Log.Verbose("Remote hash: {Checksum}", task.ArtefactInfo.Checksum);
                 throw new KnownException("Artefact hash mismatches downloaded file.");
             }
+            
             yield return new KeyValuePair<PackageMeta, string>(task.Metadata, path);
         }
     }
