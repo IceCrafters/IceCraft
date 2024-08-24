@@ -40,14 +40,20 @@ public class DotNetSdkConfigurator : IPackageConfigurator
                 new PackageReference(meta.Id, meta.Version));
         }
 
-        await _executableManager.RegisterAsync(meta, "dotnet", "dotnet");
+        // Registering executable makes Rider and potentially other tools fail to locate .NET SDK.
+        // Instead, we register PATH directly.
+        // await _executableManager.RegisterAsync(meta, "dotnet", "dotnet")
         
+        _environmentManager.AddUserGlobalPath(installDir);
         _environmentManager.AddUserVariable("DOTNET_ROOT", installDir);
     }
 
     public async Task UnconfigurePackageAsync(string installDir, PackageMeta meta)
     {
+        // Clean any leftover executables from the old logic.
         await _executableManager.UnregisterAsync(meta, "dotnet");
+        
+        _environmentManager.RemoveUserGlobalPath(installDir);
         _environmentManager.RemoveUserVariable("DOTNET_ROOT");
     }
 }
