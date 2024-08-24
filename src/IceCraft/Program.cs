@@ -53,6 +53,8 @@ cmdApp.Configure(root =>
     root.AddCommand<InfoCommand>("info")
         .WithDescription("Shows various metadata for a package series");
 
+    root.AddCommand<InitializeCommand>("init");
+
     root.AddBranch<BaseSettings>("source", source =>
     {
         source.AddCommand<SourceSwitchCommand.EnableCommand>("enable");
@@ -68,14 +70,14 @@ cmdApp.Configure(root =>
     root.AddBranch<BaseSettings>("package", package =>
     {
         package.AddCommand<PackageListCommand>("list");
+        package.AddCommand<PackageReconfigureCommand>("reconfigure");
+        root.AddCommand<MirrorGetBestCommand>("best-mirror")
+            .WithDescription("Tests for the best mirror for a given package");
     });
 
     root.AddCommand<DownloadCommand>("download");
     root.AddCommand<InstallCommand>("install");
     root.AddCommand<UninstallCommand>("remove");
-    
-    root.AddCommand<MirrorGetBestCommand>("best-mirror")
-        .WithDescription("Tests for the best mirror for a given package");
 
     root.SetExceptionHandler((ex, _) =>
     {
