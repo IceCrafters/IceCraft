@@ -42,14 +42,12 @@ public class DotNetSdkConfigurator : IPackageConfigurator
 
         await _executableManager.RegisterAsync(meta, "dotnet", "dotnet");
         
-        _environmentManager.AddUserGlobalPath(installDir);
         _environmentManager.AddUserVariable("DOTNET_ROOT", installDir);
     }
 
     public async Task UnconfigurePackageAsync(string installDir, PackageMeta meta)
     {
         await _executableManager.UnregisterAsync(meta, "dotnet");
-        _environmentManager.RemoveUserGlobalPath(installDir);
         _environmentManager.RemoveUserVariable("DOTNET_ROOT");
     }
 }

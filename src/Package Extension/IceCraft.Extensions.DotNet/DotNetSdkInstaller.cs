@@ -1,15 +1,21 @@
 namespace IceCraft.Extensions.DotNet;
 
 using IceCraft.Core.Installation;
-using SharpCompress.Archives;
-using SharpCompress.Archives.GZip;
+using SharpCompress.Common;
+using SharpCompress.Readers;
 
 public class DotNetSdkInstaller : IPackageInstaller
 {
     public Task ExpandPackageAsync(string artefactFile, string targetDir)
     {
-        using var archive = GZipArchive.Open(artefactFile);
-        archive.Entries.First().WriteToDirectory(targetDir);
+        using var stream = File.OpenRead(artefactFile);
+        using var reader = ReaderFactory.Open(stream);
+        
+        reader.WriteAllToDirectory(targetDir, new ExtractionOptions()
+        {
+            ExtractFullPath = true,
+            Overwrite = true
+        });
         return Task.CompletedTask;
     }
 
