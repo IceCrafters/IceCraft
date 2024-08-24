@@ -87,6 +87,17 @@ public class ExecutableManager : IExecutableManager
             await _scriptGenerator.WriteExecutionScriptAsync(registerInfo, targetName, stream);
         }
 
+        if (!OperatingSystem.IsWindows())
+        {
+            var fileMode = File.GetUnixFileMode(tempFileName);
+            if (!fileMode.HasFlag(UnixFileMode.UserExecute))
+            {
+                fileMode |= UnixFileMode.UserExecute;
+            }
+            
+            File.SetUnixFileMode(tempFileName, fileMode);
+        }
+
         // TODO Implement a better overwrite system
         _fileSystem.File.Move(tempFileName, linkFileName, true);
         info.Current = registerInfo;
