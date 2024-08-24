@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Deployment.DotNet.Releases" Version="1.0.0" />
+    <PackageReference Include="SharpCompress" Version="0.37.2" />
   </ItemGroup>
 
   <PropertyGroup>

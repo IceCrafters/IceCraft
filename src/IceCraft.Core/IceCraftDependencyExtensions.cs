@@ -50,7 +50,9 @@ public static class IceCraftDependencyExtensions
             .AddSingleton<IPackageInstallManager, PackageInstallManager>()
             .AddSingleton<IExecutableManager, ExecutableManager>()
             .AddSingleton<IDependencyResolver, DependencyResolver>()
-            .AddSingleton<IDependencyMapper, DependencyMapper>();
+            .AddSingleton<IDependencyMapper, DependencyMapper>()
+            .AddKeyedSingleton<IPackageInstaller, VirtualInstaller>("virtual")
+            .AddKeyedSingleton<IPackageConfigurator, VirtualConfigurator>("virtual");
     }
 
     public static IServiceCollection AddChecksumValidators(this IServiceCollection services)

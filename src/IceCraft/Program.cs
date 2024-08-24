@@ -7,6 +7,7 @@ using IceCraft.Core.Configuration;
 using IceCraft.Core.Platform;
 using IceCraft.Core.Util;
 using IceCraft.Developer;
+using IceCraft.Extensions.DotNet;
 using IceCraft.Frontend;
 using IceCraft.Frontend.Commands;
 using IceCraft.Repositories.Adoptium;
@@ -28,7 +29,8 @@ appServices
     // Core
     .AddIceCraftDefaults()
     // Sources
-    .AddAdoptiumSource();
+    .AddAdoptiumSource()
+    .AddDotNetExtension();
 
 #if DEBUG
 DummyRepositorySource.AddDummyRepositorySource(appServices);
@@ -51,7 +53,7 @@ cmdApp.Configure(root =>
     root.AddCommand<InfoCommand>("info")
         .WithDescription("Shows various metadata for a package series");
 
-    root.AddBranch<SourceSwitchCommand.Settings>("source", source =>
+    root.AddBranch<BaseSettings>("source", source =>
     {
         source.AddCommand<SourceSwitchCommand.EnableCommand>("enable");
         source.AddCommand<SourceSwitchCommand.DisableCommand>("disable");
@@ -99,7 +101,7 @@ cmdApp.Configure(root =>
         }
     });
 
-    root.SetInterceptor(new LogInterceptor());
+    root.SetInterceptor(new StandardInterceptor());
 });
 
 await cmdApp.RunAsync(args);

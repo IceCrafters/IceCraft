@@ -67,15 +67,15 @@ public class DownloadManager : IDownloadManager
     {
         if (bps >= Megabyte)
         {
-            return $"{bps / Megabyte:N3} MiB/s";
+            return $"{bps / Megabyte:N2} MiB/s";
         }
 
         if (bps >= Kilobyte)
         {
-            return $"{bps / Kilobyte:N3} KiB/s";
+            return $"{bps / Kilobyte:N2} KiB/s";
         }
 
-        return $"{bps:N3} B/s";
+        return $"{bps:N2} B/s";
     }
 
     private static void UpdateSpeed(IProgressedTask? task, string? fileName, double bps, long totalBytesToReceive, long receivedBytes)
@@ -87,7 +87,7 @@ public class DownloadManager : IDownloadManager
 
         task.SetText(fileName == null
         ? $"{GetUserReadableSize(receivedBytes)}/{GetUserReadableSize(totalBytesToReceive)} - {GetUserReadableSpeed(bps)}"
-        : $"{fileName} | {GetUserReadableSize(receivedBytes)}/{GetUserReadableSize(totalBytesToReceive)} - {GetUserReadableSpeed(bps)}");
+        : $"{fileName} | {GetUserReadableSpeed(bps)}");
         
     }
 
@@ -122,8 +122,12 @@ public class DownloadManager : IDownloadManager
             UpdateSpeed(task, fileName, args.BytesPerSecondSpeed, args.TotalBytesToReceive, args.ReceivedBytesSize);
         };
 
-        using var stream = await downloader.DownloadFileTaskAsync(from.ToString(),
+        await using var stream = await downloader.DownloadFileTaskAsync(from.ToString(),
             _frontendApp.GetCancellationToken());
+        if (stream == null)
+        {
+            throw new KnownException("Failed to initiate download");
+        }
         await stream.CopyToAsync(toStream);
 
         if (downloader.IsCancelled)

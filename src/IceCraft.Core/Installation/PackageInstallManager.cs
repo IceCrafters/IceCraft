@@ -230,7 +230,7 @@ public class PackageInstallManager : IPackageInstallManager
         }
 
         database[meta.Id].Remove(meta.Version.ToString());
-        await _databaseFactory.SaveAsync();
+        await _databaseFactory.MaintainAndSaveAsync();
     }
 
     public async Task<bool> IsInstalledAsync(string packageName)

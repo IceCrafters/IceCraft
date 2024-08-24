@@ -107,6 +107,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
     {
         _ = await GetAsync();
         var showHint = false;
+        var orphanedVirtual = new List<PackageMeta>();
         foreach (var (key, packageInfo) in 
                  _map!.SelectMany(x => x.Value))
         {
@@ -125,17 +126,22 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
                     var info = _map!.GetValueOrDefault(packageInfo.ProvidedBy.Value);
                     if (info == null)
                     {
-                        _logger.LogWarning("Virtual package {Id} ({Version}) were provided by {PackageId} ({PackageVersion}) but the latter no longer exists",
-                            packageInfo.Metadata.Id,
-                            packageInfo.Metadata.Version,
-                            packageInfo.ProvidedBy.Value.PackageId,
-                            packageInfo.ProvidedBy.Value.PackageVersion);
-                        showHint = true;
+                        orphanedVirtual.Add(packageInfo.Metadata);
                     }
                 }
             }
         }
 
+        foreach (var package in orphanedVirtual)
+        {
+            if (_map == null)
+            {
+                return;
+            }
+
+            _map[package.Id].Remove(package.Version.ToString());
+        }
+        
         if (showHint)
         {
             _logger.LogInformation("HINT: Use 'IceCraft auto-remove' to remove orphaned virtual packages.");

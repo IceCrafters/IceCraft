@@ -19,6 +19,7 @@ using IceCraft.Core.Installation.Storage;
 [JsonSerializable(typeof(PackageInstallDatabaseFactory.ValueMap), TypeInfoPropertyName = "PackageInstallValueMap")]
 [JsonSerializable(typeof(Dictionary<string, ExecutableInfo>), TypeInfoPropertyName = "ExecutableDataFile_v2")]
 [JsonSerializable(typeof(DependencyMap))]
+[JsonSerializable(typeof(Dictionary<string, string>))]
 internal partial class IceCraftCoreContext : JsonSerializerContext
 {
 }
