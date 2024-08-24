@@ -9,6 +9,9 @@ using IceCraft.Core.Installation.Analysis;
 using IceCraft.Core.Installation.Execution;
 using IceCraft.Core.Installation.Storage;
 using IceCraft.Core.Network;
+using IceCraft.Core.Platform;
+using IceCraft.Core.Platform.Linux;
+using IceCraft.Core.Platform.Windows;
 using Microsoft.Extensions.DependencyInjection;
 
 public static class IceCraftDependencyExtensions
@@ -16,9 +19,26 @@ public static class IceCraftDependencyExtensions
     public static IServiceCollection AddIceCraftDefaults(this IServiceCollection services)
     {
         return services.AddChecksumValidators()
-            .AddIceCraftServices();
+            .AddIceCraftServices()
+            .AddIceCraftPlatform();
     }
 
+    private static IServiceCollection AddIceCraftPlatform(this IServiceCollection services)
+    {
+        if (OperatingSystem.IsLinux())
+        {
+            return services.AddSingleton<IEnvironmentManager, LinuxEnvironmentManager>();
+        }
+
+        // ReSharper disable once ConvertIfStatementToReturnStatement
+        if (OperatingSystem.IsWindows())
+        {
+            return services.AddSingleton<IEnvironmentManager, WindowsEnvironmentManager>();
+        }
+
+        return services;
+    }
+    
     public static IServiceCollection AddIceCraftServices(this IServiceCollection services)
     {
         return services.AddSingleton<IMirrorSearcher, MirrorSearcher>()
