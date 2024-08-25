@@ -65,6 +65,7 @@ cmdApp.Configure(root =>
     {
         cache.AddCommand<ClearCacheCommand>("clear");
         cache.AddCommand<MaintainCacheCommand>("maintain");
+        cache.AddCommand<RegenerateDependMapCommand>("regen-dependmap");
     });
 
     root.AddBranch<BaseSettings>("package", package =>

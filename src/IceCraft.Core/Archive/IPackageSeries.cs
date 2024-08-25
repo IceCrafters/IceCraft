@@ -23,12 +23,4 @@ public interface IPackageSeries
     Task<SemVersion?> GetLatestVersionIdAsync();
 
     Task<int> GetExpectedPackageCountAsync();
-
-    async Task EnumeratePackages(Action<IPackage> consumer)
-    {
-        foreach (var x in EnumeratePackages())
-        {
-            consumer(x);
-        }
-    }
 }

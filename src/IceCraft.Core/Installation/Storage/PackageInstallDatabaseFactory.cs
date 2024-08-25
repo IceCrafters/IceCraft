@@ -77,7 +77,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
             return await CreateDatabaseFileAsync(filePath);
         }
 
-        _frontend.Output.Verbose("{Count} packages currently installed", retVal.Count);
+        _frontend.Output.Verbose("{0} packages currently installed", retVal.Count);
 
         return retVal;
     }
@@ -311,6 +311,13 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
             var index = GetValueOrDefault(reference.PackageId);
 
             return index?.GetValueOrDefault(reference.PackageVersion.ToString());
+        }
+
+        public InstalledPackageInfo? GetValueOrDefault(PackageMeta meta)
+        {
+            var index = GetValueOrDefault(meta.Id);
+
+            return index?.GetValueOrDefault(meta.Version.ToString());
         }
     }
 }

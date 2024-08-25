@@ -3,6 +3,7 @@ namespace IceCraft.Core.Installation.Analysis;
 using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Installation.Storage;
+using IceCraft.Core.Platform;
 using IceCraft.Core.Serialization;
 using Microsoft.Extensions.Logging;
 
@@ -12,15 +13,15 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
     private const string CacheObjectName = "dependencyMap";
     
     private readonly IPackageInstallDatabaseFactory _databaseFactory;
-    private readonly ILogger<DependencyMapper> _logger;
+    private readonly IOutputAdapter _output;
     private readonly ICacheStorage _cacheStorage;
 
     public DependencyMapper(IPackageInstallDatabaseFactory databaseFactory,
-        ILogger<DependencyMapper> logger,
+        IFrontendApp frontendApp,
         ICacheManager cacheManager)
     {
         _databaseFactory = databaseFactory;
-        _logger = logger;
+        _output = frontendApp.Output;
         _cacheStorage = cacheManager.GetStorage(CacheGuid);
     }
 
@@ -47,7 +48,7 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
             IceCraftCoreContext.Default.DependencyMap);
     }
 
-    private static async ValueTask ProcessIndex(string key, 
+    private async ValueTask ProcessIndex(string key, 
         IPackageInstallDatabase database, 
         PackageInstallationIndex index, 
         DependencyMap map)
@@ -56,7 +57,7 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
         
         foreach (var (version, info) in index)
         {
-            var entry = new DependencyMapEntry(key, info.Metadata.Version);
+            var entry = map.GetEntry(info.Metadata);
 
             if (info.Metadata.Dependencies == null)
             {
@@ -68,15 +69,15 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
                 var best = await DependencyResolver.SelectBestPackageDependency(database.EnumeratePackages(),
                     dependency,
                     default);
-                
+
+                var bestEntry = map.GetEntry(best);
+
                 entry.Dependencies.Add(new PackageReference(best.Id,
                     best.Version));
+                bestEntry.Dependents.Add(new PackageReference(info.Metadata.Id,
+                    info.Metadata.Version));
             }
-            
-            branch.Add(version, entry);
         }
-        
-        map.Add(key, branch);
     }
 
     public void ClearCache()

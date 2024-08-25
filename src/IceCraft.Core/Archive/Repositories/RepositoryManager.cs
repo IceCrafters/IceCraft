@@ -62,7 +62,7 @@ public class RepositoryManager : IRepositorySourceManager
 
     public void RegisterSource(string id, IRepositorySource source)
     {
-        _output.Verbose("Source {Id} registered", id);
+        _output.Verbose("Source {0} registered", id);
         _sources.Add(id, source);
     }
 

@@ -19,4 +19,5 @@ public sealed record DependencyMapEntry
     public required SemVersion Version { get; init; }
 
     public IList<PackageReference> Dependencies { get; } = [];
+    public IList<PackageReference> Dependents { get; } = [];
 }

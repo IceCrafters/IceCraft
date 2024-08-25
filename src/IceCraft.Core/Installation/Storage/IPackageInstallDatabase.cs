@@ -30,6 +30,8 @@ public interface IPackageInstallDatabase : IEnumerable<KeyValuePair<string, Pack
     
     PackageInstallationIndex? GetValueOrDefault(string packageId);
 
+    InstalledPackageInfo? GetValueOrDefault(PackageMeta meta);
+
     InstalledPackageInfo? GetValueOrDefault(PackageReference reference);
     
     /// <summary>

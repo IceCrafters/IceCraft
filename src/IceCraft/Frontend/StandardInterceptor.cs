@@ -15,6 +15,7 @@ public class StandardInterceptor : ICommandInterceptor
         if (settings is BaseSettings { Verbose: true })
         {
             level = LogEventLevel.Verbose;
+            Output.IsVerboseMode = true;
         }
 
         Log.Logger = new LoggerConfiguration()

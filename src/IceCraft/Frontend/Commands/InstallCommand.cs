@@ -234,7 +234,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
             var path = task.Objective;
             if (!await _checksumRunner.ValidateLocal(task.ArtefactInfo, path))
             {
-                Log.Verbose("Remote hash: {Checksum}", task.ArtefactInfo.Checksum);
+                Output.Shared.Verbose("Remote hash: {0}", task.ArtefactInfo.Checksum);
                 throw new KnownException("Artefact hash mismatches downloaded file.");
             }
             
@@ -247,7 +247,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
         // ReSharper disable once InvertIf
         if (await _installManager.IsInstalledAsync(meta.Id, meta.Version.ToString()))
         {
-            Log.Information("Package {Id} ({Version}) is already installed.", meta.Id, meta.Version);
+            Output.Shared.Log("Package {0} ({1}) is already installed.", meta.Id, meta.Version);
             return false;
         }
 
