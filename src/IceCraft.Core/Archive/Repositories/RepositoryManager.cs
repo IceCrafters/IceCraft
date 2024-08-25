@@ -53,7 +53,7 @@ public class RepositoryManager : IRepositorySourceManager
             RegisterSource(name, source);
         }
 
-        _logger.LogDebug("{FactoryDefaults} defaults from DI", factoryDefaults);
+        _output.Verbose("{0} defaults from DI", factoryDefaults);
     }
 
     private readonly Dictionary<string, IRepositorySource> _sources = [];
@@ -62,7 +62,7 @@ public class RepositoryManager : IRepositorySourceManager
 
     public void RegisterSource(string id, IRepositorySource source)
     {
-        _logger.LogDebug("Source {Id} registered", id);
+        _output.Verbose("Source {Id} registered", id);
         _sources.Add(id, source);
     }
 
@@ -79,7 +79,7 @@ public class RepositoryManager : IRepositorySourceManager
     public async Task<IEnumerable<IRepository>> GetRepositoriesAsync()
     {
         var list = new List<IRepository>(_sources.Count);
-        _logger.LogTrace("{Count} sources to index", _sources.Count);
+        _output.Verbose("{0} sources to index", _sources.Count);
 
         foreach (var provider in _sources)
         {
@@ -91,11 +91,11 @@ public class RepositoryManager : IRepositorySourceManager
             var repo = await provider.Value.CreateRepositoryAsync();
             if (repo == null)
             {
-                _logger.LogWarning("Source {Key} did not provide a valid repository", provider.Key);
+                _output.Warning("Source {0} did not provide a valid repository", provider.Key);
                 continue;
             }
 
-            _logger.LogDebug("RepositoryManager: provider gone through: '{Key}'", provider.Key);
+            _output.Verbose("RepositoryManager: provider gone through: '{0}'", provider.Key);
             list.Add(repo);
         }
 

@@ -13,6 +13,12 @@ public interface IOutputAdapter
     [StringFormatMethod("format")]
     void Warning(string format, params object?[] args);
 
+    [StringFormatMethod("format")]
+    void Warning(Exception exception, string format, params object?[] args)
+    {
+        Warning(exception, string.Format(format, args));
+    }
+
     void Log(string message);
     [StringFormatMethod("format")]
     void Log(string format, params object?[] args);

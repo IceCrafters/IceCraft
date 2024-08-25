@@ -191,7 +191,6 @@ public class DownloadManager : IDownloadManager
         // ReSharper disable once InvertIf
         if (!await _checksumRunner.ValidateLocal(artefact, path))
         {
-            _logger.LogTrace("Remote hash: {Checksum}", artefact.Checksum);
             throw new KnownException("Artefact hash mismatches downloaded file.");
         }
 
@@ -204,7 +203,7 @@ public class DownloadManager : IDownloadManager
         _frontendApp.Output.Verbose("Searching best mirror for {0} ({1})...", 
             packageInfo.Metadata.Id, 
             packageInfo.Metadata.Version);
-            
+
         var bestMirror = await _mirrorSearcher.GetBestMirrorAsync(packageInfo.Mirrors)
                          ?? throw new InvalidOperationException("No best mirror can be found.");
 

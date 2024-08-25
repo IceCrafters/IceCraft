@@ -169,7 +169,7 @@ public class PackageInstallManager : IPackageInstallManager
             }
         }
 
-        _logger.LogInformation("Expanding package {Id}", meta.Id);
+        _frontend.Output.Log("Expanding package {0} ({1})...", meta.Id, meta.Version);
         try
         {
             await installer.ExpandPackageAsync(artefactPath, pkgDir);
@@ -179,7 +179,7 @@ public class PackageInstallManager : IPackageInstallManager
             throw new KnownException("Failed to expand package", ex);
         }
 
-        _logger.LogInformation("Setting up package {Id}", meta.Id);
+        _frontend.Output.Log("Setting up package {0} ({1})...", meta.Id, meta.Version);
         try
         {
             await configurator.ConfigurePackageAsync(pkgDir, meta);

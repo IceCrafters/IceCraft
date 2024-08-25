@@ -63,7 +63,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
         }
         catch (JsonException ex)
         {
-            _logger.LogWarning(ex, "Json format failure");
+            _frontend.Output.Warning(ex, "Json format failure");
             return await CreateDatabaseFileAsync(filePath);
         }
         catch (Exception ex)

@@ -34,8 +34,6 @@ public class MirrorSearcher : IMirrorSearcher
 
         foreach (var mirror in mirrors)
         {
-            _logger.LogDebug("PRB: {Name} ({Host})", mirror.Name, mirror.DownloadUri.Host);
-
             PingReply reply;
 
             try
@@ -44,13 +42,13 @@ public class MirrorSearcher : IMirrorSearcher
             }
             catch (PingException ex)
             {
-                _logger.LogWarning("Can't connect to mirror {Name}: {Message}", mirror.Name, ex.Message);
+                _frontend.Output.Warning("Can't connect to mirror {0}: {1}", mirror.Name, ex.Message);
                 continue;
             }
 
             if (reply.Status != IPStatus.Success)
             {
-                _logger.LogWarning("Ping failure {Name}: {Status}", mirror.Name, reply.Status);
+                _frontend.Output.Warning("Ping failure {0}: {1}", mirror.Name, reply.Status);
                 continue;
             }
 
@@ -62,7 +60,7 @@ public class MirrorSearcher : IMirrorSearcher
                 continue;
             }
 
-            _logger.LogTrace("Mirror {Name}: {Ping}ms", mirror.Name, ping);
+            _frontend.Output.Verbose("Mirror {0}: {1}ms", mirror.Name, ping);
         }
 
         if (bestMirror == null)
@@ -70,7 +68,7 @@ public class MirrorSearcher : IMirrorSearcher
             return null;
         }
 
-        _logger.LogTrace("Best mirror: {Name} ({BestPing}ms)", bestMirror.Name, bestPing);
+        _frontend.Output.Warning("Best mirror: {0} ({1}ms)", bestMirror.Name, bestPing);
         return bestMirror;
     }
 }

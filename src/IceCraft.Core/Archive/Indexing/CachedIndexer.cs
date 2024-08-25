@@ -102,7 +102,7 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
             cancellationToken.ThrowIfCancellationRequested();
             // Go through everything.
             var pkgMeta = package.GetMeta();
-            _logger.LogTrace("Indexing version {Version}", pkgMeta.Version);
+            _output.Verbose("Indexing version {0}", pkgMeta.Version);
 
             RemoteArtefact remoteArtefact;
             IEnumerable<ArtefactMirrorInfo>? mirrors;
@@ -115,7 +115,7 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to index package {Id} {Version}", pkgMeta.Id, pkgMeta.Version);
+                _output.Warning(ex, "Failed to index package {0} {1}", pkgMeta.Id, pkgMeta.Version);
                 continue;
             }
 
@@ -137,7 +137,7 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
             cancellationToken.ThrowIfCancellationRequested();
             // Go through everything.
             var pkgMeta = package.GetMeta();
-            _logger.LogTrace("Indexing version {Version}", pkgMeta.Version);
+            _output.Verbose("Indexing version {0}", pkgMeta.Version);
 
             RemoteArtefact remoteArtefact;
             IEnumerable<ArtefactMirrorInfo>? mirrors;
@@ -150,7 +150,7 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to index package {Id} {Version}", pkgMeta.Id, pkgMeta.Version);
+                _output.Warning(ex, "Failed to index package {0} {1}", pkgMeta.Id, pkgMeta.Version);
                 continue;
             }
 
