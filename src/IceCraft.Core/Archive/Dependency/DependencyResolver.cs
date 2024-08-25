@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Installation;
+using IceCraft.Core.Platform;
 using Microsoft.Extensions.Logging;
 using Semver;
 
@@ -11,6 +12,7 @@ public class DependencyResolver : IDependencyResolver
 {
     private readonly IPackageInstallManager _installManager;
     private readonly ILogger<DependencyResolver> _logger;
+    private readonly IOutputAdapter _output;
 
     private readonly record struct StackBranch
     {
@@ -25,10 +27,12 @@ public class DependencyResolver : IDependencyResolver
     }
 
     public DependencyResolver(IPackageInstallManager installManager,
-        ILogger<DependencyResolver> logger)
+        ILogger<DependencyResolver> logger,
+        IFrontendApp frontendApp)
     {
         _installManager = installManager;
         _logger = logger;
+        _output = frontendApp.Output;
     }
 
     private static PackageMeta? SelectLatest(ParallelQuery<PackageMeta> packages, 
@@ -143,8 +147,8 @@ public class DependencyResolver : IDependencyResolver
         }
 
         // Much slower logic.
-        _logger.LogWarning("ResolveTree was called with a set that cannot EnsureCapacity");
-        _logger.LogWarning("Expect upcoming worsened performance");
+        _output.Warning("ResolveTree was called with a set that cannot EnsureCapacity");
+        _output.Warning("Expect upcoming worsened performance");
         
         await Task.Run(() =>
         {
