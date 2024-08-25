@@ -35,7 +35,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
     {
         if (_map == null)
         {
-            _logger.LogInformation("Loading package database");
+            _frontend.Output.Log("Loading package database...");
 
             var packagesPath = Path.Combine(_frontend.DataBasePath, PackageInstallManager.PackagePath);
             var retVal = await LoadDatabaseAsync(Path.Combine(packagesPath, "db.json"));
@@ -77,7 +77,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
             return await CreateDatabaseFileAsync(filePath);
         }
 
-        _logger.LogTrace("{Count} packages currently installed", retVal.Count);
+        _frontend.Output.Verbose("{Count} packages currently installed", retVal.Count);
 
         return retVal;
     }
@@ -116,7 +116,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
             {
                 if (!packageInfo.ProvidedBy.HasValue)
                 {
-                    _logger.LogWarning("Virtual package {Id} ({Version}) is provided by nobody", 
+                    _frontend.Output.Warning("Virtual package {0} ({1}) is provided by nobody", 
                         packageInfo.Metadata.Id,
                         packageInfo.Metadata.Version);
                     showHint = true;
@@ -144,7 +144,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
         
         if (showHint)
         {
-            _logger.LogInformation("HINT: Use 'IceCraft auto-remove' to remove orphaned virtual packages.");
+            _frontend.Output.Log("HINT: Use 'IceCraft auto-remove' to remove orphaned virtual packages.");
         }
 
         await SaveAsync();
@@ -152,7 +152,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
 
     public async Task SaveAsync(string filePath)
     {
-        _logger.LogInformation("Saving database");
+        _frontend.Output.Verbose("Saving database");
 
         if (_map == null)
         {

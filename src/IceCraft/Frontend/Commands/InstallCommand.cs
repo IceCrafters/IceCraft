@@ -69,8 +69,12 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        Log.Information("Cleaning up artefacts");
-        _artefactManager.CleanArtefacts();
+        // Step 0: Clean artefacts
+        if (!settings.NoCleanArtefact)
+        {
+            AnsiConsole.Status()
+                .Start("Cleaning artefacts", _ => _artefactManager.CleanArtefacts());
+        }
         
         // Step 1: Index
         SemVersion? selectedVersion;
@@ -139,7 +143,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
             return 0;
         }
 
-        Log.Information("Beginning download");
+        _frontend.Output.Verbose("Initializing download for {0} packages", allPackagesSet.Count);
 
         // Step 3: download artefacts
 
@@ -192,7 +196,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
                 await Task.WhenAll(artefactTasks.Select(x => x.Task)).ConfigureAwait(false);
             });
 
-        // Step 4: install artefacts
+        // Step 4: install artefacts and map dependencies
 
         await AnsiConsole.Status()
             .StartAsync("Installing packages",
@@ -200,14 +204,9 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
                 {
                     await _installManager.BulkInstallAsync(ValidateAndInsertInternalAsync(ctx, artefactTasks),
                         artefactTasks.Length);
-                });
 
-        // Step 5: remap dependencies
+                    ctx.Status("Evaluating dependency information");
 
-        await AnsiConsole.Status()
-            .StartAsync("Evaluating dependency information",
-                async _ =>
-                {
                     if (_dependencyMapper is ICacheClearable clearable)
                     {
                         clearable.ClearCache();
@@ -272,5 +271,9 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
         [Description("Whether to include prerelease when getting the latest version. Does not affect '--version'.")]
         [UsedImplicitly]
         public bool IncludePrerelease { get; init; }
+
+        [CommandOption("--no-clean-artefact")]
+        [Description("Do not perform artefact cleaning tasks.")]
+        public bool NoCleanArtefact { get; init; }
     }
 }

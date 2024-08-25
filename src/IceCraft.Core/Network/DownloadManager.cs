@@ -147,7 +147,10 @@ public class DownloadManager : IDownloadManager
     public async Task<string> DownloadTemporaryArtefactAsync(CachedPackageInfo packageInfo, IProgressedTask? downloadTask = null, string? fileName = null)
     {
         // Get the best mirror.
-        _logger.LogInformation("Probing mirrors");
+        _frontendApp.Output.Verbose("Searching best mirror for {0} ({1})...", 
+            packageInfo.Metadata.Id, 
+            packageInfo.Metadata.Version);
+            
         var bestMirror = await _mirrorSearcher.GetBestMirrorAsync(packageInfo.Mirrors)
             ?? throw new InvalidOperationException("No best mirror can be found.");
 
@@ -164,7 +167,10 @@ public class DownloadManager : IDownloadManager
     public async Task<string> DownloadTemporaryArtefactSecureAsync(CachedPackageInfo packageInfo, IProgressedTask? downloadTask = null, string? fileName = null)
     {
         // Get the best mirror.
-        _logger.LogInformation("Probing mirrors");
+        _frontendApp.Output.Verbose("Searching best mirror for {0} ({1})...", 
+            packageInfo.Metadata.Id, 
+            packageInfo.Metadata.Version);
+
         var bestMirror = await _mirrorSearcher.GetBestMirrorAsync(packageInfo.Mirrors)
                          ?? throw new InvalidOperationException("No best mirror can be found.");
 
@@ -195,7 +201,10 @@ public class DownloadManager : IDownloadManager
     public async Task DownloadAsync(CachedPackageInfo packageInfo, Stream to, IProgressedTask? downloadTask = null, string? fileName = null)
     {
         // Get the best mirror.
-        _logger.LogInformation("Probing mirrors");
+        _frontendApp.Output.Verbose("Searching best mirror for {0} ({1})...", 
+            packageInfo.Metadata.Id, 
+            packageInfo.Metadata.Version);
+            
         var bestMirror = await _mirrorSearcher.GetBestMirrorAsync(packageInfo.Mirrors)
                          ?? throw new InvalidOperationException("No best mirror can be found.");
 

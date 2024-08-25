@@ -76,7 +76,10 @@ public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
         }
 
         // Get the best mirror.
-        Log.Information("Probing mirrors");
+        Output.Shared.Verbose("Searching best mirror for {0} ({1})...", 
+            versionInfo.Metadata.Id, 
+            versionInfo.Metadata.Version);
+
         var bestMirror = await _mirrorSearcher.GetBestMirrorAsync(versionInfo.Mirrors);
         if (bestMirror != null)
         {

@@ -79,7 +79,7 @@ public class PackageInstallManager : IPackageInstallManager
 
             // Expand package.
             Directory.CreateDirectory(pkgDir);
-            _logger.LogInformation("Expanding package {Id}", meta.Id);
+            _frontend.Output.Log("Expanding package {0} ({1})...", meta.Id, meta.Version);
             try
             {
                 await installer.ExpandPackageAsync(artefactPath, pkgDir);
@@ -109,7 +109,7 @@ public class PackageInstallManager : IPackageInstallManager
                 State = InstallationState.Configured
             };
 
-            _logger.LogInformation("Setting up package {Id}", meta.Id);
+            _frontend.Output.Log("Setting up package {0} ({1})...", meta.Id, meta.Version);
             try
             {
                 await configurator.ConfigurePackageAsync(value, meta);
@@ -159,6 +159,16 @@ public class PackageInstallManager : IPackageInstallManager
             State = InstallationState.Expanded
         };
 
+        // If package is unitary, remove previous version.
+        if (meta.Unitary
+            && database.TryGetValue(meta.Id, out var index))
+        {
+            foreach (var (_, package) in index)
+            {
+                await UninstallAsync(package.Metadata);
+            }
+        }
+
         _logger.LogInformation("Expanding package {Id}", meta.Id);
         try
         {
@@ -200,7 +210,13 @@ public class PackageInstallManager : IPackageInstallManager
 
     private string GetPackageDirectory(PackageMeta meta)
     {
-        return Path.Combine(_packagesPath, CleanPath(meta.Id), CleanPath(meta.Version.ToString()));
+        var versionPart = meta.Unitary
+            ? "unitary"
+            : CleanPath(meta.Version.ToString());
+
+        return Path.Combine(_packagesPath,
+            CleanPath(meta.Id),
+            versionPart);
     }
 
     private static string CleanPath(string path)
@@ -221,7 +237,7 @@ public class PackageInstallManager : IPackageInstallManager
 
         var directory = GetPackageDirectory(meta);
 
-        _logger.LogInformation("Removing package");
+        _frontend.Output.Log("Removing package {0} ({1})...", meta.Id, meta.Version);
         await configurator.UnconfigurePackageAsync(directory, meta);
         await installer.RemovePackageAsync(directory);
 
@@ -234,8 +250,8 @@ public class PackageInstallManager : IPackageInstallManager
         }
         catch (IOException ex)
         {
-            _logger.LogWarning(ex, "IOException caught, retrying with recursive delete");
-            _logger.LogWarning("TO AUTHOR OF {Name}: did you forget to clean the directory?", installer.GetType().FullName);
+            _frontend.Output.Warning(ex, "IOException caught, retrying with recursive delete");
+            _frontend.Output.Warning("TO AUTHOR OF {0}: did you forget to clean the directory?", installer.GetType().FullName);
             Directory.Delete(directory, true);
         }
 
@@ -304,12 +320,12 @@ public class PackageInstallManager : IPackageInstallManager
     public async Task RegisterVirtualPackageAsync(PackageMeta virtualMeta, PackageReference origin)
     {
         var database = await _databaseFactory.GetAsync();
-        
+
         database.Put(new InstalledPackageInfo()
         {
-           Metadata = virtualMeta,
-           State = InstallationState.Virtual,
-           ProvidedBy = origin
+            Metadata = virtualMeta,
+            State = InstallationState.Virtual,
+            ProvidedBy = origin
         });
 
         await _databaseFactory.MaintainAndSaveAsync();
@@ -340,11 +356,11 @@ public class PackageInstallManager : IPackageInstallManager
                          && x.Value.ProvidedBy.Value.DoesPointTo(package))))
                 {
                     _frontend.Output.Warning("Package {0} ({1}) conflicts with {2} {3}",
-                        package.Id, 
+                        package.Id,
                         package.Version,
                         reference.PackageId,
                         reference.VersionRange);
- 
+
                     isConflictFree = false;
                     break;
                 }

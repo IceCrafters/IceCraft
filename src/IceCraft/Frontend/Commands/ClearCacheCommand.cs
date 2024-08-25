@@ -14,7 +14,7 @@ public class ClearCacheCommand : Command<BaseSettings>
 
     public override int Execute(CommandContext context, BaseSettings settings)
     {
-        Log.Verbose("Removing cache");
+        Output.Shared.Verbose("Removing cache...");
 
         _cacheManager.RemoveAll();
         return 0;

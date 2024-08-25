@@ -46,7 +46,7 @@ internal class IceCraftApp : IFrontendApp
 
     public string DataBasePath => UserDataDirectory;
 
-    public IOutputAdapter Output { get; } = new OutputAdapter();
+    public IOutputAdapter Output => Frontend.Output.Shared;
 
     private static string GetProductVersion()
     {
