@@ -11,6 +11,29 @@ public class Output : IOutputAdapter
 
     internal static Output Shared { get; } = new();
 
+    public static void Tagged(string tag, string message)
+    {
+        AnsiConsole.MarkupLineInterpolated($"[bold seagreen1]{tag}:[/] [white]{message}[/]");
+    }
+
+    #region Tagged
+
+    [StringFormatMethod("format")]
+    public static void Tagged(string tag, string format, params object?[] args)
+    {
+        Tagged(tag, string.Format(format, args));
+    }
+
+    void IOutputAdapter.Tagged(string tag, string message)
+    {
+        Tagged(tag, message);
+    }
+
+    void IOutputAdapter.Tagged(string tag, string format, params object?[] args)
+    {
+        Tagged(tag, format, args);
+    }
+
     public void Error(string message)
     {
         AnsiConsole.MarkupLineInterpolated($"[bold red]E:[/] [white]{message}[/]");
@@ -21,6 +44,8 @@ public class Output : IOutputAdapter
     {
         Error(string.Format(format, args));
     }
+
+    #endregion
 
     public void Log(string message)
     {

@@ -3,6 +3,7 @@
 using System;
 using IceCraft.Core.Archive.Providers;
 using IceCraft.Core.Configuration;
+using IceCraft.Core.Platform;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -12,16 +13,19 @@ public class RepositoryManager : IRepositorySourceManager
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<RepositoryManager> _logger;
     private readonly IRepositoryDefaultsSupplier? _defaults;
+    private readonly IOutputAdapter _output;
 
     public RepositoryManager(IManagerConfiguration config, 
         IServiceProvider serviceProvider,
         ILogger<RepositoryManager> logger,
-        IRepositoryDefaultsSupplier? defaults)
+        IRepositoryDefaultsSupplier? defaults,
+        IFrontendApp frontendApp)
     {
         _config = config;
         _serviceProvider = serviceProvider;
         _logger = logger;
         _defaults = defaults;
+        _output = frontendApp.Output;
 
         ApplyDefaults();
     }
@@ -101,5 +105,28 @@ public class RepositoryManager : IRepositorySourceManager
     public IEnumerable<IRepositorySource> EnumerateSources()
     {
         return _sources.Values;
+    }
+
+    public async IAsyncEnumerable<KeyValuePair<string, IRepository>> EnumerateRepositoriesAsync()
+    {
+        _output.Log("Rolling {0} available repositories", _sources.Count);
+
+        foreach (var provider in _sources)
+        {
+            if (!_config.IsSourceEnabled(provider.Key))
+            {
+                continue;
+            }
+
+            _output.Tagged("ROLL", provider.Key);
+            var repo = await provider.Value.CreateRepositoryAsync();
+            if (repo == null)
+            {
+                _output.Warning("Source {0} did not provide a valid repository", provider.Key);
+                continue;
+            }
+
+            yield return new KeyValuePair<string, IRepository>(provider.Key, repo);
+        }
     }
 }

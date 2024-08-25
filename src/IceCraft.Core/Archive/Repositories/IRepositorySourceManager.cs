@@ -24,5 +24,6 @@ public interface IRepositorySourceManager
 
     bool ContainsSource(string id);
     Task<IEnumerable<IRepository>> GetRepositoriesAsync();
+    IAsyncEnumerable<KeyValuePair<string, IRepository>> EnumerateRepositoriesAsync();
     IEnumerable<IRepositorySource> EnumerateSources();
 }

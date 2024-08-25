@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
+using IceCraft.Core.Platform;
 using IceCraft.Core.Serialization;
 using Microsoft.Extensions.Logging;
 
@@ -16,11 +17,15 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
 
     private readonly ILogger<CachedIndexer> _logger;
 
+    private readonly IOutputAdapter _output;
+
     public CachedIndexer(ICacheManager cacheManager,
-        ILogger<CachedIndexer> logger)
+        ILogger<CachedIndexer> logger,
+        IFrontendApp frontendApp)
     {
         _cacheStorage = cacheManager.GetStorage(CacheStorageId);
         _logger = logger;
+        _output = frontendApp.Output;
     }
 
     public async Task<PackageIndex> IndexAsync(IRepositorySourceManager manager,
@@ -37,22 +42,23 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
         CancellationToken cancellationToken = default)
     {
         var index = new Dictionary<string, CachedPackageSeriesInfo>(manager.Count);
-        var repos = await manager.GetRepositoriesAsync();
         var repoCount = 0;
         
-        foreach (var repo in repos)
+        await foreach (var (key, repo) in manager.EnumerateRepositoriesAsync())
         {
             repoCount++;
             cancellationToken.ThrowIfCancellationRequested();
 
             index.EnsureCapacity(index.Count + repo.GetExpectedSeriesCount());
 
+            _output.Tagged("SCAN", key);
+
             foreach (var series in repo.EnumerateSeries())
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var expectedCount = await series.GetExpectedPackageCountAsync();
 
-                _logger.LogInformation("Indexing series {Name} with {ExpectedCount} packages", series.Name, expectedCount);
+                _output.Verbose("Indexing series {0} with ~{1} packages", series.Name, expectedCount);
 
                 // Creates this whole dictionary of version information.
                 var versions = new Dictionary<string, CachedPackageInfo>(
@@ -77,7 +83,7 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
             }
         }
 
-        _logger.LogInformation("{RepoCount} repositories indexed", repoCount);
+        _output.Log("Total {0} repositories indexed", repoCount);
 
         return index;
     }
