@@ -46,6 +46,8 @@ internal class IceCraftApp : IFrontendApp
 
     public string DataBasePath => UserDataDirectory;
 
+    public IOutputAdapter Output { get; } = new OutputAdapter();
+
     private static string GetProductVersion()
     {
         var assemblyFile = Assembly.GetExecutingAssembly().Location;

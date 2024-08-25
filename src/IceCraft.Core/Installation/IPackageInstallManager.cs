@@ -40,6 +40,14 @@ public interface IPackageInstallManager
     Task<bool> IsInstalledAsync(DependencyReference dependency);
 
     /// <summary>
+    /// Queries the package database for any conflict between any installed package and the
+    /// specified package.
+    /// </summary>
+    /// <param name="package">The package.</param>
+    /// <returns><see langword="true"/> if there are no conflicts; otherwise, <see langword="false"/>.</returns>
+    Task<bool> CheckForConflictAsync(PackageMeta package);
+
+    /// <summary>
     /// Gets the <see cref="PackageMeta"/> instance that describes the metadata of the latest
     /// installed version of a given package.
     /// </summary>

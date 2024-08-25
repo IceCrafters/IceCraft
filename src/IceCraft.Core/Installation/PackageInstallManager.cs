@@ -304,4 +304,43 @@ public class PackageInstallManager : IPackageInstallManager
 
         await _databaseFactory.MaintainAndSaveAsync();
     }
+
+    public async Task<bool> CheckForConflictAsync(PackageMeta package)
+    {
+        if (package.ConflictsWith == null)
+        {
+            return true;
+        }
+
+        var database = await _databaseFactory.GetAsync();
+        var isConflictFree = true;
+
+        await Task.Run(() =>
+        {
+            foreach (var reference in package.ConflictsWith)
+            {
+                if (!database.TryGetValue(reference.PackageId, out var index))
+                {
+                    continue;
+                }
+
+                if (index.Any(x => reference.VersionRange.Contains(x.Value.Metadata.Version)
+                    && !(x.Value.State == InstallationState.Virtual
+                         && x.Value.ProvidedBy.HasValue
+                         && x.Value.ProvidedBy.Value.DoesPointTo(package))))
+                {
+                    _frontend.Output.Warning("Package {0} ({1}) conflicts with {2} {3}",
+                        package.Id, 
+                        package.Version,
+                        reference.PackageId,
+                        reference.VersionRange);
+ 
+                    isConflictFree = false;
+                    break;
+                }
+            }
+        });
+
+        return isConflictFree;
+    }
 }

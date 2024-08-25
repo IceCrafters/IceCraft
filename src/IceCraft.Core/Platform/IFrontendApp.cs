@@ -9,6 +9,8 @@ public interface IFrontendApp
 
     string DataBasePath { get; }
 
+    IOutputAdapter Output { get; }
+
     HttpClient GetClient();
 
     CancellationToken GetCancellationToken();

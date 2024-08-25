@@ -22,4 +22,10 @@ public readonly record struct PackageReference
     public required string PackageId { get; init; }
     [JsonConverter(typeof(SemVersionConverter))]
     public required SemVersion PackageVersion { get; init; }
+
+    public bool DoesPointTo(PackageMeta meta)
+    {
+        return PackageId == meta.Id
+            && PackageVersion == meta.Version;
+    }
 }

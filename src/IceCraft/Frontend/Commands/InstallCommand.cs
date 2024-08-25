@@ -119,6 +119,15 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
                     allPackagesSet.Add(meta);
                     await _dependencyResolver.ResolveTree(meta, index!, allPackagesSet,
                         _frontend.GetCancellationToken());
+
+                    ctx.Status("Checking for conflicts");
+                    foreach (var package in allPackagesSet)
+                    {
+                        if (!await _installManager.CheckForConflictAsync(package))
+                        {
+                            throw new KnownException("Package conflict detected.");
+                        }
+                    }
                 });
 
         // Step 2: Confirmation

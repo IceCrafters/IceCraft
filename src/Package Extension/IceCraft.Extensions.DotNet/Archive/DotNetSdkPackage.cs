@@ -2,6 +2,7 @@ namespace IceCraft.Extensions.DotNet.Archive;
 
 using IceCraft.Core.Archive;
 using IceCraft.Core.Archive.Artefacts;
+using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Packaging;
 using Microsoft.Deployment.DotNet.Releases;
 using Semver;
@@ -63,7 +64,11 @@ public class DotNetSdkPackage : IPackage
             AdditionalMetadata = new Dictionary<string, string>
             {
                 { MetadataRuntimeVersion, new SemVersion(rtVersion.Major, rtVersion.Minor, rtVersion.Patch).ToString() }
-            }
+            },
+            ConflictsWith =
+            [
+                new DependencyReference($"dotnet-{_sdkRelease.Release.Product.ProductVersion}-runtime", SemVersionRange.All)
+            ]
         };
     }
 

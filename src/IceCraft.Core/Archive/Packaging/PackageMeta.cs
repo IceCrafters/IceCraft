@@ -37,6 +37,8 @@ public sealed record PackageMeta
     
     public DependencyCollection? Dependencies { get; init; }
 
+    public DependencyCollection? ConflictsWith { get; init; }
+
     public IDictionary<string, string>? AdditionalMetadata { get; init; }
 
     /// <summary>
