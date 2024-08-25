@@ -35,7 +35,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
 
     private readonly record struct QueuedDownloadTask
     {
-        internal required Task Task { get; init; }
+        internal required Task<DownloadResult> Task { get; init; }
         internal required RemoteArtefact ArtefactInfo { get; init; }
         internal required PackageMeta Metadata { get; init; }
         internal required string Objective { get; init; }
@@ -75,7 +75,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
             AnsiConsole.Status()
                 .Start("Cleaning artefacts", _ => _artefactManager.CleanArtefacts());
         }
-        
+
         // Step 1: Index
         SemVersion? selectedVersion;
         PackageMeta? meta = null;
@@ -157,17 +157,32 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
                 {
                     var packageInfo = index!.GetPackageInfo(package);
 
-                    // Detect existing artefacts.
+                    // Detect duplicate artefacts.
+                    if (artefactList.Any(x => x.ArtefactInfo.Equals(packageInfo.Artefact)))
+                    {
+                        artefactList.Add(new QueuedDownloadTask()
+                        {
+                            Task = Task.FromResult(DownloadResult.Succeeded),
+                            ArtefactInfo = packageInfo.Artefact,
+                            Metadata = packageInfo.Metadata,
+                            Objective = _artefactManager.GetArtefactPath(packageInfo.Artefact),
+                        }
+                        );
+                        continue;
+                    }
+
                     var artefactFile = await _artefactManager.GetSafeArtefactPathAsync(packageInfo.Artefact);
+
+                    // Detect existing artefacts.
                     if (artefactFile != null)
                     {
                         artefactList.Add(new QueuedDownloadTask()
-                            {
-                                Task = Task.CompletedTask,
-                                ArtefactInfo = packageInfo.Artefact,
-                                Metadata = packageInfo.Metadata,
-                                Objective = artefactFile
-                            }
+                        {
+                            Task = Task.FromResult(DownloadResult.Succeeded),
+                            ArtefactInfo = packageInfo.Artefact,
+                            Metadata = packageInfo.Metadata,
+                            Objective = artefactFile
+                        }
                         );
 
                         continue;
@@ -178,19 +193,19 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
                     var stream = _artefactManager.CreateArtefact(packageInfo.Artefact);
 
                     artefactList.Add(new QueuedDownloadTask()
-                        {
-                            Task = _downloadManager.DownloadAsync(packageInfo, 
-                                stream, 
+                    {
+                        Task = _downloadManager.DownloadAsync(packageInfo,
+                                stream,
                                 new SpectreProgressedTask(task),
                                 $"{meta!.Id} {meta.Version}"),
-                            ArtefactInfo = packageInfo.Artefact,
-                            Metadata = packageInfo.Metadata,
-                            Objective = _artefactManager.GetArtefactPath(packageInfo.Artefact),
-                            Stream = stream
-                        }
+                        ArtefactInfo = packageInfo.Artefact,
+                        Metadata = packageInfo.Metadata,
+                        Objective = _artefactManager.GetArtefactPath(packageInfo.Artefact),
+                        Stream = stream
+                    }
                     );
                 }
-                
+
                 artefactTasks = [.. artefactList];
 
                 await Task.WhenAll(artefactTasks.Select(x => x.Task)).ConfigureAwait(false);
@@ -224,8 +239,14 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
     {
         foreach (var task in tasks)
         {
+            var result = await task.Task;
+            if (result == DownloadResult.Failed)
+            {
+                throw new KnownException($"Download for {task.Metadata.Id} ({task.Metadata.Version}) have FAILED.");
+            }
+
             status.Status($"Installing package {task.Metadata.Id}");
-            
+
             if (task.Stream != null)
             {
                 await task.Stream.DisposeAsync();
@@ -237,7 +258,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
                 Output.Shared.Verbose("Remote hash: {0}", task.ArtefactInfo.Checksum);
                 throw new KnownException("Artefact hash mismatches downloaded file.");
             }
-            
+
             yield return new KeyValuePair<PackageMeta, string>(task.Metadata, path);
         }
     }

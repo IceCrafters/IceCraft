@@ -26,7 +26,7 @@ public class ArtefactManager : IArtefactManager
         var fileName = GetArtefactPath(artefact);
         
         if (!File.Exists(fileName)
-            && !await _checksumRunner.ValidateLocal(artefact, fileName))
+            || !await _checksumRunner.ValidateLocal(artefact, fileName))
         {
             return null;
         }
@@ -53,7 +53,7 @@ public class ArtefactManager : IArtefactManager
         
         foreach (var file in files)
         {
-            if (now - File.GetLastWriteTime(file).ToUniversalTime() > TimeSpan.FromDays(7))
+            if (now - File.GetCreationTimeUtc(file) > TimeSpan.FromDays(7))
             {
                 File.Delete(file);
             }

@@ -94,7 +94,7 @@ public class DownloadManager : IDownloadManager
     #endregion
     
     
-    public async Task DownloadAsync(Uri from, string toFile, IProgressedTask? task = null, string? fileName = null)
+    public async Task<DownloadResult> DownloadAsync(Uri from, string toFile, IProgressedTask? task = null, string? fileName = null)
     {
         var downloader = new DownloadService(_downloadConfig);
 
@@ -112,9 +112,16 @@ public class DownloadManager : IDownloadManager
         {
             throw new TaskCanceledException();
         }
+
+        if (downloader.Status == DownloadStatus.Failed)
+        {
+            return DownloadResult.Failed;
+        }
+
+        return DownloadResult.Succeeded;
     }
 
-    public async Task DownloadAsync(Uri from, Stream toStream, IProgressedTask? task = null, string? fileName = null)
+    public async Task<DownloadResult> DownloadAsync(Uri from, Stream toStream, IProgressedTask? task = null, string? fileName = null)
     {
         var downloader = new DownloadService(_downloadConfig);
         downloader.DownloadProgressChanged += (sender, args) =>
@@ -130,11 +137,19 @@ public class DownloadManager : IDownloadManager
             throw new KnownException("Failed to initiate download");
         }
         await stream.CopyToAsync(toStream);
+        await toStream.FlushAsync();
 
         if (downloader.IsCancelled)
         {
             throw new TaskCanceledException();
         }
+
+        if (downloader.Status == DownloadStatus.Failed)
+        {
+            return DownloadResult.Failed;
+        }
+
+        return DownloadResult.Succeeded;
     }
 
     private static FileStream CreateTemporaryPackageFile(out string path)
@@ -197,7 +212,7 @@ public class DownloadManager : IDownloadManager
         return path;
     }
     
-    public async Task DownloadAsync(CachedPackageInfo packageInfo, Stream to, IProgressedTask? downloadTask = null, string? fileName = null)
+    public async Task<DownloadResult> DownloadAsync(CachedPackageInfo packageInfo, Stream to, IProgressedTask? downloadTask = null, string? fileName = null)
     {
         // Get the best mirror.
         _frontendApp.Output.Verbose("Searching best mirror for {0} ({1})...", 
@@ -207,15 +222,15 @@ public class DownloadManager : IDownloadManager
         var bestMirror = await _mirrorSearcher.GetBestMirrorAsync(packageInfo.Mirrors)
                          ?? throw new InvalidOperationException("No best mirror can be found.");
 
-        await DownloadAsync(bestMirror, to, downloadTask, fileName);
+        return await DownloadAsync(bestMirror, to, downloadTask, fileName);
     }
 
-    public async Task DownloadAsync(ArtefactMirrorInfo bestMirror, 
+    public async Task<DownloadResult> DownloadAsync(ArtefactMirrorInfo bestMirror, 
         Stream stream,
         IProgressedTask? downloadTask = null,
         string? fileName = null)
     {
-        await DownloadAsync(bestMirror.DownloadUri,
+        return await DownloadAsync(bestMirror.DownloadUri,
             stream,
             downloadTask,
             fileName);

@@ -7,11 +7,11 @@ using IceCraft.Core.Util;
 
 public interface IDownloadManager
 {
-    Task DownloadAsync(Uri from, string toFile, IProgressedTask? downloadTask = null, string? fileName = null);
-    Task DownloadAsync(Uri from, Stream toStream, IProgressedTask? downloadTask = null, string? fileName = null);
-    Task DownloadAsync(ArtefactMirrorInfo fromMirror, Stream toStream, IProgressedTask? downloadTask = null, string? fileName = null);
+    Task<DownloadResult> DownloadAsync(Uri from, string toFile, IProgressedTask? downloadTask = null, string? fileName = null);
+    Task<DownloadResult> DownloadAsync(Uri from, Stream toStream, IProgressedTask? downloadTask = null, string? fileName = null);
+    Task<DownloadResult> DownloadAsync(ArtefactMirrorInfo fromMirror, Stream toStream, IProgressedTask? downloadTask = null, string? fileName = null);
 
-    Task DownloadAsync(CachedPackageInfo packageInfo, Stream to, IProgressedTask? downloadTask = null,
+    Task<DownloadResult> DownloadAsync(CachedPackageInfo packageInfo, Stream to, IProgressedTask? downloadTask = null,
         string? fileName = null);
     
     Task<string> DownloadTemporaryArtefactAsync(CachedPackageInfo packageInfo, IProgressedTask? downloadTask = null, string? fileName = null);

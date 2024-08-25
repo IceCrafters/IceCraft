@@ -1,5 +1,6 @@
 ﻿namespace IceCraft.Core.Archive.Checksums;
 
+using System.Diagnostics;
 using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Configuration;
 using IceCraft.Core.Util;
@@ -43,6 +44,8 @@ public class DependencyChecksumRunner : IChecksumRunner
         var checkCode = await validator.GetChecksumBinaryAsync(stream);
         
         var fileChecksum = validator.GetChecksumString(checkCode);
+        Debug.WriteLine(fileChecksum.Equals(artefact.Checksum, StringComparison.OrdinalIgnoreCase));
+
         return validator.CompareChecksum(fileChecksum, artefact.Checksum);
     }
 }
