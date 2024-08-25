@@ -55,4 +55,10 @@ public sealed record PackageMeta
     /// </para>
     /// </remarks>
     public bool CanMultipleVersionsCoexist { get; init; }
+
+    /// <summary>
+    /// Gets a value indicating whether this package should install to a fixed location and the previous version must be
+    /// uninstalled before installing the new version.
+    /// </summary>
+    public bool Unitary { get; init; }
 }

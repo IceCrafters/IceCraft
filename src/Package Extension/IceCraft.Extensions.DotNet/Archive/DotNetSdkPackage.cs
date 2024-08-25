@@ -68,7 +68,8 @@ public class DotNetSdkPackage : IPackage
             ConflictsWith =
             [
                 new DependencyReference($"dotnet-{_sdkRelease.Release.Product.ProductVersion}-runtime", SemVersionRange.All)
-            ]
+            ],
+            Unitary = true
         };
     }
 

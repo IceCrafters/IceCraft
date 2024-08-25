@@ -7,6 +7,7 @@ public class DummyPackageBuilder
 {
     private readonly DependencyCollection _dependencies = [];
     private SemVersion? _version;
+    private bool _unitary;
 
     public DummyPackageBuilder()
     {
@@ -31,6 +32,12 @@ public class DummyPackageBuilder
             throw new InvalidOperationException("Incomplete package.");
         }
 
-        return new DummyPackage(series.Name, series, _version, _dependencies);
+        return new DummyPackage(series.Name, series, _version, _dependencies, _unitary);
+    }
+
+    public DummyPackageBuilder Unitary()
+    {
+        _unitary = true;
+        return this;
     }
 }

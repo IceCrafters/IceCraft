@@ -67,6 +67,16 @@ public class PackageInstallManager : IPackageInstallManager
                 ?? throw new ArgumentException($"Installer '{meta.PluginInfo.InstallerRef}' not found for package '{meta.Id}' '{meta.Version}'.");
             var pkgDir = GetPackageDirectory(meta);
 
+            // If package is unitary, remove previous version.
+            if (meta.Unitary
+                && database.TryGetValue(meta.Id, out var index))
+            {
+                foreach (var (_, package) in index)
+                {
+                    await UninstallAsync(package.Metadata);
+                }
+            }
+
             // Expand package.
             Directory.CreateDirectory(pkgDir);
             _logger.LogInformation("Expanding package {Id}", meta.Id);

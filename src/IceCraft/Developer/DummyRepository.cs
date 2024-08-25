@@ -33,6 +33,17 @@ public class DummyRepository : IRepository
                     .WithVersion(new(0, 1, 0))
                     .WithDependency("dummy-lib", SemVersionRange.AtLeast(new(0, 1, 0))),
             ])
+        },
+        {
+            "dummy-app-unitary", new DummyPackageSeries("dummy-app-unitary",
+            [
+                new DummyPackageBuilder()
+                    .WithVersion(new(0, 1, 0))
+                    .Unitary(),
+                new DummyPackageBuilder()
+                    .WithVersion(new(0, 2, 0))
+                    .Unitary()
+            ])
         }
     };
 

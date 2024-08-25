@@ -13,13 +13,19 @@ public class DummyPackage : IPackage
     private readonly SemVersion _version;
     private readonly DependencyCollection? _dependencyCollection;
     private readonly string _name;
+    private readonly bool _unitary;
 
-    public DummyPackage(string name, DummyPackageSeries series, SemVersion version, DependencyCollection? dependencyCollection)
+    public DummyPackage(string name, 
+        DummyPackageSeries series, 
+        SemVersion version, 
+        DependencyCollection? dependencyCollection,
+        bool unitary)
     {
         _name = name;
         _series = series;
         _version = version;
         _dependencyCollection = dependencyCollection;
+        _unitary = unitary;
     }
 
     public IPackageSeries Series => _series;
@@ -41,7 +47,8 @@ public class DummyPackage : IPackage
             PluginInfo = new PackagePluginInfo("dummy-test", "dummy-test"),
             ReleaseDate = DateTime.MinValue,
             Version = _version,
-            Dependencies = _dependencyCollection
+            Dependencies = _dependencyCollection,
+            Unitary = _unitary
         };
     }
 
