@@ -210,7 +210,7 @@ public class DependencyResolver : IDependencyResolver
     {
         return await Task.Run(() =>
             metas
-                .Where(x => dependency.VersionRange.Contains(x.Version))
+                .Where(x => dependency.PackageId.Equals(x.Id) && dependency.VersionRange.Contains(x.Version))
                 .AsParallel()
                 .WithCancellation(cancellationToken)
                 .MaxBy(x => x.Version, SemVersion.SortOrderComparer)
