@@ -35,6 +35,50 @@ public class DependencyResolverTests
 
     }
     
+    [Fact]
+    public async Task SelectBest_SelectLatestOne()
+    {
+        // Arrange
+        const string DependencyName = "dependency";
+        var dependency = new DependencyReference(DependencyName, SemVersionRange.AllRelease);
+        var toSelect = new PackageMeta(DependencyName, new SemVersion(0, 2, 0), DateTime.MinValue, MockPluginInfo);
+
+        PackageMeta[] versions =
+        [
+            new PackageMeta(DependencyName, new SemVersion(0, 1, 0), DateTime.MinValue, MockPluginInfo),
+            toSelect
+        ];
+
+        // Act
+        var result = await DependencyResolver.SelectBestPackageDependencyOrDefault(versions,
+            dependency);
+
+        // Assert
+        Assert.Equal(result, toSelect);
+    }
+
+    [Fact]
+    public async Task SelectBest_SelectSameName()
+    {
+        // Arrange
+        const string DependencyName = "dependency";
+        var dependency = new DependencyReference(DependencyName, SemVersionRange.AllRelease);
+        var toSelect = new PackageMeta(DependencyName, new SemVersion(0, 1, 0), DateTime.MinValue, MockPluginInfo);
+
+        PackageMeta[] versions =
+        [
+            new PackageMeta("other", new SemVersion(0, 1, 0), DateTime.MinValue, MockPluginInfo),
+            toSelect
+        ];
+
+        // Act
+        var result = await DependencyResolver.SelectBestPackageDependencyOrDefault(versions,
+            dependency);
+
+        // Assert
+        Assert.Equal(result, toSelect);
+    }
+
     [Fact(Timeout = 3000)]
     public async Task Tree_Circular_Deep_ToRoot()
     {

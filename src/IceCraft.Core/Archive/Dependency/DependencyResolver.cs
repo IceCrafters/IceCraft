@@ -206,7 +206,7 @@ public class DependencyResolver : IDependencyResolver
 
      internal static async Task<PackageMeta?> SelectBestPackageDependencyOrDefault(IEnumerable<PackageMeta> metas, 
         DependencyReference dependency, 
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         return await Task.Run(() =>
             metas
@@ -218,7 +218,7 @@ public class DependencyResolver : IDependencyResolver
 
     internal static async Task<PackageMeta> SelectBestPackageDependency(IEnumerable<PackageMeta> metas, 
         DependencyReference dependency, 
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         return await SelectBestPackageDependencyOrDefault(metas, dependency, cancellationToken)
             ?? throw DependencyException.Unsatisfied(dependency);
