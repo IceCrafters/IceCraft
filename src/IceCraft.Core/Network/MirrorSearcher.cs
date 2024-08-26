@@ -68,7 +68,7 @@ public class MirrorSearcher : IMirrorSearcher
             return null;
         }
 
-        _frontend.Output.Warning("Best mirror: {0} ({1}ms)", bestMirror.Name, bestPing);
+        _frontend.Output.Verbose("Best mirror: {0} ({1}ms)", bestMirror.Name, bestPing);
         return bestMirror;
     }
 }

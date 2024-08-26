@@ -13,6 +13,7 @@ using IceCraft.Core.Installation.Analysis;
 using IceCraft.Core.Network;
 using IceCraft.Core.Platform;
 using IceCraft.Core.Util;
+using IceCraft.Interactive;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Semver;
@@ -32,6 +33,8 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
     private readonly IChecksumRunner _checksumRunner;
     private readonly IDependencyMapper _dependencyMapper;
     private readonly IArtefactManager _artefactManager;
+
+    private readonly InteractiveInstaller _interactiveInstaller;
 
     private readonly record struct QueuedDownloadTask
     {
@@ -53,6 +56,8 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
         _checksumRunner = serviceProvider.GetRequiredService<IChecksumRunner>();
         _dependencyMapper = serviceProvider.GetRequiredService<IDependencyMapper>();
         _artefactManager = serviceProvider.GetRequiredService<IArtefactManager>();
+
+        _interactiveInstaller = new InteractiveInstaller(_downloadManager, _installManager, _artefactManager, _checksumRunner, _dependencyMapper);
     }
 
     public override ValidationResult Validate(CommandContext context, Settings settings)
@@ -135,10 +140,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
                 });
 
         // Step 2: Confirmation
-        AnsiConsole.MarkupLineInterpolated($":star: Total {allPackagesSet.Count} packages");
-        AnsiConsole.Write(new Columns(allPackagesSet.Select(p => p.Id)));
-
-        if (!AnsiConsole.Confirm("Install packages?", defaultValue: false))
+        if (!_interactiveInstaller.AskConfirmation(allPackagesSet))
         {
             return 0;
         }
@@ -147,79 +149,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
 
         // Step 3: download artefacts
 
-        QueuedDownloadTask[] artefactTasks = [];
-        await AnsiConsole.Progress()
-            .HideCompleted(true)
-            .StartAsync(async ctx =>
-            {
-                var artefactList = new List<QueuedDownloadTask>(allPackagesSet.Count);
-                foreach (var package in allPackagesSet)
-                {
-                    var packageInfo = index!.GetPackageInfo(package);
-
-                    var artefactFile = await _artefactManager.GetSafeArtefactPathAsync(packageInfo.Artefact, 
-                        packageInfo.Metadata);
-
-                    // Detect existing artefacts.
-                    if (artefactFile != null)
-                    {
-                        artefactList.Add(new QueuedDownloadTask()
-                        {
-                            Task = Task.FromResult(DownloadResult.Succeeded),
-                            ArtefactInfo = packageInfo.Artefact,
-                            Metadata = packageInfo.Metadata,
-                            Objective = artefactFile
-                        }
-                        );
-
-                        continue;
-                    }
-
-                    // Download new artefact.
-                    var task = ctx.AddTask(package.Id);
-                    var stream = _artefactManager.CreateArtefact(packageInfo.Artefact,
-                        packageInfo.Metadata);
-
-                    artefactList.Add(new QueuedDownloadTask()
-                    {
-                        Task = _downloadManager.DownloadAsync(packageInfo,
-                                stream,
-                                new SpectreProgressedTask(task),
-                                $"{meta!.Id} {meta.Version}"),
-                        ArtefactInfo = packageInfo.Artefact,
-                        Metadata = packageInfo.Metadata,
-                        Objective = _artefactManager.GetArtefactPath(packageInfo.Artefact,
-                            packageInfo.Metadata),
-                        Stream = stream
-                    }
-                    );
-                }
-
-                artefactTasks = [.. artefactList];
-
-                await Task.WhenAll(artefactTasks.Select(x => x.Task)).ConfigureAwait(false);
-            });
-
-        // Step 4: install artefacts and map dependencies
-
-        await AnsiConsole.Status()
-            .StartAsync("Installing packages",
-                async ctx =>
-                {
-                    await _installManager.BulkInstallAsync(ValidateAndInsertInternalAsync(ctx, artefactTasks),
-                        artefactTasks.Length);
-
-                    ctx.Status("Evaluating dependency information");
-
-                    if (_dependencyMapper is ICacheClearable clearable)
-                    {
-                        clearable.ClearCache();
-                    }
-
-                    await _dependencyMapper.MapDependenciesCached();
-                });
-
-        return 0;
+        return await _interactiveInstaller.InstallAsync(allPackagesSet, index!);
     }
 
     private async IAsyncEnumerable<KeyValuePair<PackageMeta, string>> ValidateAndInsertInternalAsync(

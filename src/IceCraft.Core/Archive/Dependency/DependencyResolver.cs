@@ -204,7 +204,7 @@ public class DependencyResolver : IDependencyResolver
         }
     }
 
-    internal static async Task<PackageMeta> SelectBestPackageDependency(IEnumerable<PackageMeta> metas, 
+     internal static async Task<PackageMeta?> SelectBestPackageDependencyOrDefault(IEnumerable<PackageMeta> metas, 
         DependencyReference dependency, 
         CancellationToken cancellationToken)
     {
@@ -213,7 +213,14 @@ public class DependencyResolver : IDependencyResolver
                 .Where(x => dependency.PackageId.Equals(x.Id) && dependency.VersionRange.Contains(x.Version))
                 .AsParallel()
                 .WithCancellation(cancellationToken)
-                .MaxBy(x => x.Version, SemVersion.SortOrderComparer)
-            ?? throw DependencyException.Unsatisfied(dependency), cancellationToken);
+                .MaxBy(x => x.Version, SemVersion.SortOrderComparer));
+    }
+
+    internal static async Task<PackageMeta> SelectBestPackageDependency(IEnumerable<PackageMeta> metas, 
+        DependencyReference dependency, 
+        CancellationToken cancellationToken)
+    {
+        return await SelectBestPackageDependencyOrDefault(metas, dependency, cancellationToken)
+            ?? throw DependencyException.Unsatisfied(dependency);
     }
 }

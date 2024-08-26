@@ -34,7 +34,7 @@ appServices
     .AddDotNetExtension();
 
 #if DEBUG
-if (!Debugger.IsAttached)
+if (!Debugger.IsAttached && args.Contains("--debug"))
 {
     AnsiConsole.WriteLine("Attach a debugger, and then PRESS ANY KEY...");
     Console.ReadKey(true);
@@ -79,8 +79,10 @@ cmdApp.Configure(root =>
     {
         package.AddCommand<PackageListCommand>("list");
         package.AddCommand<PackageReconfigureCommand>("reconfigure");
-        root.AddCommand<MirrorGetBestCommand>("best-mirror")
+        package.AddCommand<MirrorGetBestCommand>("best-mirror")
             .WithDescription("Tests for the best mirror for a given package");
+        package.AddCommand<PackageFixBrokenCommand>("fix-broken")
+            .WithDescription("Install missing dependencies for packages");
     });
 
     root.AddCommand<DownloadCommand>("download");
