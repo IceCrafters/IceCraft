@@ -6,6 +6,7 @@ using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Platform;
 using Serilog;
+using Spectre.Console;
 using Spectre.Console.Cli;
 
 [Description("List all versions for a given package")]
@@ -37,7 +38,7 @@ public sealed class PackageListCommand : AsyncCommand<PackageListCommand.Setting
         foreach (var version in seriesInfo.Versions
             .Where(x => !x.Value.Metadata.Version.IsPrerelease || settings.IncludePrerelease))
         {
-            Console.WriteLine(version.Key);
+            AnsiConsole.WriteLine(version.Key);
         }
 
         return 0;

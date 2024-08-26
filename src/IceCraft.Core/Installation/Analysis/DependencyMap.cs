@@ -1,5 +1,6 @@
 namespace IceCraft.Core.Installation.Analysis;
 
+using System.Diagnostics.CodeAnalysis;
 using IceCraft.Core.Archive.Packaging;
 
 public sealed class DependencyMap : Dictionary<string, DependencyMapBranch>
@@ -31,6 +32,7 @@ public sealed class DependencyMap : Dictionary<string, DependencyMapBranch>
         if (!branch.TryGetValue(meta.Version.ToString(), out var entry))
         {
             entry = new DependencyMapEntry(meta.Id, meta.Version);
+
             branch.Add(meta.Version.ToString(), entry);
         }
 

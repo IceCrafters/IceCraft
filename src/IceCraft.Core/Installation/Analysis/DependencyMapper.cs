@@ -72,9 +72,9 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
 
                 var bestEntry = map.GetEntry(best);
 
-                entry.Dependencies.Add(new PackageReference(best.Id,
+                entry.Dependencies!.Add(new PackageReference(best.Id,
                     best.Version));
-                bestEntry.Dependents.Add(new PackageReference(info.Metadata.Id,
+                bestEntry.Dependents!.Add(new PackageReference(info.Metadata.Id,
                     info.Metadata.Version));
             }
         }

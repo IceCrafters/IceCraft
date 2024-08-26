@@ -16,6 +16,27 @@ public class Output : IOutputAdapter
         AnsiConsole.MarkupLineInterpolated($"[bold seagreen1]{tag}:[/] [white]{message}[/]");
     }
 
+    public static void Verbose(string message)
+    {
+        if (!IsVerboseMode)
+        {
+            return;
+        }
+
+        AnsiConsole.MarkupLineInterpolated($"[bold white]V:[/] [gray]{message}[/]");
+    }
+
+    public static void Verbose(Exception exception, string message)
+    {
+        if (!IsVerboseMode)
+        {
+            return;
+        }
+        
+        Verbose(message);
+        AnsiConsole.WriteException(exception);
+    }
+
     #region Tagged
 
     [StringFormatMethod("format")]
@@ -85,13 +106,8 @@ public class Output : IOutputAdapter
         Verbose(string.Format(format, args));
     }
 
-    public void Verbose(string message)
+    void IOutputAdapter.Verbose(string message)
     {
-        if (!IsVerboseMode)
-        {
-            return;
-        }
-
-        AnsiConsole.MarkupLineInterpolated($"[bold white]V:[/] [gray]{message}[/]");
+        Verbose(message);
     }
 }

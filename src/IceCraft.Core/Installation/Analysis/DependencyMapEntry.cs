@@ -7,17 +7,25 @@ using Semver;
 
 public sealed record DependencyMapEntry
 {
+    public DependencyMapEntry()
+    {
+    }
+
     [SetsRequiredMembers]
     public DependencyMapEntry(string packageName, SemVersion version)
     {
         PackageName = packageName;
         Version = version;
+
+        Dependencies = [];
+        Dependents = [];
     }
     
     public required string PackageName { get; init; }
     [JsonConverter(typeof(SemVersionConverter))]
     public required SemVersion Version { get; init; }
 
-    public IList<PackageReference> Dependencies { get; } = [];
-    public IList<PackageReference> Dependents { get; } = [];
+    public required IList<PackageReference> Dependencies { get; init; }
+
+    public required IList<PackageReference> Dependents { get; init; }
 }

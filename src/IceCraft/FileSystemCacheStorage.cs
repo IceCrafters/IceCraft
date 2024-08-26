@@ -3,6 +3,7 @@
 using System.IO;
 using System.Text.Json;
 using IceCraft.Core.Caching;
+using IceCraft.Frontend;
 using Serilog;
 
 internal class FileSystemCacheStorage : ICacheStorage
@@ -60,8 +61,8 @@ internal class FileSystemCacheStorage : ICacheStorage
         }
         catch (Exception ex)
         {
-            Log.Warning(ex, "WARNING: Failed to create cache index for storage: '{}'", Id);
-            Console.WriteLine("WARNING: Cache will not be stored on disk.");
+            Output.Shared.Warning("WARNING: Failed to create cache index for storage: '{}'", Id);
+            Output.Shared.Warning("WARNING: Cache will not be stored on disk.");
             _dry = true;
         }
 

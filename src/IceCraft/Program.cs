@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System.Diagnostics;
+using System.IO.Abstractions;
 using IceCraft;
 using IceCraft.Core;
 using IceCraft.Core.Archive.Repositories;
@@ -33,6 +34,12 @@ appServices
     .AddDotNetExtension();
 
 #if DEBUG
+if (!Debugger.IsAttached)
+{
+    AnsiConsole.WriteLine("Attach a debugger, and then PRESS ANY KEY...");
+    Console.ReadKey(true);
+}
+
 DummyRepositorySource.AddDummyRepositorySource(appServices);
 #endif
 
