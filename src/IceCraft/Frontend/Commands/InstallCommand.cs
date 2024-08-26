@@ -157,21 +157,8 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
                 {
                     var packageInfo = index!.GetPackageInfo(package);
 
-                    // Detect duplicate artefacts.
-                    if (artefactList.Any(x => x.ArtefactInfo.Equals(packageInfo.Artefact)))
-                    {
-                        artefactList.Add(new QueuedDownloadTask()
-                        {
-                            Task = Task.FromResult(DownloadResult.Succeeded),
-                            ArtefactInfo = packageInfo.Artefact,
-                            Metadata = packageInfo.Metadata,
-                            Objective = _artefactManager.GetArtefactPath(packageInfo.Artefact),
-                        }
-                        );
-                        continue;
-                    }
-
-                    var artefactFile = await _artefactManager.GetSafeArtefactPathAsync(packageInfo.Artefact);
+                    var artefactFile = await _artefactManager.GetSafeArtefactPathAsync(packageInfo.Artefact, 
+                        packageInfo.Metadata);
 
                     // Detect existing artefacts.
                     if (artefactFile != null)
@@ -190,7 +177,8 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
 
                     // Download new artefact.
                     var task = ctx.AddTask(package.Id);
-                    var stream = _artefactManager.CreateArtefact(packageInfo.Artefact);
+                    var stream = _artefactManager.CreateArtefact(packageInfo.Artefact,
+                        packageInfo.Metadata);
 
                     artefactList.Add(new QueuedDownloadTask()
                     {
@@ -200,7 +188,8 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
                                 $"{meta!.Id} {meta.Version}"),
                         ArtefactInfo = packageInfo.Artefact,
                         Metadata = packageInfo.Metadata,
-                        Objective = _artefactManager.GetArtefactPath(packageInfo.Artefact),
+                        Objective = _artefactManager.GetArtefactPath(packageInfo.Artefact,
+                            packageInfo.Metadata),
                         Stream = stream
                     }
                     );

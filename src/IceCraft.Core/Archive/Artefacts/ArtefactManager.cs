@@ -1,7 +1,11 @@
 namespace IceCraft.Core.Archive.Artefacts;
 
+using System.Security.Cryptography;
+using System.Text;
 using IceCraft.Core.Archive.Checksums;
+using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Platform;
+using IceCraft.Core.Util;
 
 public class ArtefactManager : IArtefactManager
 {
@@ -16,14 +20,14 @@ public class ArtefactManager : IArtefactManager
         Directory.CreateDirectory(_artefactDirectory);
     }
     
-    public async Task<bool> VerifyArtefactAsync(RemoteArtefact artefact)
+    public async Task<bool> VerifyArtefactAsync(RemoteArtefact artefact, PackageMeta package)
     {
-        return await GetSafeArtefactPathAsync(artefact) != null;
+        return await GetSafeArtefactPathAsync(artefact, package) != null;
     }
 
-    public async Task<string?> GetSafeArtefactPathAsync(RemoteArtefact artefact)
+    public async Task<string?> GetSafeArtefactPathAsync(RemoteArtefact artefact, PackageMeta package)
     {
-        var fileName = GetArtefactPath(artefact);
+        var fileName = GetArtefactPath(artefact, package);
         
         if (!File.Exists(fileName)
             || !await _checksumRunner.ValidateLocal(artefact, fileName))
@@ -34,15 +38,18 @@ public class ArtefactManager : IArtefactManager
         return fileName;
     }
 
-    public string GetArtefactPath(RemoteArtefact artefact)
+    public string GetArtefactPath(RemoteArtefact artefact, PackageMeta package)
     {
+        var idString = $"{package.Id}-{artefact.ChecksumType}-{artefact.Checksum}";
+        var strHash = Convert.ToHexString(SHA512.HashData(Encoding.UTF8.GetBytes(idString)));
+
         return Path.Combine(_artefactDirectory,
-            $"{artefact.ChecksumType}-{artefact.Checksum}");
+            strHash);
     }
 
-    public Stream CreateArtefact(RemoteArtefact artefact)
+    public Stream CreateArtefact(RemoteArtefact artefact, PackageMeta package)
     {
-        var fileName = GetArtefactPath(artefact);
+        var fileName = GetArtefactPath(artefact, package);
         return File.Create(fileName);
     }
 

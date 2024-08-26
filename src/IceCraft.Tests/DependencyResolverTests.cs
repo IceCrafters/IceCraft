@@ -4,6 +4,7 @@ using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Installation;
+using IceCraft.Core.Platform;
 using IceCraft.Core.Util;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -71,7 +72,8 @@ public class DependencyResolverTests
         #endregion
 
         var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
-            _loggerFactory.CreateLogger<DependencyResolver>());
+            _loggerFactory.CreateLogger<DependencyResolver>(),
+            Mock.Of<IFrontendApp>());
         var hashSet = new HashSet<PackageMeta>();
 
         // Act
@@ -119,7 +121,8 @@ public class DependencyResolverTests
         #endregion
 
         var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
-            _loggerFactory.CreateLogger<DependencyResolver>());
+            _loggerFactory.CreateLogger<DependencyResolver>(),
+            Mock.Of<IFrontendApp>());
         var hashSet = new HashSet<PackageMeta>();
 
         // Act
@@ -152,7 +155,8 @@ public class DependencyResolverTests
         #endregion
 
         var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
-            _loggerFactory.CreateLogger<DependencyResolver>());
+            _loggerFactory.CreateLogger<DependencyResolver>(),
+            Mock.Of<IFrontendApp>());
         var hashSet = new HashSet<PackageMeta>();
 
         // Act
@@ -199,7 +203,8 @@ public class DependencyResolverTests
         #endregion
 
         var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
-            _loggerFactory.CreateLogger<DependencyResolver>());
+            _loggerFactory.CreateLogger<DependencyResolver>(),
+            Mock.Of<IFrontendApp>());
         var hashSet = new HashSet<PackageMeta>();
 
         var expectedList =
@@ -254,7 +259,8 @@ public class DependencyResolverTests
         #endregion
 
         var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
-            _loggerFactory.CreateLogger<DependencyResolver>());
+            _loggerFactory.CreateLogger<DependencyResolver>(),
+            Mock.Of<IFrontendApp>());
         var hashSet = new HashSet<PackageMeta>();
 
         // Act

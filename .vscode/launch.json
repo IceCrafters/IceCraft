@@ -5,6 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "IceCraft: Regen-dependmap",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/IceCraft/bin/Debug/net8.0/IceCraft.dll",
+            "args": ["cache","regen-dependmap"],
+            "cwd": "${workspaceFolder}/src/IceCraft/bin/Debug/net8.0/",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach"
