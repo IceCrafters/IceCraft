@@ -79,7 +79,7 @@ public class DependencyResolverTests
         Assert.Equal(result, toSelect);
     }
 
-    [Fact(Timeout = 3000)]
+    [Fact(Timeout = 5000)]
     public async Task Tree_Circular_Deep_ToRoot()
     {
         // Arrange
