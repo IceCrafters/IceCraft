@@ -17,13 +17,17 @@ public sealed record PackageMeta
         SemVersion version, 
         DateTime releaseDate, 
         PackagePluginInfo pluginInfo,
-        DependencyCollection? dependencies = null)
+        DependencyCollection? dependencies = null,
+        bool unitary = false,
+        PackageTranscript? transcript = null)
     {
         Id = id;
         Version = version;
         ReleaseDate = releaseDate;
         PluginInfo = pluginInfo;
         Dependencies = dependencies;
+        Unitary = unitary;
+        Transcript = transcript;
     }
 
     public required string Id { get; init; }
@@ -46,4 +50,9 @@ public sealed record PackageMeta
     /// uninstalled before installing the new version.
     /// </summary>
     public bool Unitary { get; init; }
+
+    /// <summary>
+    /// Gets the human-readable information associated with this package.
+    /// </summary>
+    public PackageTranscript? Transcript { get; init; }
 }

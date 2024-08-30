@@ -69,7 +69,19 @@ public class DotNetSdkPackage : IPackage
             [
                 new DependencyReference($"dotnet-{_sdkRelease.Release.Product.ProductVersion}-runtime", SemVersionRange.All)
             ],
-            Unitary = true
+            Unitary = true,
+            Transcript = new PackageTranscript
+            {
+                Authors = 
+                [ 
+                    new PackageAuthorInfo(".NET Foundation", "contact@dotnetfoundation.org"),
+                    new PackageAuthorInfo("Microsoft Corporation"),
+                    new PackageAuthorInfo(".NET contributors")
+                ],
+                Description = "An open-source framework for application and cloud services",
+                Maintainer = new PackageAuthorInfo("Microsoft Corporation"),
+                PluginMaintainer = new PackageAuthorInfo("IceCrafters")
+            }
         };
     }
 
