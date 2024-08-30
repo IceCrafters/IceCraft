@@ -3,6 +3,7 @@ namespace IceCraft.Tests;
 using System.Text;
 using IceCraft.Core.Installation.Execution;
 using IceCraft.Core.Platform;
+using IceCraft.Tests.Helpers;
 
 public class ExecutionScriptTests
 {
@@ -12,7 +13,7 @@ public class ExecutionScriptTests
         PackageRef = "test"
     };
 
-    [Fact]
+    [LinuxFact]
     public async Task Posix_NoArgs()
     {
         const string FilePath = "/icMock/packages/test/test";
