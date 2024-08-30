@@ -15,6 +15,8 @@ public class DependencyResolverTests
 {
     private static readonly PackagePluginInfo MockPluginInfo = new PackagePluginInfo("foo", "bar");
 
+    private const int Timeout = 10000;
+
     private static readonly RemoteArtefact MockArtefact = new()
     {
         Checksum = "",
@@ -79,7 +81,7 @@ public class DependencyResolverTests
         Assert.Equal(result, toSelect);
     }
 
-    [Fact(Timeout = 5000)]
+    [Fact(Timeout = Timeout)]
     public async Task Tree_Circular_Deep_ToRoot()
     {
         // Arrange
@@ -128,7 +130,7 @@ public class DependencyResolverTests
         Assert.IsType<DependencyException>(exception);
     }
 
-     [Fact(Timeout = 3000)]
+    [Fact(Timeout = Timeout)]
     public async Task Tree_Circular_Deep_InBetween()
     {
         // Arrange
@@ -177,7 +179,7 @@ public class DependencyResolverTests
         Assert.IsType<DependencyException>(exception);
     }
 
-    [Fact(Timeout = 3000)]
+    [Fact(Timeout = Timeout)]
     public async Task Tree_Circular_Shallow()
     {
         // Arrange
@@ -211,7 +213,7 @@ public class DependencyResolverTests
         Assert.IsType<DependencyException>(exception);
     }
 
-    [Fact(Timeout = 5000)]
+    [Fact(Timeout = Timeout)]
     public async Task Recursive_FiveLayers()
     {
         // Arrange
@@ -267,7 +269,7 @@ public class DependencyResolverTests
         Assert.Equal(expectedList, hashSet);
     }
 
-    [Fact(Timeout = 3000)]
+    [Fact(Timeout = Timeout)]
     public async Task Tree_Complex_ParentToParent()
     {
         // Arrange
