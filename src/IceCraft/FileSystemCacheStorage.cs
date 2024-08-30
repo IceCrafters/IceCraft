@@ -59,7 +59,7 @@ internal class FileSystemCacheStorage : ICacheStorage
             using var stream = File.Create(_indexFilePath);
             JsonSerializer.Serialize(stream, dict);
         }
-        catch (Exception ex)
+        catch // (Exception ex)
         {
             Output.Shared.Warning("WARNING: Failed to create cache index for storage: '{}'", Id);
             Output.Shared.Warning("WARNING: Cache will not be stored on disk.");

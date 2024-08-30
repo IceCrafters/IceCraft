@@ -80,7 +80,8 @@ public class DotNetSdkPackage : IPackage
                 ],
                 Description = "An open-source framework for application and cloud services",
                 Maintainer = new PackageAuthorInfo("Microsoft Corporation"),
-                PluginMaintainer = new PackageAuthorInfo("IceCrafters")
+                PluginMaintainer = new PackageAuthorInfo("IceCrafters"),
+                License = "MIT"
             }
         };
     }

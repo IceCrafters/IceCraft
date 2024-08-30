@@ -2,8 +2,11 @@
 
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Text;
 using IceCraft.Core;
+using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Indexing;
+using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Frontend;
 using JetBrains.Annotations;
@@ -37,15 +40,13 @@ public class InfoCommand : AsyncCommand<InfoCommand.Settings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        Log.Information("Indexing packages");
         var stopwatch = Stopwatch.StartNew();
         var index = await _indexer.IndexAsync(_sourceManager);
         stopwatch.Stop();
-        Log.Verbose("Indexing packages took {ElapsedMilliseconds} milliseconds", stopwatch.ElapsedMilliseconds);
 
         if (!index.TryGetValue(settings.PackageId, out var result))
         {
-            Log.Error("Package series {PackageId} not found", settings.PackageId);
+            Output.Shared.Error("Package series {PackageId} not found", settings.PackageId);
             return -2;
         }
 
@@ -54,16 +55,107 @@ public class InfoCommand : AsyncCommand<InfoCommand.Settings>
         if (latestId == null
             || !result.Versions.TryGetValue(latestId.ToString(), out var latest))
         {
-            Log.Warning("Package did not specify latest version");
+            Output.Shared.Warning("Package did not specify latest version");
             return 0;
         }
 
         var meta = latest.Metadata;
 
-        Log.Information("Package ID: {PackageId}", meta.Id);
-        Log.Information("Latest version release: {ReleaseDate}", meta.ReleaseDate);
-        Log.Information("Latest version number: {Version}", meta.Version);
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLineInterpolated($"[aqua underline]{meta.Id}[/] [grey]ver.[/] [teal]{meta.Version}[/]");
+        AnsiConsole.MarkupLineInterpolated($"[silver]Released: [/]{meta.ReleaseDate}");
+        AnsiConsole.MarkupLineInterpolated($"[silver]Unitary: [/]{meta.Unitary}");
+
+        if (meta.Dependencies != null)
+        {
+            AnsiConsole.Markup("[silver]Dependencies: [/]");
+            PrintRefs(meta.Dependencies);
+            AnsiConsole.WriteLine();
+        }
+
+        if (meta.ConflictsWith != null)
+        {
+            AnsiConsole.Markup("[silver]Conflicts with: [/]");
+            PrintRefs(meta.ConflictsWith);
+            AnsiConsole.WriteLine();
+        }
+
+        AnsiConsole.WriteLine();
+
+        // Transcript
+        if (meta.Transcript != null)
+        {
+            if (meta.Transcript.Authors.Count > 0)
+            {
+                string authorsString = GetAuthors(meta);
+                AnsiConsole.MarkupLineInterpolated($"[silver]By:[/] [steelblue]{authorsString}[/]");
+            }
+
+            if (!meta.Transcript.Maintainer.Equals(default(PackageAuthorInfo)))
+            {
+                AnsiConsole.MarkupLineInterpolated($"[silver]Artefact Maintainer:[/] [cadetblue]{meta.Transcript.Maintainer}[/]");
+            }
+
+            if (!meta.Transcript.PluginMaintainer.Equals(default(PackageAuthorInfo)))
+            {
+                AnsiConsole.MarkupLineInterpolated($"[silver]Plugin Maintainer:[/] [cadetblue]{meta.Transcript.PluginMaintainer}[/]");
+            }
+
+            if (meta.Transcript.License != null)
+            {
+                AnsiConsole.MarkupLineInterpolated($"[silver]License:[/] [cadetblue]{meta.Transcript.License}[/]");
+            }
+
+            if (meta.Transcript.Description != null)
+            {
+                AnsiConsole.WriteLine();
+                AnsiConsole.MarkupLineInterpolated($"[white]{meta.Transcript.Description}[/]");
+                AnsiConsole.WriteLine();
+            }
+        }
+
         return 0;
+    }
+
+    private static void PrintRefs(DependencyCollection dependencies)
+    {
+        var firstDependency = false;
+        foreach (var depRef in dependencies)
+        {
+            if (firstDependency)
+            {
+                AnsiConsole.Markup("[grey],[/] ");
+            }
+            firstDependency = true;
+
+            AnsiConsole.MarkupInterpolated($"[plum4]{depRef.PackageId}[/] [silver]([/][grey53]{depRef.VersionRange}[/][silver])[/]");
+        }
+    }
+
+    private static string GetAuthors(PackageMeta meta)
+    {
+        var builder = new StringBuilder();
+
+        if (meta.Transcript == null)
+        {
+            return "(no authors)";
+        }
+
+        // Assemble authors string
+        var authorFirst = false;
+        foreach (var author in meta.Transcript.Authors)
+        {
+            if (authorFirst)
+            {
+                builder.Append(", ");
+            }
+
+            builder.Append(author.ToString());
+            authorFirst = true;
+        }
+
+        var authorsString = builder.ToString();
+        return authorsString;
     }
 
     [UsedImplicitly(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature)]

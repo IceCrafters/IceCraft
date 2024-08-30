@@ -1,6 +1,6 @@
 namespace IceCraft.Core.Archive.Packaging;
 
-public sealed record PackageTranscript
+public sealed record PackageTranscript : IEquatable<PackageTranscript>
 {
     public required IReadOnlyList<PackageAuthorInfo> Authors { get; init; }
 

@@ -16,7 +16,7 @@ public readonly struct PackageAuthorInfo
 
     public override string ToString()
     {
-        if (!string.IsNullOrEmpty(Name))
+        if (!string.IsNullOrEmpty(MailAddress))
         {
             return $"{Name} <{MailAddress}>";
         }
