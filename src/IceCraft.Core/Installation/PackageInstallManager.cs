@@ -1,5 +1,7 @@
 namespace IceCraft.Core.Installation;
 
+using System.Diagnostics;
+using System.IO.Abstractions;
 using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Packaging;
@@ -21,6 +23,7 @@ public class PackageInstallManager : IPackageInstallManager
     private readonly IFrontendApp _frontend;
     private readonly IServiceProvider _serviceProvider;
     private readonly IPackageInstallDatabaseFactory _databaseFactory;
+    private readonly IFileSystem _fileSystem;
 
     private readonly string _packagesPath;
 
@@ -28,13 +31,15 @@ public class PackageInstallManager : IPackageInstallManager
         IFrontendApp frontend,
         IDownloadManager downloadManager,
         IServiceProvider serviceProvider,
-        IPackageInstallDatabaseFactory databaseFactory)
+        IPackageInstallDatabaseFactory databaseFactory,
+        IFileSystem fileSystem)
     {
         _logger = logger;
         _frontend = frontend;
         _downloadManager = downloadManager;
         _serviceProvider = serviceProvider;
         _databaseFactory = databaseFactory;
+        _fileSystem = fileSystem;
 
         _packagesPath = Path.Combine(frontend.DataBasePath, "packages");
         CreateDirectories();
@@ -65,6 +70,10 @@ public class PackageInstallManager : IPackageInstallManager
 
             var installer = _serviceProvider.GetKeyedService<IPackageInstaller>(meta.PluginInfo.InstallerRef)
                 ?? throw new ArgumentException($"Installer '{meta.PluginInfo.InstallerRef}' not found for package '{meta.Id}' '{meta.Version}'.");
+            var preprocessor = meta.PluginInfo.PreProcessorRef != null
+            ? _serviceProvider.GetKeyedService<IArtefactPreprocessor>(meta.PluginInfo.PreProcessorRef)
+                ?? throw new ArgumentException($"Preprocessor '{meta.PluginInfo.PreProcessorRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta))
+            : null;
             var pkgDir = GetPackageDirectory(meta);
 
             // If package is unitary, remove previous version.
@@ -78,16 +87,13 @@ public class PackageInstallManager : IPackageInstallManager
             }
 
             // Expand package.
-            Directory.CreateDirectory(pkgDir);
-            _frontend.Output.Log("Expanding package {0} ({1})...", meta.Id, meta.Version);
-            try
-            {
-                await installer.ExpandPackageAsync(artefactPath, pkgDir);
-            }
-            catch (Exception ex)
-            {
-                throw new KnownException("Failed to expand package", ex);
-            }
+            await InternalExpandAsync(meta,
+                artefactPath,
+                pkgDir,
+                _fileSystem,
+                installer,
+                preprocessor,
+                _frontend.Output);
 
             database.Put(entry);
             dictionary.Add(meta, pkgDir);
@@ -143,15 +149,97 @@ public class PackageInstallManager : IPackageInstallManager
         await _databaseFactory.SaveAsync();
     }
 
+    /// <summary>
+    /// Expands the specified package and preprocesses it if available.
+    /// </summary>
+    /// <param name="meta">The package to install.</param>
+    /// <param name="artefactPath">The path where the artefact is stored at.</param>
+    /// <param name="expandTo">The path where the artefact will be expanded to.</param>
+    /// <param name="fileSystem">The file system.</param>
+    /// <param name="serviceProvider">The service provider where <see cref="IPackageInstaller"/> (and <see cref="IArtefactPreprocessor"/> if applicable) will be sourced from.</param>
+    /// <param name="output"></param>
+    /// <returns><see langword="true"/> if should continue; <see langword="false"/> if should store package as expanded not configured and abort.</returns>
+    /// <exception cref="ArgumentException">The service provide failed to provide necessary services.</exception>
+    /// <exception cref="KnownException">Expanding or reprocessing failed.</exception>
+    internal static async Task InternalExpandAsync(PackageMeta meta, 
+        string artefactPath, 
+        string expandTo, 
+        IFileSystem fileSystem,
+        IPackageInstaller installer,
+        IArtefactPreprocessor? preprocessor,
+        IOutputAdapter? output = null)
+    {
+        string? tempExtraction = null;
+
+        // If preprocessor is specified, create a temp directory that will await preprocessing
+        if (preprocessor != null)
+        {
+            tempExtraction = fileSystem.Path.Combine(fileSystem.Path.GetTempPath(), 
+                fileSystem.Path.GetRandomFileName());
+                
+            fileSystem.Directory.CreateDirectory(tempExtraction);
+        }
+
+        output?.Log("Expanding package {0} ({1})...", meta.Id, meta.Version);
+        try
+        {
+            var objective = tempExtraction ?? expandTo;
+
+            await installer.ExpandPackageAsync(artefactPath, objective);
+        }
+        catch (Exception ex)
+        {
+            throw new KnownException("Failed to expand package.", ex);
+        }
+
+        if (preprocessor != null)
+        {
+            // tempExtraction should absolutely NOT be null if preprocessor is found
+            Debug.Assert(tempExtraction != null);
+
+            output?.Log("Preprocessing package {0} ({1})...", meta.Id, meta.Version);
+
+            try
+            {
+                await preprocessor.Preprocess(tempExtraction, expandTo, meta);
+            }
+            catch (Exception ex)
+            {
+                // Don't put anything in database because nothing is installed.
+                
+                // In case we left anything in the target get rid of it.
+                if (fileSystem.Directory.Exists(expandTo))
+                {
+                    fileSystem.Directory.Delete(expandTo);
+                }
+                throw new KnownException("Failed to preprocess package", ex);
+            }
+        }
+    }
+
     private async Task InternalInstallAsync(IPackageInstallDatabase database, PackageMeta meta, string artefactPath)
     {
         var pkgDir = GetPackageDirectory(meta);
+        string? tempExtraction = null;
+
         var installer = _serviceProvider.GetKeyedService<IPackageInstaller>(meta.PluginInfo.InstallerRef)
             ?? throw new ArgumentException($"Installer '{meta.PluginInfo.InstallerRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta));
         var configurator = _serviceProvider.GetKeyedService<IPackageConfigurator>(meta.PluginInfo.ConfiguratorRef)
             ?? throw new ArgumentException($"Configurator '{meta.PluginInfo.ConfiguratorRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta));
 
+        var preprocessor = meta.PluginInfo.PreProcessorRef != null
+            ? _serviceProvider.GetKeyedService<IArtefactPreprocessor>(meta.PluginInfo.PreProcessorRef)
+                ?? throw new ArgumentException($"Preprocessor '{meta.PluginInfo.PreProcessorRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta))
+            : null;
+
         Directory.CreateDirectory(pkgDir);
+
+        // If preprocessor is specified, create a temp directory that will await preprocessing
+        if (preprocessor != null)
+        {
+            tempExtraction = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+            Directory.CreateDirectory(tempExtraction);
+        }
 
         var entry = new InstalledPackageInfo()
         {
@@ -169,15 +257,13 @@ public class PackageInstallManager : IPackageInstallManager
             }
         }
 
-        _frontend.Output.Log("Expanding package {0} ({1})...", meta.Id, meta.Version);
-        try
-        {
-            await installer.ExpandPackageAsync(artefactPath, pkgDir);
-        }
-        catch (Exception ex)
-        {
-            throw new KnownException("Failed to expand package", ex);
-        }
+        await InternalExpandAsync(meta,
+            artefactPath,
+            pkgDir,
+            _fileSystem,
+            installer,
+            preprocessor,
+            _frontend.Output);
 
         _frontend.Output.Log("Setting up package {0} ({1})...", meta.Id, meta.Version);
         try
