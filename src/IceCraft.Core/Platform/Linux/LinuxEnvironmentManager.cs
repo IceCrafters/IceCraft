@@ -23,12 +23,12 @@ public class LinuxEnvironmentManager : IEnvironmentManager
         EnvScriptFileName);
 
     private const string PathScriptFileName = ".ice_craft_paths";
-    private const string PathScriptImport = $"source $HOME/{PathScriptFileName}";
+    private const string PathScriptImport = $". $HOME/{PathScriptFileName}";
     
     private const string EnvConfigFileName = ".ice_craft_env_config.json";
     
     private const string EnvScriptFileName = ".ice_craft_envs";
-    private const string EnvScriptImport = $"source $HOME/{EnvScriptFileName}";
+    private const string EnvScriptImport = $". $HOME/{EnvScriptFileName}";
 
     private readonly Dictionary<string, string> _envRegistry;
 
