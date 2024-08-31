@@ -7,6 +7,7 @@ public interface IRepository
     /// </summary>
     /// <param name="name">The name.</param>
     /// <returns>The returned series; <see langword="null"/> if not found.</returns>
+    [Obsolete("This method is hard to implement without sacrificing performance, and is never used.")]
     IPackageSeries? GetSeriesOrDefault(string name);
 
     /// <summary>
