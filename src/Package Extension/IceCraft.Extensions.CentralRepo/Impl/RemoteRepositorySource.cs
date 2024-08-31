@@ -3,6 +3,7 @@ namespace IceCraft.Extensions.CentralRepo.Impl;
 using System.Net.Http.Json;
 using IceCraft.Core.Archive;
 using IceCraft.Core.Archive.Providers;
+using IceCraft.Core.Caching;
 using IceCraft.Core.Platform;
 using IceCraft.Extensions.CentralRepo.Models;
 
@@ -10,11 +11,17 @@ public class RemoteRepositorySource : IRepositorySource
 {
     private readonly IFrontendApp _frontendApp;
     private readonly HttpClient _httpClient;
+    private readonly ICacheStorage _cacheStorage;
 
-    public RemoteRepositorySource(IFrontendApp frontendApp)
+    private const string StorageUuid = "E5EFB74F-6F93-42C1-85D6-B15A9556B647";
+    private const string IndexCacheObj = "remoteIndex";
+
+    public RemoteRepositorySource(IFrontendApp frontendApp, ICacheManager cacheManager)
     {
         _frontendApp = frontendApp;
         _httpClient = _frontendApp.GetClient();
+
+        _cacheStorage = cacheManager.GetStorage(new Guid(StorageUuid));
     }
     
     private static string GetConfigureRepoUrl()
@@ -30,8 +37,9 @@ public class RemoteRepositorySource : IRepositorySource
         {
             return null;
         }
-
-        var index = await _httpClient.GetFromJsonAsync<RemoteIndex>(indexUrl);
+        
+        var index = await _cacheStorage.RollJsonAsync(IndexCacheObj, 
+            async () => await _httpClient.GetFromJsonAsync<RemoteIndex>(indexUrl));
         
         return index == null
             ? null
@@ -40,6 +48,7 @@ public class RemoteRepositorySource : IRepositorySource
 
     public Task RefreshAsync()
     {
-        throw new NotImplementedException();
+        _cacheStorage.DeleteObject(IndexCacheObj);
+        return Task.CompletedTask;
     }
 }

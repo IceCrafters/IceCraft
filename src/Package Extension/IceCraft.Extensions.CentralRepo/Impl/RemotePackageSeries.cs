@@ -1,6 +1,7 @@
 namespace IceCraft.Extensions.CentralRepo.Impl;
 
 using IceCraft.Core.Archive;
+using IceCraft.Core.Archive.Packaging;
 using IceCraft.Extensions.CentralRepo.Models;
 using Semver;
 
@@ -16,6 +17,8 @@ public class RemotePackageSeries : IPackageSeries
 
     public string Name { get; }
     
+    public PackageTranscript? Transcript => _seriesEntry.Transcript;
+
     public Task<IPackage?> GetLatestAsync()
     {
         return Task.FromResult<IPackage?>(null);

@@ -9,7 +9,7 @@ using Semver;
 
 public sealed class RemoteVersionEntry
 {
-    public required PackageTranscript Transcript { get; init; }
+    public PackageTranscript? Transcript { get; init; }
     
     [JsonConverter(typeof(SemVersionConverter))]
     public required SemVersion Version { get; init; }

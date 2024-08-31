@@ -8,6 +8,7 @@ using IceCraft.Core.Configuration;
 using IceCraft.Core.Platform;
 using IceCraft.Core.Util;
 using IceCraft.Developer;
+using IceCraft.Extensions.CentralRepo;
 using IceCraft.Extensions.DotNet;
 using IceCraft.Frontend;
 using IceCraft.Frontend.Commands;
@@ -31,7 +32,8 @@ appServices
     .AddIceCraftDefaults()
     // Sources
     .AddAdoptiumSource()
-    .AddDotNetExtension();
+    .AddDotNetExtension()
+    .AddCsrExtension();
 
 #if DEBUG
 if (!Debugger.IsAttached && args.Contains("--debug"))

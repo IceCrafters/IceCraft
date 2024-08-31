@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\IceCraft.Core\IceCraft.Core.csproj" />
     <ProjectReference Include="..\IceCraft.Repositories.Adoptium\IceCraft.Repositories.Adoptium.csproj" />
+    <ProjectReference Include="..\Package Extension\IceCraft.Extensions.CentralRepo\IceCraft.Extensions.CentralRepo.csproj" />
     <ProjectReference Include="..\Package Extension\IceCraft.Extensions.DotNet\IceCraft.Extensions.DotNet.csproj" />
   </ItemGroup>
 

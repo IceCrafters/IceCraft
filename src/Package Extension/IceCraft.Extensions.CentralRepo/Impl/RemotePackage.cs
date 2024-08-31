@@ -9,6 +9,7 @@ public class RemotePackage : IPackage
 {
     private readonly RemoteVersionEntry _versionEntry;
     private readonly string _id;
+    private readonly RemotePackageSeries _series;
 
     private static readonly PackagePluginInfo PluginInfo = new PackagePluginInfo()
     {
@@ -17,14 +18,14 @@ public class RemotePackage : IPackage
         PreProcessorRef = "ic_csr"
     };
 
-    public RemotePackage(RemoteVersionEntry versionEntry, IPackageSeries packageSeries, string id)
+    public RemotePackage(RemoteVersionEntry versionEntry, RemotePackageSeries packageSeries, string id)
     {
         _versionEntry = versionEntry;
-        Series = packageSeries;
+        _series = packageSeries;
         _id = id;
     }
 
-    public IPackageSeries Series { get; }
+    public IPackageSeries Series => _series;
 
     public RemoteArtefact GetArtefact()
     {
@@ -39,7 +40,7 @@ public class RemotePackage : IPackage
             Id = _id,
             PluginInfo = PluginInfo,
             ReleaseDate = _versionEntry.ReleaseDate,
-            Transcript = _versionEntry.Transcript,
+            Transcript = _versionEntry.Transcript ?? _series.Transcript,
             Unitary = _versionEntry.Unitary,
             Dependencies = _versionEntry.Dependencies,
             ConflictsWith = _versionEntry.ConflictsWith
