@@ -2,10 +2,17 @@
 
 using DotNetConfig;
 using IceCraft.Core.Configuration;
+using IceCraft.Core.Platform;
 
 internal class DotNetConfigServiceImpl : IManagerConfiguration
 {
     private readonly Config _config = Config.Build();
+    private readonly IFrontendApp _frontend;
+
+    public DotNetConfigServiceImpl(IFrontendApp frontend)
+    {
+        _frontend = frontend;
+    }
 
     private const string SectionSources = "source";
     private const string EntrySourcesEnabled = "enabled";
@@ -31,6 +38,6 @@ internal class DotNetConfigServiceImpl : IManagerConfiguration
 
     public string GetCachePath()
     {
-        return IceCraftApp.CachesDirectory;
+        return Path.Combine(_frontend.DataBasePath, "caches");
     }
 }

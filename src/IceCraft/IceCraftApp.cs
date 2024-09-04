@@ -13,10 +13,12 @@ using Spectre.Console;
 
 internal class IceCraftApp : IFrontendApp
 {
-    private static readonly string UserDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+    private static readonly string DefaultUserRootDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "IceCraft");
-    internal static readonly string CachesDirectory = Path.Combine(UserDataDirectory, "caches");
-    
+    private static string? CurrentUserRoot;
+
+    internal static string? UserDataOverride { get; set; }
+
     private static readonly CancellationTokenSource _tokenSource = new();
 
     private static readonly HttpClient HttpClient = new()
@@ -44,7 +46,7 @@ internal class IceCraftApp : IFrontendApp
 
     string IFrontendApp.ProductVersion => ProductVersion;
 
-    public string DataBasePath => UserDataDirectory;
+    public string DataBasePath => GetActiveUserRoot();
 
     public IOutputAdapter Output => Frontend.Output.Shared;
 
@@ -62,7 +64,7 @@ internal class IceCraftApp : IFrontendApp
 
     public static void Initialize()
     {
-        Directory.CreateDirectory(UserDataDirectory);
+        Directory.CreateDirectory(DefaultUserRootDirectory);
         Console.CancelKeyPress += Console_CancelKeyPress;
     }
 
@@ -107,5 +109,44 @@ internal class IceCraftApp : IFrontendApp
     {
         await AnsiConsole.Status()
             .StartAsync(initialStatus, async ctx => await action(new SpectreStatusReporter(ctx)));
+    }
+
+    private static string GetActiveUserRoot()
+    {
+        if (CurrentUserRoot != null)
+        {
+            return CurrentUserRoot;
+        }
+
+        var envVar = Environment.GetEnvironmentVariable("ICECRAFT_ROOT");
+        string result;
+
+        if (UserDataOverride != null)
+        {
+            // Fail early if direcory doesn't exist and can't be created
+            // This method succeeds on existing directory or when created a directory
+            Directory.CreateDirectory(UserDataOverride);
+
+            result = UserDataOverride;
+        }
+        else if (envVar != null)
+        {
+            // Fail early if direcory doesn't exist and can't be created
+            // This method succeeds on existing directory or when created a directory 
+            Directory.CreateDirectory(envVar);
+
+            result = envVar;
+        }
+        else
+        {
+            result = DefaultUserRootDirectory;
+        }
+
+        #if DEBUG
+        Frontend.Output.Shared.Log("Selected data directory '{0}'", result);
+        #endif
+
+        CurrentUserRoot = result;
+        return result;
     }
 }

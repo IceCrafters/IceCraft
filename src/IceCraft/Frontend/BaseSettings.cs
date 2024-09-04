@@ -10,6 +10,10 @@ public class BaseSettings : CommandSettings
     [CommandOption("--verbose")]
     [Description("Displays trace output.")]
     public bool Verbose { get; set; }
+
+    [CommandOption("--root")]
+    [Description("Sets the directory where caches, artefacts and installed packages are stored")]
+    public string? Root { get; set; }
     
     #if DEBUG
     [CommandOption("--debug")]

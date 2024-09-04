@@ -1,5 +1,6 @@
 namespace IceCraft.Frontend;
 
+using System;
 using System.Diagnostics;
 using Serilog;
 using Serilog.Events;
@@ -9,6 +10,32 @@ using Spectre.Console.Cli;
 public class StandardInterceptor : ICommandInterceptor
 {
     void ICommandInterceptor.Intercept(CommandContext context, CommandSettings settings)
+    {
+        InterceptLogSettings(settings);
+        InterceptRootDir(settings);
+
+#if DEBUG
+        if (settings is BaseSettings { Debug: true })
+        {
+            Debugger.Launch();
+        }
+#endif
+    }
+
+    private static void InterceptRootDir(CommandSettings settings)
+    {
+        if (settings is not BaseSettings baseSettings)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(baseSettings.Root))
+        {
+            IceCraftApp.UserDataOverride = baseSettings.Root;
+        }
+    }
+
+    private static void InterceptLogSettings(CommandSettings settings)
     {
         var level = LogEventLevel.Information;
 
@@ -29,12 +56,5 @@ public class StandardInterceptor : ICommandInterceptor
         {
             Log.Verbose("Verbose logging is enabled.");
         }
-
-#if DEBUG
-        if (settings is BaseSettings { Debug: true })
-        {
-            Debugger.Launch();
-        }
-#endif
     }
 }
