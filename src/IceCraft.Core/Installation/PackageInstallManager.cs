@@ -180,11 +180,14 @@ public class PackageInstallManager : IPackageInstallManager
             fileSystem.Directory.CreateDirectory(tempExtraction);
         }
 
+        fileSystem.Directory.CreateDirectory(expandTo);
+
         output?.Log("Expanding package {0} ({1})...", meta.Id, meta.Version);
         try
         {
             var objective = tempExtraction ?? expandTo;
 
+            fileSystem.Directory.CreateDirectory(objective);
             await installer.ExpandPackageAsync(artefactPath, objective);
         }
         catch (Exception ex)

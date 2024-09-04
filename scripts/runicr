@@ -1,0 +1,16 @@
+#!/bin/sh
+
+SCRNAME=$(basename "$0")
+
+# Test for src folder (must run in repo root)
+if [ ! -d "src" ]; then
+    echo "$SCRNAME: probably not IceCraft dev directory ('src' doesn't exist)"
+    exit 1
+fi
+
+mkdir -p "$PWD/run"
+mkdir -p "$PWD/run/bin"
+
+export ICECRAFT_ROOT="$PWD/run"
+
+dotnet run --project "$PWD/src/IceCraft/IceCraft.csproj" --no-self-contained -- $@
