@@ -12,6 +12,8 @@ public class LinuxEnvironmentManager : IEnvironmentManager
 {
     private readonly string _pathFile;
 
+    private static readonly bool DryEnvRuns = Environment.GetEnvironmentVariable("ICECRAFT_DRY_ENV") != null;
+
     private static readonly string PathScriptFile = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
         PathScriptFileName);
@@ -51,6 +53,11 @@ public class LinuxEnvironmentManager : IEnvironmentManager
 
     private static Dictionary<string, string> ReadRegistryFile()
     {
+        if (DryEnvRuns)
+        {
+            return [];
+        }
+
         if (!File.Exists(EnvConfigFile))
         {
             return CreateRegistryFile();
@@ -68,6 +75,11 @@ public class LinuxEnvironmentManager : IEnvironmentManager
 
     private static Dictionary<string, string> CreateRegistryFile()
     {
+        if (DryEnvRuns)
+        {
+            return [];
+        }
+
         var result = new Dictionary<string,string>();
         using var stream = File.Create(EnvConfigFile);
         JsonSerializer.SerializeAsync(stream, result, IceCraftCoreContext.Default.DictionaryStringString);
@@ -77,18 +89,33 @@ public class LinuxEnvironmentManager : IEnvironmentManager
 
     private void SaveRegistryFile()
     {
+        if (DryEnvRuns)
+        {
+            return;
+        }
+
         using var stream = File.Create(EnvConfigFile);
         JsonSerializer.SerializeAsync(stream, _envRegistry, IceCraftCoreContext.Default.DictionaryStringString);
     }
 
     public void AddUserGlobalPath(string path)
     {
+        if (DryEnvRuns)
+        {
+            return;
+        }
+
         File.AppendAllLines(_pathFile, [path]);
         ApplyProfile();
     }
 
     private void ApplyProfile()
     {
+        if (DryEnvRuns)
+        {
+            return;
+        }
+
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         WritePathScript();
         WriteEnvScript();
@@ -111,6 +138,11 @@ public class LinuxEnvironmentManager : IEnvironmentManager
 
     private void WriteEnvScript()
     {
+        if (DryEnvRuns)
+        {
+            return;
+        }
+
         using var envScript = File.Create(EnvScriptFile);
         var writer = new StreamWriter(envScript);
         
@@ -127,11 +159,21 @@ public class LinuxEnvironmentManager : IEnvironmentManager
 
     private static bool DoesImportLineExist(string filePath)
     {
+        if (DryEnvRuns)
+        {
+            return true;
+        }
+
         return File.ReadLines(filePath).Any(x => x.Equals(PathScriptImport) || x.Equals(EnvScriptImport));
     }
 
     private void WritePathScript()
     {
+        if (DryEnvRuns)
+        {
+            return;
+        }
+
         using var pathScript = File.Create(PathScriptFile);
         var writer = new StreamWriter(pathScript);
         writer.WriteLine("# This script is auto-generated.");
@@ -152,11 +194,21 @@ public class LinuxEnvironmentManager : IEnvironmentManager
 
     public void AddUserGlobalPathFromHome(string relativeToHome)
     {
+        if (DryEnvRuns)
+        {
+            return;
+        }
+
         AddUserGlobalPath($"$HOME/{relativeToHome}");
     }
 
     public void RemoveUserGlobalPath(string path)
     {
+        if (DryEnvRuns)
+        {
+            return;
+        }
+
         var lines = new List<string>(File.ReadAllLines(_pathFile));
         lines.Remove(path);
         File.WriteAllLines(_pathFile, lines);
@@ -166,6 +218,11 @@ public class LinuxEnvironmentManager : IEnvironmentManager
 
     public void AddUserVariable(string key, string value)
     {
+        if (DryEnvRuns)
+        {
+            return;
+        }
+
         _envRegistry[key] = value;
         SaveRegistryFile();
         ApplyProfile();
@@ -173,6 +230,11 @@ public class LinuxEnvironmentManager : IEnvironmentManager
 
     public void RemoveUserVariable(string key)
     {
+        if (DryEnvRuns)
+        {
+            return;
+        }
+
         _envRegistry.Remove(key);
         SaveRegistryFile();
         ApplyProfile();

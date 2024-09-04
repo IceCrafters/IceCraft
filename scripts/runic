@@ -12,5 +12,6 @@ mkdir -p "$PWD/run"
 mkdir -p "$PWD/run/bin"
 
 export ICECRAFT_ROOT="$PWD/run"
+export ICECRAFT_DRY_ENV=1
 
 dotnet run --project "$PWD/src/IceCraft/IceCraft.csproj" --no-self-contained --artifacts-path "$PWD/run/bin" -- $@

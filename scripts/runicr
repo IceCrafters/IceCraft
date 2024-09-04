@@ -11,6 +11,8 @@ fi
 mkdir -p "$PWD/run"
 mkdir -p "$PWD/run/bin"
 
+# Configure Icecraft to isolate environment
 export ICECRAFT_ROOT="$PWD/run"
+export ICECRAFT_DRY_ENV=1
 
 dotnet run --project "$PWD/src/IceCraft/IceCraft.csproj" --no-self-contained -- $@
