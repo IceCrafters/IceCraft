@@ -1,12 +1,13 @@
 ﻿namespace IceCraft.Extensions.CentralRepo;
 
 using IceCraft.Extensions.CentralRepo.Api;
+using IceCraft.Extensions.CentralRepo.Interop;
 using Mond;
 using Mond.Libraries;
 
 public class ScriptRuntime
 {
-    internal static MondState CreateState(string scriptFilePath)
+    internal static InstallerState CreateState(string scriptFilePath)
     {
         var state = new MondState
         {
@@ -20,6 +21,6 @@ public class ScriptRuntime
         var program = MondProgram.FromFile(scriptFilePath);
         state.Load(program);
 
-        return state;
+        return new InstallerState(state, program);
     }
 }

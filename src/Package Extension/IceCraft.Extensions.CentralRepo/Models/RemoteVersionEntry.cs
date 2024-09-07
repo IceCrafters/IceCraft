@@ -25,4 +25,6 @@ public sealed class RemoteVersionEntry
     
     public DependencyCollection? Dependencies { get; init; }
     public DependencyCollection? ConflictsWith { get; init; }
+
+    public required Uri InstallerScript { get; init; }
 }
