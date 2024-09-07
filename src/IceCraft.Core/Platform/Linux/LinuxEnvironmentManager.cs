@@ -1,5 +1,6 @@
 namespace IceCraft.Core.Platform.Linux;
 
+using System.IO.Abstractions;
 using System.Runtime.Versioning;
 using System.Text.Json;
 using IceCraft.Core.Serialization;
@@ -14,15 +15,9 @@ public class LinuxEnvironmentManager : IEnvironmentManager
 
     private static readonly bool DryEnvRuns = Environment.GetEnvironmentVariable("ICECRAFT_DRY_ENV") != null;
 
-    private static readonly string PathScriptFile = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-        PathScriptFileName);
-    private static readonly string EnvConfigFile = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-        EnvConfigFileName);
-    private static readonly string EnvScriptFile = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-        EnvScriptFileName);
+    private readonly string PathScriptFile;
+    private readonly string EnvConfigFile;
+    private readonly string EnvScriptFile;
 
     private const string PathScriptFileName = ".ice_craft_paths";
     private const string PathScriptImport = $". $HOME/{PathScriptFileName}";
@@ -34,6 +29,10 @@ public class LinuxEnvironmentManager : IEnvironmentManager
 
     private readonly Dictionary<string, string> _envRegistry;
 
+    private readonly IFileSystem _fileSystem;
+
+    private readonly IEnvironmentProvider _envProvider;
+
     private static readonly string[] ShellProfileFiles =
     [
         ".bash_profile",
@@ -43,22 +42,35 @@ public class LinuxEnvironmentManager : IEnvironmentManager
         ".zshrc"
     ];
 
-    public LinuxEnvironmentManager(IFrontendApp frontend)
+    public LinuxEnvironmentManager(IFrontendApp frontend, IFileSystem fileSystem, IEnvironmentProvider envProvider)
     {
         var dataPath = frontend.DataBasePath;
         _pathFile = Path.Combine(dataPath, "ic_paths");
 
+        _fileSystem = fileSystem;
+        _envProvider = envProvider;
+
+        PathScriptFile = Path.Combine(
+            _envProvider.GetUserProfile(),
+            PathScriptFileName);
+        EnvConfigFile = Path.Combine(
+            _envProvider.GetUserProfile(),
+            EnvConfigFileName);
+        EnvScriptFile = Path.Combine(
+            _envProvider.GetUserProfile(),
+            EnvScriptFileName);
+
         _envRegistry = ReadRegistryFile();
     }
 
-    private static Dictionary<string, string> ReadRegistryFile()
+    private Dictionary<string, string> ReadRegistryFile()
     {
         if (DryEnvRuns)
         {
             return [];
         }
 
-        if (!File.Exists(EnvConfigFile))
+        if (!_fileSystem.File.Exists(EnvConfigFile))
         {
             return CreateRegistryFile();
         }
@@ -73,7 +85,7 @@ public class LinuxEnvironmentManager : IEnvironmentManager
         return result ?? CreateRegistryFile();
     }
 
-    private static Dictionary<string, string> CreateRegistryFile()
+    private Dictionary<string, string> CreateRegistryFile()
     {
         if (DryEnvRuns)
         {
@@ -81,7 +93,7 @@ public class LinuxEnvironmentManager : IEnvironmentManager
         }
 
         var result = new Dictionary<string,string>();
-        using var stream = File.Create(EnvConfigFile);
+        using var stream = _fileSystem.File.Create(EnvConfigFile);
         JsonSerializer.SerializeAsync(stream, result, IceCraftCoreContext.Default.DictionaryStringString);
 
         return result;
@@ -94,7 +106,7 @@ public class LinuxEnvironmentManager : IEnvironmentManager
             return;
         }
 
-        using var stream = File.Create(EnvConfigFile);
+        using var stream = _fileSystem.File.Create(EnvConfigFile);
         JsonSerializer.SerializeAsync(stream, _envRegistry, IceCraftCoreContext.Default.DictionaryStringString);
     }
 
@@ -105,8 +117,16 @@ public class LinuxEnvironmentManager : IEnvironmentManager
             return;
         }
 
-        File.AppendAllLines(_pathFile, [path]);
+        _fileSystem.File.AppendAllLines(_pathFile, [path]);
         ApplyProfile();
+    }
+
+    private void EnsurePathFile()
+    {
+        if (!_fileSystem.File.Exists(_pathFile))
+        {
+            File.WriteAllLines(_pathFile, []);
+        }
     }
 
     private void ApplyProfile()
@@ -116,18 +136,18 @@ public class LinuxEnvironmentManager : IEnvironmentManager
             return;
         }
 
-        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        var home = _envProvider.GetUserProfile();
         WritePathScript();
         WriteEnvScript();
 
         foreach (var profileFile in ShellProfileFiles)
         {
-            var path = Path.Combine(home, profileFile);
+            var path = _fileSystem.Path.Combine(home, profileFile);
 
-            if (!File.Exists(path)) continue;
+            if (!_fileSystem.File.Exists(path)) continue;
             if (DoesImportLineExist(path)) continue;
 
-            File.AppendAllLines(path,
+            _fileSystem.File.AppendAllLines(path,
             [
                 "# Imports for IceCraft",
                 PathScriptImport,
@@ -143,7 +163,7 @@ public class LinuxEnvironmentManager : IEnvironmentManager
             return;
         }
 
-        using var envScript = File.Create(EnvScriptFile);
+        using var envScript = _fileSystem.File.Create(EnvScriptFile);
         var writer = new StreamWriter(envScript);
         
         writer.WriteLine("# This script is auto-generated.");
@@ -157,14 +177,14 @@ public class LinuxEnvironmentManager : IEnvironmentManager
         writer.Flush();
     }
 
-    private static bool DoesImportLineExist(string filePath)
+    private bool DoesImportLineExist(string filePath)
     {
         if (DryEnvRuns)
         {
             return true;
         }
 
-        return File.ReadLines(filePath).Any(x => x.Equals(PathScriptImport) || x.Equals(EnvScriptImport));
+        return _fileSystem.File.ReadLines(filePath).Any(x => x.Equals(PathScriptImport) || x.Equals(EnvScriptImport));
     }
 
     private void WritePathScript()
@@ -174,13 +194,14 @@ public class LinuxEnvironmentManager : IEnvironmentManager
             return;
         }
 
-        using var pathScript = File.Create(PathScriptFile);
+        using var pathScript = _fileSystem.File.Create(PathScriptFile);
         var writer = new StreamWriter(pathScript);
         writer.WriteLine("# This script is auto-generated.");
         writer.WriteLine("# Changes to contents WILL BE LOST if this file is refreshed.");
         writer.Write("export PATH=\"$PATH");
 
-        foreach (var line in File.ReadLines(_pathFile))
+        EnsurePathFile();
+        foreach (var line in _fileSystem.File.ReadLines(_pathFile))
         {
             writer.Write(':');
             writer.Write(line);
@@ -211,7 +232,7 @@ public class LinuxEnvironmentManager : IEnvironmentManager
 
         var lines = new List<string>(File.ReadAllLines(_pathFile));
         lines.Remove(path);
-        File.WriteAllLines(_pathFile, lines);
+        _fileSystem.File.WriteAllLines(_pathFile, lines);
         
         ApplyProfile();
     }

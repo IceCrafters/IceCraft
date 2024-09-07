@@ -13,6 +13,7 @@ using IceCraft.Core.Network;
 using IceCraft.Core.Platform;
 using IceCraft.Core.Platform.Linux;
 using IceCraft.Core.Platform.Windows;
+using IceCraft.Core.Util;
 using Microsoft.Extensions.DependencyInjection;
 
 public static class IceCraftDependencyExtensions
@@ -55,7 +56,8 @@ public static class IceCraftDependencyExtensions
             .AddSingleton<IDependencyMapper, DependencyMapper>()
             .AddKeyedSingleton<IPackageInstaller, VirtualInstaller>("virtual")
             .AddKeyedSingleton<IPackageConfigurator, VirtualConfigurator>("virtual")
-            .AddSingleton<IArtefactManager, ArtefactManager>();
+            .AddSingleton<IArtefactManager, ArtefactManager>()
+            .AddSingleton<IEnvironmentProvider, EnvironmentWrapper>();
     }
 
     public static IServiceCollection AddChecksumValidators(this IServiceCollection services)
