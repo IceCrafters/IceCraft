@@ -125,11 +125,11 @@ public class LinuxEnvironmentManager : IEnvironmentManager
     {
         if (!_fileSystem.File.Exists(_pathFile))
         {
-            File.WriteAllLines(_pathFile, []);
+            _fileSystem.File.WriteAllLines(_pathFile, []);
         }
     }
 
-    private void ApplyProfile()
+    internal void ApplyProfile()
     {
         if (DryEnvRuns)
         {

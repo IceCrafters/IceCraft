@@ -1,12 +1,14 @@
 namespace IceCraft.Tests.Helpers;
 
+using System.Runtime.Versioning;
+
 public class LinuxFactAttribute : FactAttribute
 {
     public LinuxFactAttribute()
     {
         if (!OperatingSystem.IsLinux())
         {
-            Skip = "Test is only available on Linux";
+            Skip = "Fact is only available on Linux";
         }
     }
 }
