@@ -19,18 +19,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Semver;
 using Spectre.Console;
 
-#if LEGACY_INTERFACE
-using System.ComponentModel;
-using Spectre.Console.Cli;
-#endif
-
-using CliCommand = System.CommandLine.Command;
-
 [UsedImplicitly]
-public class InstallCommand
-#if LEGACY_INTERFACE
-    : AsyncCommand<InstallCommand.Settings>
-#endif
+public class InstallCommandFactory : ICommandFactory
 {
     private readonly IPackageInstallManager _installManager;
     private readonly IPackageIndexer _indexer;
@@ -41,7 +31,7 @@ public class InstallCommand
 
     private readonly InteractiveInstaller _interactiveInstaller;
 
-    public InstallCommand(IServiceProvider serviceProvider)
+    public InstallCommandFactory(IServiceProvider serviceProvider)
     {
         _installManager = serviceProvider.GetRequiredService<IPackageInstallManager>();
         _indexer = serviceProvider.GetRequiredService<IPackageIndexer>();
@@ -57,7 +47,7 @@ public class InstallCommand
             checksumRunner, dependencyMapper);
     }
 
-    public CliCommand CreateCli()
+    public Command CreateCommand()
     {
         var argPackage = new Argument<string>("package", "The package to install");
         var argVersion = new Argument<string?>("version", () => null, "The version to install. If not specified, selects the latest version");
@@ -65,7 +55,7 @@ public class InstallCommand
         var optNoCleanArtefact = new Option<bool>("--no-clean-artefact", "Do not clean previous artefact before proceeding");
         var optPrerelease = new Option<bool>(["-P", "--include-prerelease"], "Include prerelease versions when selecting latest version");
 
-        var command = new CliCommand("install", "Install a package")
+        var command = new Command("install", "Install a package")
         {
             argPackage,
             argVersion,
@@ -178,50 +168,4 @@ public class InstallCommand
 
         return true;
     }
-
-    #if LEGACY_INTERFACE
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
-    {
-        return await ExecuteInternalAsync(settings.NoCleanArtefact,
-            settings.PackageName,
-            settings.Version,
-            settings.IncludePrerelease);
-    }
-    
-    public override ValidationResult Validate(CommandContext context, Settings settings)
-    {
-        if (!string.IsNullOrWhiteSpace(settings.Version)
-            // Does not need to be that strict on user input since we all make mistakes.
-            && !SemVersion.TryParse(settings.Version, SemVersionStyles.Any, out _))
-        {
-            return ValidationResult.Error("Invalid semantic version");
-        }
-
-        return base.Validate(context, settings);
-    }
-    
-    [UsedImplicitly]
-    public class Settings : BaseSettings
-    {
-        [CommandArgument(0, "<PACKAGE>")]
-        [Description("Package to install.")]
-        [UsedImplicitly]
-        public required string PackageName { get; init; }
-
-        [CommandOption("-v|--version")]
-        [Description("Version to install. If unspecified, the latest one is installed.")]
-        [UsedImplicitly]
-        public string? Version { get; init; }
-
-        [CommandOption("-P|--include-prerelease")]
-        [Description("Whether to include prerelease when getting the latest version. Does not affect '--version'.")]
-        [UsedImplicitly]
-        public bool IncludePrerelease { get; init; }
-
-        [CommandOption("--no-clean-artefact")]
-        [Description("Do not perform artefact cleaning tasks.")]
-        [UsedImplicitly]
-        public bool NoCleanArtefact { get; init; }
-    }
-#endif
 }

@@ -15,7 +15,7 @@ using IceCraft.Interactive;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 
-public class CliFixBrokenCommandFactory
+public class FixBrokenCommandFactory : ICommandFactory
 {
     private readonly IDependencyMapper _dependencyMapper;
     private readonly IPackageIndexer _indexer;
@@ -23,7 +23,7 @@ public class CliFixBrokenCommandFactory
     private readonly IRepositorySourceManager _sourceManager;
     private readonly InteractiveInstaller _installer;
 
-    public CliFixBrokenCommandFactory(IServiceProvider serviceProvider)
+    public FixBrokenCommandFactory(IServiceProvider serviceProvider)
     {
         _dependencyMapper = serviceProvider.GetRequiredService<IDependencyMapper>();
         _indexer = serviceProvider.GetRequiredService<IPackageIndexer>();
@@ -37,7 +37,7 @@ public class CliFixBrokenCommandFactory
             serviceProvider.GetRequiredService<IDependencyMapper>());
     }
 
-    public Command CreateCli()
+    public Command CreateCommand()
     {
         var optDryRun = new Option<bool>("--dry-run");
 

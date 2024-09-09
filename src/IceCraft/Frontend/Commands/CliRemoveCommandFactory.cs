@@ -9,21 +9,9 @@ using IceCraft.Frontend.Cli;
 using Semver;
 using Serilog;
 using Spectre.Console;
-
-#if LEGACY_INTERFACE
-using JetBrains.Annotations;
-using Spectre.Console.Cli;
-using System.ComponentModel;
-#else
 using System.CommandLine;
-#endif
 
-#if LEGACY_INTERFACE
-[UsedImplicitly]
-public class UninstallCommand : AsyncCommand<UninstallCommand.Settings>
-#else
 public class CliRemoveCommandFactory : ICommandFactory
-#endif
 {
     private readonly IPackageInstallManager _installManager;
     private readonly IDependencyMapper _dependencyMapper;
@@ -38,9 +26,8 @@ public class CliRemoveCommandFactory : ICommandFactory
         _installManager = installManager;
         _dependencyMapper = dependencyMapper;
     }
-
-    #if !LEGACY_INTERFACE
-    public Command CreateCli()
+    
+    public Command CreateCommand()
     {
         var argPackage = new Argument<string>("package", "Package to uninstall");
         var argVersion = new Argument<string?>("version", () => null, "Version to uninstall");
@@ -59,7 +46,6 @@ public class CliRemoveCommandFactory : ICommandFactory
 
         return command;
     }
-    #endif
     
     private async Task<int> ExecuteInternalAsync(string packageName, string? version, bool force)
     {
@@ -136,41 +122,4 @@ public class CliRemoveCommandFactory : ICommandFactory
                 });
         return ExitCodes.Ok;
     }
-    
-    #if LEGACY_INTERFACE
-    public override ValidationResult Validate(CommandContext context, Settings settings)
-    {
-        if (settings.Version != null && !SemVersion.TryParse(settings.Version, SemVersionStyles.Any, out _))
-        {
-            return ValidationResult.Error("Invalid semantic version.");
-        }
-
-        return base.Validate(context, settings);
-    }
-    
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
-    {
-        return await ExecuteInternalAsync(settings.PackageName,
-            settings.Version,
-            settings.Force);
-    }
-
-    [UsedImplicitly]
-    public sealed class Settings : BaseSettings
-    {
-        [CommandArgument(0, "<PACKAGE>")]
-        [Description("The package to uninstall")]
-        [UsedImplicitly]
-        public required string PackageName { get; init; }
-
-        [CommandOption("-v|--version")]
-        [Description("The version to uninstall")]
-        [UsedImplicitly]
-        public string? Version { get; init; }
-
-        [CommandOption("--force")]
-        [Description("Uninstall package even if it currently have dependents.s")]
-        public bool Force { get; init; }
-    }
-#endif
 }

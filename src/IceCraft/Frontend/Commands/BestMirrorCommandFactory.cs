@@ -7,7 +7,7 @@ using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Network;
 using IceCraft.Frontend.Cli;
 
-public class CliBestMirrorCommandFactory
+public class BestMirrorCommandFactory
 {
     private static readonly Argument<string> ArgPackage = new("package");
     private static readonly Option<bool> OptPrerelease = new(["-P", "--include-prerelease"], "Include prerelease versions when looking for latest version");
@@ -16,7 +16,7 @@ public class CliBestMirrorCommandFactory
     private readonly IRepositorySourceManager _sourceManager;
     private readonly IMirrorSearcher _searcher;
 
-    public CliBestMirrorCommandFactory(IPackageIndexer indexer, IRepositorySourceManager sourceManager, IMirrorSearcher searcher)
+    public BestMirrorCommandFactory(IPackageIndexer indexer, IRepositorySourceManager sourceManager, IMirrorSearcher searcher)
     {
         _indexer = indexer;
         _sourceManager = sourceManager;

@@ -4,5 +4,5 @@ using System.CommandLine;
 
 public interface ICommandFactory
 {
-    Command CreateCli();
+    Command CreateCommand();
 }

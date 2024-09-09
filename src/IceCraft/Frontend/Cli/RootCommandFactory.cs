@@ -30,32 +30,32 @@ internal static class RootCommandFactory
 
         var sourceCmd = CreateSourceCmd(serviceProvider);
 
-        var downloadCmd = new CliDownloadCommandFactory(sourceManager,
+        var downloadCmd = new DownloadCommandFactory(sourceManager,
                 indexer,
             serviceProvider.GetRequiredService<IDownloadManager>(),
             serviceProvider.GetRequiredService<IMirrorSearcher>())
-            .CreateCli();
+            .CreateCommand();
         
-        var infoCmd = new CliInfoCommandFactory(indexer, sourceManager)
-            .CreateCli();
+        var infoCmd = new InfoCommandFactory(indexer, sourceManager)
+            .CreateCommand();
 
-        var initCmd = new InitializeCommand(serviceProvider.GetRequiredService<IEnvironmentManager>(),
+        var initCmd = new InitializeCommandFactory(serviceProvider.GetRequiredService<IEnvironmentManager>(),
             serviceProvider.GetRequiredService<IFrontendApp>())
-            .CreateCli();
+            .CreateCommand();
 
-        var cacheCmd = new CliCacheCommandFactory(serviceProvider.GetRequiredService<ICacheManager>())
-            .CreateCli();
+        var cacheCmd = new CacheCommandFactory(serviceProvider.GetRequiredService<ICacheManager>())
+            .CreateCommand();
 
         var packageCmd = CreatePackageCmd(sourceManager, indexer, 
             serviceProvider.GetRequiredService<IMirrorSearcher>(),
             serviceProvider);
 
-        var installCmd = new InstallCommand(serviceProvider)
-            .CreateCli();
+        var installCmd = new InstallCommandFactory(serviceProvider)
+            .CreateCommand();
 
         var removeCmd = new CliRemoveCommandFactory(serviceProvider.GetRequiredService<IPackageInstallManager>(),
             serviceProvider.GetRequiredService<IDependencyMapper>())
-            .CreateCli();
+            .CreateCommand();
 
         // Create root command
 
@@ -86,24 +86,24 @@ internal static class RootCommandFactory
     {
         // Assemble commands
 
-        var bestMirror = new CliBestMirrorCommandFactory(indexer,
+        var bestMirror = new BestMirrorCommandFactory(indexer,
             sourceManager,
             mirrorSearcher)
             .CreateCli();
 
-        var fixBroken = new CliFixBrokenCommandFactory(serviceProvider)
-            .CreateCli();
+        var fixBroken = new FixBrokenCommandFactory(serviceProvider)
+            .CreateCommand();
 
-        var list = new PackageListCommand(sourceManager, indexer, serviceProvider.GetRequiredService<IFrontendApp>())
-            .CreateCli();
+        var list = new ListVersionCommandFactory(sourceManager, indexer, serviceProvider.GetRequiredService<IFrontendApp>())
+            .CreateCommand();
 
-        var reconfigure = new CliReconfigureCommandFactory(serviceProvider,
+        var reconfigure = new ReconfigureCommandFactory(serviceProvider,
             serviceProvider.GetRequiredService<IPackageInstallManager>())
-            .CreateCli();
+            .CreateCommand();
 
         var regenDependMap =
-            new CliRemapDependencyCommandFactory(serviceProvider.GetRequiredService<IDependencyMapper>())
-                .CreateCli();
+            new RemapDependencyCommandFactory(serviceProvider.GetRequiredService<IDependencyMapper>())
+                .CreateCommand();
 
         return new Command("package", "Perform various package tasks")
         {

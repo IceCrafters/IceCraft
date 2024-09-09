@@ -2,17 +2,18 @@ namespace IceCraft.Frontend.Commands;
 
 using System.CommandLine;
 using IceCraft.Core.Caching;
+using IceCraft.Frontend.Cli;
 
-public class CliCacheCommandFactory
+public class CacheCommandFactory : ICommandFactory
 {
     private readonly ICacheManager _cacheManager;
 
-    public CliCacheCommandFactory(ICacheManager cacheManager)
+    public CacheCommandFactory(ICacheManager cacheManager)
     {
         _cacheManager = cacheManager;
     }
     
-    public Command CreateCli()
+    public Command CreateCommand()
     {
         var command = new Command("cache", "Manage and maintains cache data")
         {

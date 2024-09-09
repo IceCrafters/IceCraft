@@ -11,7 +11,7 @@ using IceCraft.Frontend.Cli;
 using Semver;
 using Spectre.Console;
 
-public class CliDownloadCommandFactory
+public class DownloadCommandFactory : ICommandFactory
 {
     private static readonly Argument<string> ArgPackage = new("package", "The package to download.");
     private static readonly Argument<string?> ArgTarget = new("target", () => null, "The file or directory to download to");
@@ -27,7 +27,7 @@ public class CliDownloadCommandFactory
     private readonly IDownloadManager _downloadManager;
     private readonly IMirrorSearcher _mirrorSearcher;
 
-    public CliDownloadCommandFactory(IRepositorySourceManager sourceManager,
+    public DownloadCommandFactory(IRepositorySourceManager sourceManager,
         IPackageIndexer indexer,
         IDownloadManager downloadManager,
         IMirrorSearcher mirrorSearcher)
@@ -38,7 +38,7 @@ public class CliDownloadCommandFactory
         _mirrorSearcher = mirrorSearcher;
     }
 
-    public Command CreateCli()
+    public Command CreateCommand()
     {
         var command = new Command("download")
         {

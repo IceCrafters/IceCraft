@@ -5,16 +5,16 @@ using IceCraft.Core.Caching;
 using IceCraft.Core.Installation.Analysis;
 using IceCraft.Frontend.Cli;
 
-public class CliRemapDependencyCommandFactory : ICommandFactory
+public class RemapDependencyCommandFactory : ICommandFactory
 {
     private readonly IDependencyMapper _dependencyMapper;
 
-    public CliRemapDependencyCommandFactory(IDependencyMapper dependencyMapper)
+    public RemapDependencyCommandFactory(IDependencyMapper dependencyMapper)
     {
         _dependencyMapper = dependencyMapper;
     }
     
-    public Command CreateCli()
+    public Command CreateCommand()
     {
         var command = new Command("regen-dependmap", "Regenerate the dependency map cache");
         command.SetHandler(Execute);

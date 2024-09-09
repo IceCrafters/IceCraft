@@ -11,7 +11,7 @@ using IceCraft.Core.Archive.Repositories;
 using IceCraft.Frontend.Cli;
 using Spectre.Console;
 
-public class CliInfoCommandFactory
+public class InfoCommandFactory : ICommandFactory
 {
     private static readonly Argument<string> ArgPackage = new("package", "The package to lookup");
     private static readonly Option<string?> OptSource = new(["-s", "--source"], "The source to lookup");
@@ -20,14 +20,14 @@ public class CliInfoCommandFactory
     private readonly IPackageIndexer _indexer;
     private readonly IRepositorySourceManager _sourceManager;
 
-    public CliInfoCommandFactory(IPackageIndexer indexer, 
+    public InfoCommandFactory(IPackageIndexer indexer, 
         IRepositorySourceManager sourceManager)
     {
         _indexer = indexer;
         _sourceManager = sourceManager;
     }
 
-    public Command CreateCli()
+    public Command CreateCommand()
     {
         var command = new Command("info", "Looks up metadata information for a given package")
         {
