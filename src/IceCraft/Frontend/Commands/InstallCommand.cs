@@ -7,7 +7,6 @@ using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Archive.Repositories;
-using IceCraft.Core.Caching;
 using IceCraft.Core.Installation;
 using IceCraft.Core.Installation.Analysis;
 using IceCraft.Core.Network;
@@ -17,7 +16,6 @@ using IceCraft.Interactive;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Semver;
-using Serilog;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -27,37 +25,26 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
     private readonly IPackageInstallManager _installManager;
     private readonly IPackageIndexer _indexer;
     private readonly IRepositorySourceManager _sourceManager;
-    private readonly IDownloadManager _downloadManager;
     private readonly IDependencyResolver _dependencyResolver;
     private readonly IFrontendApp _frontend;
-    private readonly IChecksumRunner _checksumRunner;
-    private readonly IDependencyMapper _dependencyMapper;
     private readonly IArtefactManager _artefactManager;
 
     private readonly InteractiveInstaller _interactiveInstaller;
-
-    private readonly record struct QueuedDownloadTask
-    {
-        internal required Task<DownloadResult> Task { get; init; }
-        internal required RemoteArtefact ArtefactInfo { get; init; }
-        internal required PackageMeta Metadata { get; init; }
-        internal required string Objective { get; init; }
-        internal Stream? Stream { get; init; }
-    }
 
     public InstallCommand(IServiceProvider serviceProvider)
     {
         _installManager = serviceProvider.GetRequiredService<IPackageInstallManager>();
         _indexer = serviceProvider.GetRequiredService<IPackageIndexer>();
         _sourceManager = serviceProvider.GetRequiredService<IRepositorySourceManager>();
-        _downloadManager = serviceProvider.GetRequiredService<IDownloadManager>();
         _dependencyResolver = serviceProvider.GetRequiredService<IDependencyResolver>();
         _frontend = serviceProvider.GetRequiredService<IFrontendApp>();
-        _checksumRunner = serviceProvider.GetRequiredService<IChecksumRunner>();
-        _dependencyMapper = serviceProvider.GetRequiredService<IDependencyMapper>();
         _artefactManager = serviceProvider.GetRequiredService<IArtefactManager>();
 
-        _interactiveInstaller = new InteractiveInstaller(_downloadManager, _installManager, _artefactManager, _checksumRunner, _dependencyMapper);
+        var checksumRunner = serviceProvider.GetRequiredService<IChecksumRunner>();
+        var downloadManager = serviceProvider.GetRequiredService<IDownloadManager>();
+        var dependencyMapper = serviceProvider.GetRequiredService<IDependencyMapper>();
+        _interactiveInstaller = new InteractiveInstaller(downloadManager, _installManager, _artefactManager,
+            checksumRunner, dependencyMapper);
     }
 
     public override ValidationResult Validate(CommandContext context, Settings settings)
@@ -83,7 +70,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
 
         // Step 1: Index
         SemVersion? selectedVersion;
-        PackageMeta? meta = null;
+        PackageMeta? meta;
         PackageIndex? index = null;
         HashSet<PackageMeta> allPackagesSet = [];
 
@@ -152,36 +139,6 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
         return await _interactiveInstaller.InstallAsync(allPackagesSet, index!);
     }
 
-    private async IAsyncEnumerable<KeyValuePair<PackageMeta, string>> ValidateAndInsertInternalAsync(
-        StatusContext status,
-        IEnumerable<QueuedDownloadTask> tasks)
-    {
-        foreach (var task in tasks)
-        {
-            var result = await task.Task;
-            if (result == DownloadResult.Failed)
-            {
-                throw new KnownException($"Download for {task.Metadata.Id} ({task.Metadata.Version}) have FAILED.");
-            }
-
-            status.Status($"Installing package {task.Metadata.Id}");
-
-            if (task.Stream != null)
-            {
-                await task.Stream.DisposeAsync();
-            }
-
-            var path = task.Objective;
-            if (!await _checksumRunner.ValidateLocal(task.ArtefactInfo, path))
-            {
-                Output.Shared.Verbose("Remote hash: {0}", task.ArtefactInfo.Checksum);
-                throw new KnownException("Artefact hash mismatches downloaded file.");
-            }
-
-            yield return new KeyValuePair<PackageMeta, string>(task.Metadata, path);
-        }
-    }
-
     private async Task<bool> ComparePackageAsync(PackageMeta meta)
     {
         // ReSharper disable once InvertIf
@@ -214,6 +171,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
 
         [CommandOption("--no-clean-artefact")]
         [Description("Do not perform artefact cleaning tasks.")]
+        [UsedImplicitly]
         public bool NoCleanArtefact { get; init; }
     }
 }

@@ -1,3 +1,4 @@
+#if LEGACY_INTERFACE
 namespace IceCraft.Frontend.Commands;
 
 using System.ComponentModel;
@@ -6,7 +7,6 @@ using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Network;
-using IceCraft.Core.Util;
 using JetBrains.Annotations;
 using Semver;
 using Serilog;
@@ -154,3 +154,4 @@ public class DownloadCommand : AsyncCommand<DownloadCommand.Settings>
         public bool IncludePrerelease { get; init; }
     }
 }
+#endif

@@ -2,7 +2,7 @@ namespace IceCraft.Core.Archive.Packaging;
 
 using System.Diagnostics.CodeAnalysis;
 
-public readonly struct PackageAuthorInfo
+public readonly record struct PackageAuthorInfo
 {
     [SetsRequiredMembers]
     public PackageAuthorInfo(string name, string? mailAddress = null)

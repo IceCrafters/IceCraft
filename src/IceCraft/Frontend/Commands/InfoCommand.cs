@@ -1,16 +1,15 @@
-﻿namespace IceCraft.Frontend.Commands;
+﻿#if LEGACY_INTERFACE
+namespace IceCraft.Frontend.Commands;
 
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
-using IceCraft.Core;
 using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Frontend;
 using JetBrains.Annotations;
-using Serilog;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -173,3 +172,4 @@ public class InfoCommand : AsyncCommand<InfoCommand.Settings>
         public bool IncludePrerelease { get; init; }
     }
 }
+#endif

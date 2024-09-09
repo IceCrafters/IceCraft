@@ -1,6 +1,5 @@
 namespace IceCraft.Frontend.Commands;
 using IceCraft.Core.Caching;
-using Serilog;
 using Spectre.Console.Cli;
 
 public class ClearCacheCommand : Command<BaseSettings>
