@@ -6,6 +6,8 @@ using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Configuration;
+using IceCraft.Core.Installation;
+using IceCraft.Core.Installation.Analysis;
 using IceCraft.Core.Network;
 using IceCraft.Core.Platform;
 using IceCraft.Frontend.Commands;
@@ -45,9 +47,14 @@ internal static class RootCommandFactory
             .CreateCli();
 
         var packageCmd = CreatePackageCmd(sourceManager, indexer, 
-            serviceProvider.GetRequiredService<IMirrorSearcher>());
+            serviceProvider.GetRequiredService<IMirrorSearcher>(),
+            serviceProvider);
 
         var installCmd = new InstallCommand(serviceProvider)
+            .CreateCli();
+
+        var removeCmd = new CliRemoveCommandFactory(serviceProvider.GetRequiredService<IPackageInstallManager>(),
+            serviceProvider.GetRequiredService<IDependencyMapper>())
             .CreateCli();
 
         // Create root command
@@ -61,7 +68,8 @@ internal static class RootCommandFactory
             initCmd,
             cacheCmd,
             packageCmd,
-            installCmd
+            installCmd,
+            removeCmd
         };
 
         // Configure verbose options
@@ -73,7 +81,8 @@ internal static class RootCommandFactory
 
     private static Command CreatePackageCmd(IRepositorySourceManager sourceManager,
         IPackageIndexer indexer,
-        IMirrorSearcher mirrorSearcher)
+        IMirrorSearcher mirrorSearcher,
+        IServiceProvider serviceProvider)
     {
         // Assemble commands
 
@@ -82,9 +91,27 @@ internal static class RootCommandFactory
             mirrorSearcher)
             .CreateCli();
 
+        var fixBroken = new CliFixBrokenCommandFactory(serviceProvider)
+            .CreateCli();
+
+        var list = new PackageListCommand(sourceManager, indexer, serviceProvider.GetRequiredService<IFrontendApp>())
+            .CreateCli();
+
+        var reconfigure = new CliReconfigureCommandFactory(serviceProvider,
+            serviceProvider.GetRequiredService<IPackageInstallManager>())
+            .CreateCli();
+
+        var regenDependMap =
+            new CliRemapDependencyCommandFactory(serviceProvider.GetRequiredService<IDependencyMapper>())
+                .CreateCli();
+
         return new Command("package", "Perform various package tasks")
         {
-            bestMirror
+            bestMirror,
+            fixBroken,
+            list,
+            reconfigure,
+            regenDependMap
         };
     }
 

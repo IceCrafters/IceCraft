@@ -1,3 +1,4 @@
+#if LEGACY_INTERFACE
 namespace IceCraft.Frontend.Commands;
 
 using System.ComponentModel;
@@ -82,3 +83,4 @@ public class PackageFixBrokenCommand : AsyncCommand<PackageFixBrokenCommand.Sett
         public bool DryRun { get; init; }
     }
 }
+#endif

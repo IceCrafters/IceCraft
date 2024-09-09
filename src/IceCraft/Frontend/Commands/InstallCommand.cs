@@ -65,7 +65,7 @@ public class InstallCommand
         var optNoCleanArtefact = new Option<bool>("--no-clean-artefact", "Do not clean previous artefact before proceeding");
         var optPrerelease = new Option<bool>(["-P", "--include-prerelease"], "Include prerelease versions when selecting latest version");
 
-        var command = new CliCommand("install")
+        var command = new CliCommand("install", "Install a package")
         {
             argPackage,
             argVersion,

@@ -1,3 +1,4 @@
+#if LEGACY_INTERFACE
 namespace IceCraft.Frontend.Commands;
 using System.ComponentModel;
 using IceCraft.Core.Caching;
@@ -25,3 +26,4 @@ public class RegenerateDependMapCommand : AsyncCommand<BaseSettings>
         return 0;
     }
 }
+#endif

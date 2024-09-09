@@ -1,40 +1,41 @@
-#if LEGACY_INTERFACE
 namespace IceCraft.Frontend.Commands;
 
-using System.ComponentModel;
+using System.CommandLine;
 using IceCraft.Core.Installation;
 using IceCraft.Core.Util;
-using JetBrains.Annotations;
+using IceCraft.Frontend.Cli;
 using Microsoft.Extensions.DependencyInjection;
-using Spectre.Console.Cli;
 
-[Description("Reconfigures an already installed package.")]
-[UsedImplicitly]
-public class PackageReconfigureCommand : AsyncCommand<PackageReconfigureCommand.Settings>
+public class CliReconfigureCommandFactory : ICommandFactory
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IPackageInstallManager _installManager;
 
-    public PackageReconfigureCommand(IServiceProvider serviceProvider, IPackageInstallManager installManager)
+    public CliReconfigureCommandFactory(IServiceProvider serviceProvider, IPackageInstallManager installManager)
     {
         _serviceProvider = serviceProvider;
         _installManager = installManager;
     }
     
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    public sealed class Settings : BaseSettings
+    public Command CreateCli()
     {
-        [CommandArgument(0, "<PACKAGE>")]
-        [Description("The package to reconfigure.")]
-        public required string PackageName { get; init; }
+        var argPackage = new Argument<string>("package", "The package to reconfigure");
+
+        var command = new Command("reconfigure", "Reconfigure an installed package")
+        {
+            argPackage
+        };
+        
+        command.SetHandler(ExecuteAsync, argPackage);
+        return command;
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    private async Task ExecuteAsync(string package)
     {
-        var meta = await _installManager.GetLatestMetaOrDefaultAsync(settings.PackageName);
+        var meta = await _installManager.GetLatestMetaOrDefaultAsync(package);
         if (meta == null)
         {
-            throw new KnownException($"No such package '{settings.PackageName}'");
+            throw new KnownException($"No such package '{package}'");
         }
 
         var configurator = _serviceProvider.GetKeyedService<IPackageConfigurator>(meta.PluginInfo.ConfiguratorRef);
@@ -47,8 +48,5 @@ public class PackageReconfigureCommand : AsyncCommand<PackageReconfigureCommand.
         
         await configurator.UnconfigurePackageAsync(installDir, meta);
         await configurator.ConfigurePackageAsync(installDir, meta);
-
-        return 0;
     }
 }
-#endif
