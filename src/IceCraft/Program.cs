@@ -68,10 +68,6 @@ builder.AddMiddleware(async (context, next) =>
     await next(context);
 });
 
-// builder.UseDefaults();
-
-#if !LEGACY_INTERFACE
-
 try
 {
     return await command.InvokeAsync(args);
@@ -87,82 +83,3 @@ catch (Exception e)
     Console.Error.WriteLine(e.ToString());
     return ExitCodes.GenericError;
 }
-
-#else
-
-var registrar = new TypeRegistrar(appServices);
-
-// Initialize command line
-
-var cmdApp = new CommandApp(registrar);
-
-cmdApp.Configure(root =>
-{
-    root.SetApplicationName("IceCraft");
-    root.SetApplicationVersion(IceCraftApp.ProductVersion);
-
-    root.AddCommand<UpdateCommand>("update")
-        .WithDescription("Regenerates package cache and refs");
-
-    root.AddCommand<InfoCommand>("info")
-        .WithDescription("Shows various metadata for a package series");
-
-    root.AddCommand<InitializeCommand>("init");
-
-    root.AddBranch<BaseSettings>("source", source =>
-    {
-        source.AddCommand<SourceSwitchCommand.EnableCommand>("enable");
-        source.AddCommand<SourceSwitchCommand.DisableCommand>("disable");
-    });
-
-    root.AddBranch<BaseSettings>("cache", cache =>
-    {
-        cache.AddCommand<ClearCacheCommand>("clear");
-        cache.AddCommand<MaintainCacheCommand>("maintain");
-        cache.AddCommand<RegenerateDependMapCommand>("regen-dependmap");
-    });
-
-    root.AddBranch<BaseSettings>("package", package =>
-    {
-        package.AddCommand<PackageListCommand>("list");
-        package.AddCommand<PackageReconfigureCommand>("reconfigure");
-        package.AddCommand<MirrorGetBestCommand>("best-mirror")
-            .WithDescription("Tests for the best mirror for a given package");
-        package.AddCommand<PackageFixBrokenCommand>("fix-broken")
-            .WithDescription("Install missing dependencies for packages");
-    });
-
-    root.AddCommand<DownloadCommand>("download");
-    root.AddCommand<InstallCommand>("install");
-    root.AddCommand<UninstallCommand>("remove");
-
-    root.SetExceptionHandler((ex, _) =>
-    {
-        switch (ex)
-        {
-            case CommandRuntimeException { InnerException: not null }:
-                Log.Fatal(ex, "Failed to set up application");
-                return;
-            case CommandRuntimeException cex:
-                AnsiConsole.MarkupLineInterpolated($"[red][bold]IceCraft: {cex.Message}[/][/]");
-                return;
-            case OperationCanceledException:
-                return;
-            // Known exceptions are errors that are expected to occur unlike Unknown error which
-            // something is terribly wrong.
-            case KnownException kex:
-                AnsiConsole.MarkupLineInterpolated($"[red][bold]IceCraft: {kex.Message}[/][/]");
-                Log.Verbose(kex, "Details:");
-                return;
-            default:
-                Log.Fatal(ex, "Unknown error occurred");
-                break;
-        }
-    });
-
-    root.SetInterceptor(new StandardInterceptor());
-});
-
-await cmdApp.RunAsync(args);
-
-#endif
