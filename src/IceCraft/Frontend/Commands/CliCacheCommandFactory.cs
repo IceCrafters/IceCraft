@@ -3,11 +3,11 @@ namespace IceCraft.Frontend.Commands;
 using System.CommandLine;
 using IceCraft.Core.Caching;
 
-public class CliCacheCommand
+public class CliCacheCommandFactory
 {
     private readonly ICacheManager _cacheManager;
 
-    public CliCacheCommand(ICacheManager cacheManager)
+    public CliCacheCommandFactory(ICacheManager cacheManager)
     {
         _cacheManager = cacheManager;
     }
@@ -61,7 +61,6 @@ public class CliCacheCommand
                 var fileName = Path.GetFileNameWithoutExtension(file);
 
                 // Skip our index file.
-                // TODO make this a constant
                 if (Path.GetFileName(file) == FileSystemCacheStorage.IndexFile)
                 {
                     continue;

@@ -1,3 +1,4 @@
+#if LEGACY_INTERFACE
 namespace IceCraft.Frontend.Commands;
 
 using System;
@@ -101,3 +102,4 @@ public class MaintainCacheCommand : Command<MaintainCacheCommand.Settings>
         return 0;
     }
 }
+#endif

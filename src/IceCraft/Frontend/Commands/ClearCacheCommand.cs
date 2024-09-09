@@ -1,3 +1,4 @@
+#if LEGACY_INTERFACE
 namespace IceCraft.Frontend.Commands;
 using IceCraft.Core.Caching;
 using Spectre.Console.Cli;
@@ -19,3 +20,4 @@ public class ClearCacheCommand : Command<BaseSettings>
         return 0;
     }
 }
+#endif

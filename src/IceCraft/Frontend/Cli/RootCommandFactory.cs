@@ -1,4 +1,4 @@
-namespace IceCraft.Frontend;
+namespace IceCraft.Frontend.Cli;
 
 using System;
 using System.CommandLine;
@@ -11,11 +11,8 @@ using IceCraft.Core.Platform;
 using IceCraft.Frontend.Commands;
 using Microsoft.Extensions.DependencyInjection;
 
-internal static class CliFrontend
+internal static class RootCommandFactory
 {
-    internal static readonly Option<bool> OptVerbose = new("--verbose", "Enable verbose output");
-    private static readonly Option<bool> OptDebug = new("--debug", "Allow debugger attach confirmation before acting");
-
     public static RootCommand CreateCommand(IServiceProvider serviceProvider)
     {
         // Commonly used dependencies
@@ -31,20 +28,26 @@ internal static class CliFrontend
 
         var sourceCmd = CreateSourceCmd(serviceProvider);
 
-        var downloadCmd = new CliDownloadCommand(sourceManager,
+        var downloadCmd = new CliDownloadCommandFactory(sourceManager,
                 indexer,
             serviceProvider.GetRequiredService<IDownloadManager>(),
             serviceProvider.GetRequiredService<IMirrorSearcher>())
             .CreateCli();
         
-        var infoCmd = new CliInfoCommand(indexer, sourceManager)
+        var infoCmd = new CliInfoCommandFactory(indexer, sourceManager)
             .CreateCli();
 
         var initCmd = new InitializeCommand(serviceProvider.GetRequiredService<IEnvironmentManager>(),
             serviceProvider.GetRequiredService<IFrontendApp>())
             .CreateCli();
 
-        var cacheCmd = new CliCacheCommand(serviceProvider.GetRequiredService<ICacheManager>())
+        var cacheCmd = new CliCacheCommandFactory(serviceProvider.GetRequiredService<ICacheManager>())
+            .CreateCli();
+
+        var packageCmd = CreatePackageCmd(sourceManager, indexer, 
+            serviceProvider.GetRequiredService<IMirrorSearcher>());
+
+        var installCmd = new InstallCommand(serviceProvider)
             .CreateCli();
 
         // Create root command
@@ -56,14 +59,33 @@ internal static class CliFrontend
             downloadCmd,
             infoCmd,
             initCmd,
-            cacheCmd
+            cacheCmd,
+            packageCmd,
+            installCmd
         };
 
         // Configure verbose options
-        root.AddGlobalOption(OptVerbose);
-        root.AddGlobalOption(OptDebug);
+        root.AddGlobalOption(FrontendUtil.OptVerbose);
+        root.AddGlobalOption(FrontendUtil.OptDebug);
 
         return root;
+    }
+
+    private static Command CreatePackageCmd(IRepositorySourceManager sourceManager,
+        IPackageIndexer indexer,
+        IMirrorSearcher mirrorSearcher)
+    {
+        // Assemble commands
+
+        var bestMirror = new CliBestMirrorCommandFactory(indexer,
+            sourceManager,
+            mirrorSearcher)
+            .CreateCli();
+
+        return new Command("package", "Perform various package tasks")
+        {
+            bestMirror
+        };
     }
 
     private static Command CreateSourceCmd(IServiceProvider serviceProvider)

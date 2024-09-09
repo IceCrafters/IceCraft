@@ -1,4 +1,4 @@
-namespace IceCraft.Frontend;
+namespace IceCraft.Frontend.Cli;
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -7,9 +7,8 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 
-public static class CliHelper
+public static class CommandUtil
 {
-    internal static readonly string BaseName = Environment.GetCommandLineArgs()[0];
     public static T? GetOpt<T>(this InvocationContext context, Option<T> option)
     {
         return context.ParseResult.GetValueForOption(option);
@@ -72,7 +71,7 @@ public static class CliHelper
 
     public static void ConfigureVerbose(this InvocationContext context)
     {
-        var optVerbose = context.ParseResult.GetValueForOption(CliFrontend.OptVerbose);
+        var optVerbose = context.ParseResult.GetValueForOption(FrontendUtil.OptVerbose);
 
         var level = LogEventLevel.Information;
 

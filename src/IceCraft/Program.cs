@@ -45,7 +45,7 @@ appServices
 #if DEBUG
 if (!Debugger.IsAttached && args.Contains("--debug"))
 {
-    AnsiConsole.WriteLine($"{CliHelper.BaseName}: Attach a debugger, and then PRESS ANY KEY...");
+    AnsiConsole.WriteLine($"{FrontendUtil.BaseName}: Attach a debugger, and then PRESS ANY KEY...");
     Console.ReadKey(true);
 }
 
@@ -56,7 +56,7 @@ DummyRepositorySource.AddDummyRepositorySource(appServices);
 
 var serviceProvider = appServices.BuildServiceProvider();
 
-var command = CliFrontend.CreateCommand(serviceProvider);
+var command = RootCommandFactory.CreateCommand(serviceProvider);
 
 // Build middleware
 var builder = new CommandLineBuilder(command);
@@ -78,7 +78,7 @@ try
 }
 catch (KnownException e)
 {
-    AnsiConsole.MarkupLineInterpolated($"[red][bold]{CliHelper.BaseName}: {e.Message}[/][/]");
+    AnsiConsole.MarkupLineInterpolated($"[red][bold]{FrontendUtil.BaseName}: {e.Message}[/][/]");
     Output.Shared.Verbose(e.StackTrace ?? "No stack trace available");
     return ExitCodes.GenericError;
 }

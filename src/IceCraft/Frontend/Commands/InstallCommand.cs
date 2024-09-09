@@ -1,6 +1,6 @@
 namespace IceCraft.Frontend.Commands;
 
-using System.ComponentModel;
+using System.CommandLine;
 using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Checksums;
 using IceCraft.Core.Archive.Dependency;
@@ -12,15 +12,25 @@ using IceCraft.Core.Installation.Analysis;
 using IceCraft.Core.Network;
 using IceCraft.Core.Platform;
 using IceCraft.Core.Util;
+using IceCraft.Frontend.Cli;
 using IceCraft.Interactive;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Semver;
 using Spectre.Console;
+
+#if LEGACY_INTERFACE
+using System.ComponentModel;
 using Spectre.Console.Cli;
+#endif
+
+using CliCommand = System.CommandLine.Command;
 
 [UsedImplicitly]
-public class InstallCommand : AsyncCommand<InstallCommand.Settings>
+public class InstallCommand
+#if LEGACY_INTERFACE
+    : AsyncCommand<InstallCommand.Settings>
+#endif
 {
     private readonly IPackageInstallManager _installManager;
     private readonly IPackageIndexer _indexer;
@@ -47,22 +57,40 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
             checksumRunner, dependencyMapper);
     }
 
-    public override ValidationResult Validate(CommandContext context, Settings settings)
+    public CliCommand CreateCli()
     {
-        if (!string.IsNullOrWhiteSpace(settings.Version)
-            // Does not need to be that strict on user input since we all make mistakes.
-            && !SemVersion.TryParse(settings.Version, SemVersionStyles.Any, out _))
+        var argPackage = new Argument<string>("package", "The package to install");
+        var argVersion = new Argument<string?>("version", () => null, "The version to install. If not specified, selects the latest version");
+
+        var optNoCleanArtefact = new Option<bool>("--no-clean-artefact", "Do not clean previous artefact before proceeding");
+        var optPrerelease = new Option<bool>(["-P", "--include-prerelease"], "Include prerelease versions when selecting latest version");
+
+        var command = new CliCommand("install")
         {
-            return ValidationResult.Error("Invalid semantic version");
-        }
+            argPackage,
+            argVersion,
+            optNoCleanArtefact,
+            optPrerelease
+        };
+        
+        command.SetHandler(async context =>
+        {
+            context.ExitCode = await ExecuteInternalAsync(context.GetOpt(optNoCleanArtefact),
+                context.GetArgNotNull(argPackage),
+                context.GetArg(argVersion),
+                context.GetOpt(optPrerelease));
+        });
 
-        return base.Validate(context, settings);
+        return command;
     }
-
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    
+    private async Task<int> ExecuteInternalAsync(bool noCleanArtefact,
+        string packageName,
+        string? version,
+        bool includePrerelease)
     {
         // Step 0: Clean artefacts
-        if (!settings.NoCleanArtefact)
+        if (!noCleanArtefact)
         {
             AnsiConsole.Status()
                 .Start("Cleaning artefacts", _ => _artefactManager.CleanArtefacts());
@@ -80,23 +108,23 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
                 {
                     // STEP: Index remote packages
                     index = await _indexer.IndexAsync(_sourceManager);
-                    if (!index.TryGetValue(settings.PackageName, out var seriesInfo))
+                    if (!index.TryGetValue(packageName, out var seriesInfo))
                     {
-                        throw new KnownException($"No such package series {settings.PackageName}");
+                        throw new KnownException($"No such package series {packageName}");
                     }
 
                     // STEP: Select version
                     ctx.Status("Acquiring version information");
-                    if (!string.IsNullOrWhiteSpace(settings.Version))
+                    if (!string.IsNullOrWhiteSpace(version))
                     {
                         // Parse user input, and store in specifiedVersion.
                         // Does not need to be that strict on user input since we all make mistakes.
-                        selectedVersion = SemVersion.Parse(settings.Version, SemVersionStyles.Any);
+                        selectedVersion = SemVersion.Parse(version, SemVersionStyles.Any);
                     }
                     else
                     {
                         selectedVersion = await Task.Run(() =>
-                            seriesInfo.Versions.GetLatestSemVersion(settings.IncludePrerelease));
+                            seriesInfo.Versions.GetLatestSemVersion(includePrerelease));
                     }
 
                     var versionInfo = seriesInfo.Versions[selectedVersion.ToString()];
@@ -138,7 +166,7 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
 
         return await _interactiveInstaller.InstallAsync(allPackagesSet, index!);
     }
-
+    
     private async Task<bool> ComparePackageAsync(PackageMeta meta)
     {
         // ReSharper disable once InvertIf
@@ -151,6 +179,27 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
         return true;
     }
 
+    #if LEGACY_INTERFACE
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    {
+        return await ExecuteInternalAsync(settings.NoCleanArtefact,
+            settings.PackageName,
+            settings.Version,
+            settings.IncludePrerelease);
+    }
+    
+    public override ValidationResult Validate(CommandContext context, Settings settings)
+    {
+        if (!string.IsNullOrWhiteSpace(settings.Version)
+            // Does not need to be that strict on user input since we all make mistakes.
+            && !SemVersion.TryParse(settings.Version, SemVersionStyles.Any, out _))
+        {
+            return ValidationResult.Error("Invalid semantic version");
+        }
+
+        return base.Validate(context, settings);
+    }
+    
     [UsedImplicitly]
     public class Settings : BaseSettings
     {
@@ -174,4 +223,5 @@ public class InstallCommand : AsyncCommand<InstallCommand.Settings>
         [UsedImplicitly]
         public bool NoCleanArtefact { get; init; }
     }
+#endif
 }

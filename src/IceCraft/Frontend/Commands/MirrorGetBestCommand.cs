@@ -1,3 +1,4 @@
+#if LEGACY_INTERFACE
 namespace IceCraft.Frontend.Commands;
 
 using System.ComponentModel;
@@ -60,3 +61,4 @@ public class MirrorGetBestCommand : AsyncCommand<MirrorGetBestCommand.Settings>
         public bool IncludePrerelease { get; init; }
     }
 }
+#endif
