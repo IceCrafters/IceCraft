@@ -1,6 +1,7 @@
 ﻿namespace IceCraft.Api.Archive.Artefacts;
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Represents an artefact available over HTTP(S).
@@ -8,8 +9,11 @@ using System.Diagnostics;
 [DebuggerDisplay($"{{{nameof(GetDebuggerDisplay)}(),nq}}")]
 public readonly struct RemoteArtefact : IEquatable<RemoteArtefact>
 {
-    public RemoteArtefact()
+    [SetsRequiredMembers]
+    public RemoteArtefact(string checksumType, string checksum)
     {
+        ChecksumType = checksumType;
+        Checksum = checksum;
     }
 
     [Obsolete("Artefacts will be downloaded from mirrors.")]
