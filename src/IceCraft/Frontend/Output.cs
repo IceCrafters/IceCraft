@@ -1,6 +1,7 @@
 namespace IceCraft.Frontend;
 
 using System;
+using IceCraft.Api.Client;
 using IceCraft.Core.Platform;
 using JetBrains.Annotations;
 using Spectre.Console;

@@ -1,7 +1,8 @@
 ﻿namespace IceCraft.Repositories.Adoptium;
 
+using IceCraft.Api.Archive.Repositories;
+using IceCraft.Api.Caching;
 using IceCraft.Core.Archive;
-using IceCraft.Core.Archive.Providers;
 using IceCraft.Core.Caching;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

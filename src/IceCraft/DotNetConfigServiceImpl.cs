@@ -1,7 +1,7 @@
 ﻿namespace IceCraft;
 
 using DotNetConfig;
-using IceCraft.Core.Configuration;
+using IceCraft.Api.Client;
 using IceCraft.Core.Platform;
 
 internal class DotNetConfigServiceImpl : IManagerConfiguration

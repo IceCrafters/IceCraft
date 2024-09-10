@@ -2,10 +2,17 @@ namespace IceCraft.Frontend.Cli;
 
 using System;
 using System.CommandLine;
+using IceCraft.Api.Archive.Indexing;
+using IceCraft.Api.Archive.Repositories;
+using IceCraft.Api.Caching;
+using IceCraft.Api.Client;
+using IceCraft.Api.Installation;
+using IceCraft.Api.Installation.Dependency;
+using IceCraft.Api.Network;
+using IceCraft.Api.Platform;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
-using IceCraft.Core.Configuration;
 using IceCraft.Core.Installation;
 using IceCraft.Core.Installation.Analysis;
 using IceCraft.Core.Network;

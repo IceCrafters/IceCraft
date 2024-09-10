@@ -1,9 +1,12 @@
 namespace IceCraft.Extensions.CentralRepo.Models;
 
 using System.Text.Json.Serialization;
+using IceCraft.Api.Archive.Artefacts;
+using IceCraft.Api.Installation.Dependency;
+using IceCraft.Api.Package;
+using IceCraft.Api.Serialization;
 using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Dependency;
-using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Serialization;
 using Semver;
 

@@ -1,9 +1,16 @@
 namespace IceCraft.Interactive;
 
+using IceCraft.Api.Archive.Artefacts;
+using IceCraft.Api.Archive.Indexing;
+using IceCraft.Api.Caching;
+using IceCraft.Api.Exceptions;
+using IceCraft.Api.Installation;
+using IceCraft.Api.Installation.Dependency;
+using IceCraft.Api.Network;
+using IceCraft.Api.Package;
 using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Checksums;
 using IceCraft.Core.Archive.Indexing;
-using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Installation;
 using IceCraft.Core.Installation.Analysis;

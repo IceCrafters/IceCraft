@@ -1,8 +1,10 @@
 namespace IceCraft.Core.Util;
 
+using IceCraft.Api.Archive.Artefacts;
+using IceCraft.Api.Archive.Indexing;
+using IceCraft.Api.Package;
 using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Indexing;
-using IceCraft.Core.Archive.Packaging;
 
 public class PackageIndexBuilder
 {

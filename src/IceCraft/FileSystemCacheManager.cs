@@ -2,8 +2,9 @@
 
 using System;
 using System.Collections.Generic;
+using IceCraft.Api.Caching;
+using IceCraft.Api.Client;
 using IceCraft.Core.Caching;
-using IceCraft.Core.Configuration;
 using Serilog;
 
 internal class FileSystemCacheManager : ICacheManager

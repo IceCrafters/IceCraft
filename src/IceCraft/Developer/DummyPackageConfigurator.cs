@@ -1,8 +1,8 @@
 namespace IceCraft.Developer;
 
 using System.Threading.Tasks;
-using IceCraft.Core.Archive.Packaging;
-using IceCraft.Core.Installation;
+using IceCraft.Api.Installation;
+using IceCraft.Api.Package;
 
 public class DummyPackageConfigurator : IPackageConfigurator
 {

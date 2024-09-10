@@ -1,5 +1,8 @@
 namespace IceCraft.Core.Installation.Execution;
 
+using IceCraft.Api.Platform;
+using IceCraft.Core.Platform;
+
 public sealed record ExecutableEntry
 {
     public required string LinkName { get; init; }

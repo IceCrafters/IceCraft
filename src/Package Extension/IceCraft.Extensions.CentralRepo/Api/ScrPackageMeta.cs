@@ -1,6 +1,6 @@
 namespace IceCraft.Extensions.CentralRepo.Api;
 
-using IceCraft.Core.Archive.Packaging;
+using IceCraft.Api.Package;
 using Mond.Binding;
 
 [MondClass("PackageMeta")]

@@ -1,8 +1,8 @@
 ﻿namespace IceCraft.Extensions.DotNet;
 
 using System.Threading.Tasks;
+using IceCraft.Api.Archive.Repositories;
 using IceCraft.Core.Archive;
-using IceCraft.Core.Archive.Providers;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Extensions.DotNet.Archive;
 using Microsoft.Deployment.DotNet.Releases;

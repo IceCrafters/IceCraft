@@ -1,5 +1,6 @@
 namespace IceCraft.Extensions.CentralRepo.Impl;
 
+using IceCraft.Api.Archive.Repositories;
 using IceCraft.Core.Archive;
 using IceCraft.Extensions.CentralRepo.Models;
 

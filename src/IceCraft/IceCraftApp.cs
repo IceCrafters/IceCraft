@@ -5,6 +5,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading.Tasks;
+using IceCraft.Api.Client;
+using IceCraft.Api.Network;
 using IceCraft.Core.Network;
 using IceCraft.Core.Platform;
 using IceCraft.Frontend;

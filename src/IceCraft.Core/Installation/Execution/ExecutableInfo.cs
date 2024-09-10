@@ -1,5 +1,8 @@
 namespace IceCraft.Core.Installation.Execution;
 
+using IceCraft.Api.Platform;
+using IceCraft.Core.Platform;
+
 public sealed record ExecutableInfo
 {
     public required IDictionary<string, ExecutableRegistrationEntry> Registrations { get; init; }

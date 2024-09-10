@@ -1,8 +1,12 @@
 namespace IceCraft.Tests;
 
+using IceCraft.Api.Archive.Artefacts;
+using IceCraft.Api.Client;
+using IceCraft.Api.Installation;
+using IceCraft.Api.Installation.Dependency;
+using IceCraft.Api.Package;
 using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Dependency;
-using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Installation;
 using IceCraft.Core.Platform;
 using IceCraft.Core.Util;

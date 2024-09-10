@@ -2,8 +2,9 @@ namespace IceCraft.Developer;
 
 using System;
 using System.Threading.Tasks;
+using IceCraft.Api.Archive.Repositories;
+using IceCraft.Api.Installation;
 using IceCraft.Core.Archive;
-using IceCraft.Core.Archive.Providers;
 using IceCraft.Core.Installation;
 using Microsoft.Extensions.DependencyInjection;
 

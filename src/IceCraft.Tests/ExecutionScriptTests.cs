@@ -1,6 +1,7 @@
 namespace IceCraft.Tests;
 
 using System.Text;
+using IceCraft.Api.Platform;
 using IceCraft.Core.Installation.Execution;
 using IceCraft.Core.Platform;
 using IceCraft.Tests.Helpers;

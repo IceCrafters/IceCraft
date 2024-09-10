@@ -1,11 +1,19 @@
 namespace IceCraft.Frontend.Commands;
 
 using System.CommandLine;
+using IceCraft.Api.Archive.Artefacts;
+using IceCraft.Api.Archive.Indexing;
+using IceCraft.Api.Archive.Repositories;
+using IceCraft.Api.Client;
+using IceCraft.Api.Exceptions;
+using IceCraft.Api.Installation;
+using IceCraft.Api.Installation.Dependency;
+using IceCraft.Api.Network;
+using IceCraft.Api.Package;
 using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Checksums;
 using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Archive.Indexing;
-using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Installation;
 using IceCraft.Core.Installation.Analysis;

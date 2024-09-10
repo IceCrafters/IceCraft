@@ -12,4 +12,7 @@
     <PackageReference Include="Semver" Version="2.3.0" />
     <PackageReference Include="TestableIO.System.IO.Abstractions" Version="21.0.29" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IceCraft.Api\IceCraft.Api.csproj" />
+  </ItemGroup>
 </Project>

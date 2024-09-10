@@ -2,9 +2,10 @@ namespace IceCraft.Tests;
 
 using System.Security.Cryptography;
 using System.Text;
+using IceCraft.Api.Archive.Artefacts;
+using IceCraft.Api.Client;
 using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Checksums;
-using IceCraft.Core.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;

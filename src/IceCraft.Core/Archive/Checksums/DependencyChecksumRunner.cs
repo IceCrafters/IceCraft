@@ -1,8 +1,10 @@
 ﻿namespace IceCraft.Core.Archive.Checksums;
 
 using System.Diagnostics;
+using IceCraft.Api.Archive.Artefacts;
+using IceCraft.Api.Client;
+using IceCraft.Api.Exceptions;
 using IceCraft.Core.Archive.Artefacts;
-using IceCraft.Core.Configuration;
 using IceCraft.Core.Util;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

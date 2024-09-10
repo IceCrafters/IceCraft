@@ -1,6 +1,7 @@
 namespace IceCraft.Core.Platform.Windows;
 
 using System.Runtime.Versioning;
+using IceCraft.Api.Platform;
 
 /// <summary>
 /// Provides environment variable management for operating systems with <c>Win32</c> API (i.e. Windows).

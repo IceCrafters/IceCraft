@@ -2,6 +2,7 @@
 
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
+using IceCraft.Api.Caching;
 using JetBrains.Annotations;
 
 [PublicAPI]

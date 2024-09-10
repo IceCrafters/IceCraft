@@ -1,6 +1,8 @@
 namespace IceCraft.Extensions.CentralRepo.Impl;
 
-using IceCraft.Core.Archive.Providers;
+using IceCraft.Api.Archive.Repositories;
+using IceCraft.Api.Caching;
+using IceCraft.Api.Client;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Platform;
 using Microsoft.Extensions.DependencyInjection;

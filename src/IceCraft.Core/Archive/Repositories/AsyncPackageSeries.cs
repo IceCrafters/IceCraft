@@ -1,5 +1,6 @@
 namespace IceCraft.Core.Archive.Repositories;
 
+using IceCraft.Api.Archive.Repositories;
 using Semver;
 
 public abstract class AsyncPackageSeries : IPackageSeries

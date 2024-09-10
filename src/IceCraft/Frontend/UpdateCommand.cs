@@ -1,6 +1,9 @@
 ﻿namespace IceCraft.Frontend;
 
 using System.CommandLine;
+using IceCraft.Api.Archive.Indexing;
+using IceCraft.Api.Archive.Repositories;
+using IceCraft.Api.Caching;
 using IceCraft.Core.Archive.Indexing;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;

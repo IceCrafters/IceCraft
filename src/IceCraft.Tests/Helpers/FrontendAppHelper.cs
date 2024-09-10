@@ -4,6 +4,8 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using IceCraft.Api.Client;
+using IceCraft.Api.Network;
 using IceCraft.Core.Network;
 using IceCraft.Core.Platform;
 using Xunit.Abstractions;

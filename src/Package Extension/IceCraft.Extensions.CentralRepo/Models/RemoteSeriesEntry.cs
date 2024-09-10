@@ -1,6 +1,6 @@
 namespace IceCraft.Extensions.CentralRepo.Models;
 
-using IceCraft.Core.Archive.Packaging;
+using IceCraft.Api.Package;
 using JetBrains.Annotations;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

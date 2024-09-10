@@ -2,6 +2,7 @@ namespace IceCraft.Core.Platform;
 
 using System.IO;
 using System.Threading.Tasks;
+using IceCraft.Api.Platform;
 using IceCraft.Core.Installation.Execution;
 
 public class PosixExecutionScriptGenerator : IExecutionScriptGenerator

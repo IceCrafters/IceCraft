@@ -3,6 +3,8 @@ namespace IceCraft.Core.Platform.Linux;
 using System.IO.Abstractions;
 using System.Runtime.Versioning;
 using System.Text.Json;
+using IceCraft.Api.Client;
+using IceCraft.Api.Platform;
 using IceCraft.Core.Serialization;
 
 /// <summary>

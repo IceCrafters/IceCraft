@@ -1,8 +1,10 @@
 namespace IceCraft.Extensions.CentralRepo.Impl;
 
 using System.Net.Http.Json;
+using IceCraft.Api.Archive.Repositories;
+using IceCraft.Api.Caching;
+using IceCraft.Api.Client;
 using IceCraft.Core.Archive;
-using IceCraft.Core.Archive.Providers;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Platform;
 using IceCraft.Extensions.CentralRepo.Models;

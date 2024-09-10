@@ -1,9 +1,11 @@
 ﻿namespace IceCraft.Repositories.Adoptium;
 
 using System.Collections.Generic;
+using IceCraft.Api.Archive.Artefacts;
+using IceCraft.Api.Archive.Repositories;
+using IceCraft.Api.Package;
 using IceCraft.Core.Archive;
 using IceCraft.Core.Archive.Artefacts;
-using IceCraft.Core.Archive.Packaging;
 using IceCraft.Repositories.Adoptium.Models;
 using Microsoft.Extensions.Logging;
 using Semver;

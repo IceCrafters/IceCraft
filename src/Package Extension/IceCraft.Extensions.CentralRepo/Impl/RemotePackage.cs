@@ -1,8 +1,10 @@
 namespace IceCraft.Extensions.CentralRepo.Impl;
 
+using IceCraft.Api.Archive.Artefacts;
+using IceCraft.Api.Archive.Repositories;
+using IceCraft.Api.Package;
 using IceCraft.Core.Archive;
 using IceCraft.Core.Archive.Artefacts;
-using IceCraft.Core.Archive.Packaging;
 using IceCraft.Extensions.CentralRepo.Models;
 
 public class RemotePackage : IPackage

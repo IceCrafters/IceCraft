@@ -1,6 +1,7 @@
 namespace IceCraft.Core.Installation;
 
-using IceCraft.Core.Archive.Packaging;
+using IceCraft.Api.Installation;
+using IceCraft.Api.Package;
 
 public class VirtualConfigurator : IPackageConfigurator
 {

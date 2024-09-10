@@ -1,8 +1,12 @@
 namespace IceCraft.Core.Archive.Dependency;
 
 using System.Runtime.CompilerServices;
+using IceCraft.Api.Archive.Indexing;
+using IceCraft.Api.Client;
+using IceCraft.Api.Installation;
+using IceCraft.Api.Installation.Dependency;
+using IceCraft.Api.Package;
 using IceCraft.Core.Archive.Indexing;
-using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Installation;
 using IceCraft.Core.Platform;
 using Microsoft.Extensions.Logging;

@@ -1,6 +1,7 @@
 namespace IceCraft.Tests.Helpers;
 
 using System;
+using IceCraft.Api.Client;
 using IceCraft.Core.Platform;
 using Xunit.Abstractions;
 

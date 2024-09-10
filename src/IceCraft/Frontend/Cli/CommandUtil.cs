@@ -2,6 +2,7 @@ namespace IceCraft.Frontend.Cli;
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using IceCraft.Api.Exceptions;
 using IceCraft.Core.Util;
 using Serilog;
 using Serilog.Events;

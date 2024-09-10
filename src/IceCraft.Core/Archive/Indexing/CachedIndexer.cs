@@ -1,6 +1,11 @@
 ﻿namespace IceCraft.Core.Archive.Indexing;
 
 using System.Threading.Tasks;
+using IceCraft.Api.Archive.Artefacts;
+using IceCraft.Api.Archive.Indexing;
+using IceCraft.Api.Archive.Repositories;
+using IceCraft.Api.Caching;
+using IceCraft.Api.Client;
 using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;

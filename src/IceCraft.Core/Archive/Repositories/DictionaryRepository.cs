@@ -1,6 +1,7 @@
 namespace IceCraft.Core.Archive.Repositories;
 
 using System.Collections.Generic;
+using IceCraft.Api.Archive.Repositories;
 
 public class DictionaryRepository : Dictionary<string, IPackageSeries>,
     IRepository

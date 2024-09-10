@@ -1,6 +1,6 @@
 namespace IceCraft.Extensions.CentralRepo.Interop;
 
-using IceCraft.Core.Archive.Packaging;
+using IceCraft.Api.Package;
 using IceCraft.Extensions.CentralRepo.Api;
 using Mond;
 

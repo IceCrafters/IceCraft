@@ -1,7 +1,6 @@
 namespace IceCraft.Frontend.Commands;
 
 using System.Threading.Tasks;
-using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Installation;
 using IceCraft.Core.Installation.Analysis;
@@ -10,6 +9,10 @@ using Semver;
 using Serilog;
 using Spectre.Console;
 using System.CommandLine;
+using IceCraft.Api.Caching;
+using IceCraft.Api.Installation;
+using IceCraft.Api.Installation.Dependency;
+using IceCraft.Api.Package;
 
 public class CliRemoveCommandFactory : ICommandFactory
 {

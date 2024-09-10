@@ -1,5 +1,7 @@
 namespace IceCraft.Core.Archive.Repositories;
 
+using IceCraft.Api.Archive.Repositories;
+
 public static class PackageSeriesExtensions
 {
     public static async Task EnumeratePackagesAsync(this IPackageSeries series, Func<IPackage, Task> consumer)

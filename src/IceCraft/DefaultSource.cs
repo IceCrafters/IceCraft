@@ -1,11 +1,12 @@
 ﻿namespace IceCraft;
 
 using System.Collections.Generic;
+using IceCraft.Api.Archive.Repositories;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Repositories.Adoptium;
 
 using SourceFactoryPair = KeyValuePair<string, Func<IServiceProvider, 
-    IceCraft.Core.Archive.Providers.IRepositorySource>>;
+    Api.Archive.Repositories.IRepositorySource>>;
 
 public class DefaultSource : IRepositoryDefaultsSupplier
 {

@@ -1,5 +1,6 @@
 namespace IceCraft.Extensions.DotNet;
 
+using IceCraft.Api.Installation;
 using IceCraft.Core.Installation;
 using SharpCompress.Common;
 using SharpCompress.Readers;

@@ -2,8 +2,10 @@ namespace IceCraft.Core.Archive.Artefacts;
 
 using System.Security.Cryptography;
 using System.Text;
+using IceCraft.Api.Archive.Artefacts;
+using IceCraft.Api.Client;
+using IceCraft.Api.Package;
 using IceCraft.Core.Archive.Checksums;
-using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Platform;
 using IceCraft.Core.Util;
 

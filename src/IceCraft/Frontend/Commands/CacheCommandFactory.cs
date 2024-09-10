@@ -1,6 +1,7 @@
 namespace IceCraft.Frontend.Commands;
 
 using System.CommandLine;
+using IceCraft.Api.Caching;
 using IceCraft.Core.Caching;
 using IceCraft.Frontend.Cli;
 

@@ -1,6 +1,9 @@
 namespace IceCraft.Extensions.DotNet;
 
-using IceCraft.Core.Archive.Packaging;
+using IceCraft.Api.Installation;
+using IceCraft.Api.Installation.Dependency;
+using IceCraft.Api.Package;
+using IceCraft.Api.Platform;
 using IceCraft.Core.Installation;
 using IceCraft.Core.Installation.Analysis;
 using IceCraft.Core.Installation.Execution;

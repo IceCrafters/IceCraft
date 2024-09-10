@@ -1,7 +1,7 @@
 namespace IceCraft.Extensions.DotNet;
 
 using System;
-using IceCraft.Core.Archive.Providers;
+using IceCraft.Api.Archive.Repositories;
 
 public class DotNetRepositorySourceFactory : IRepositorySourceFactory
 {

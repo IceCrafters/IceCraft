@@ -1,6 +1,8 @@
 namespace IceCraft.Frontend.Commands;
 
 using System.CommandLine;
+using IceCraft.Api.Exceptions;
+using IceCraft.Api.Installation;
 using IceCraft.Core.Installation;
 using IceCraft.Core.Util;
 using IceCraft.Frontend.Cli;

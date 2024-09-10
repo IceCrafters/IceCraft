@@ -1,8 +1,8 @@
 ﻿namespace IceCraft.Core.Archive.Repositories;
 
 using System;
-using IceCraft.Core.Archive.Providers;
-using IceCraft.Core.Configuration;
+using IceCraft.Api.Archive.Repositories;
+using IceCraft.Api.Client;
 using IceCraft.Core.Platform;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

@@ -2,6 +2,7 @@ namespace IceCraft.Tests.Platform;
 
 using System.IO.Abstractions.TestingHelpers;
 using System.Runtime.Versioning;
+using IceCraft.Api.Platform;
 using IceCraft.Core;
 using IceCraft.Core.Platform.Linux;
 using IceCraft.Tests.Helpers;

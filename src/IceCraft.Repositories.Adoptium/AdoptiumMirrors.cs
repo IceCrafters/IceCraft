@@ -1,6 +1,7 @@
 namespace IceCraft.Repositories.Adoptium;
 using System.Runtime.InteropServices;
 using Flurl;
+using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Repositories.Adoptium.Models;
 

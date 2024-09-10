@@ -1,5 +1,6 @@
 namespace IceCraft.Developer;
 
+using IceCraft.Api.Installation.Dependency;
 using IceCraft.Core.Archive.Dependency;
 using Semver;
 

@@ -1,6 +1,7 @@
 ﻿namespace IceCraft.Repositories.Adoptium;
 
 using System.Collections.Generic;
+using IceCraft.Api.Archive.Repositories;
 using IceCraft.Core.Archive;
 using IceCraft.Repositories.Adoptium.Models;
 using Microsoft.Extensions.Logging;

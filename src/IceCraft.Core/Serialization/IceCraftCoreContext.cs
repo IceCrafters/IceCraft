@@ -1,9 +1,12 @@
 ﻿namespace IceCraft.Core.Serialization;
 
 using System.Text.Json.Serialization;
+using IceCraft.Api.Archive.Artefacts;
+using IceCraft.Api.Archive.Indexing;
+using IceCraft.Api.Installation.Dependency;
+using IceCraft.Api.Package;
 using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Indexing;
-using IceCraft.Core.Archive.Packaging;
 using IceCraft.Core.Installation.Analysis;
 using IceCraft.Core.Installation.Execution;
 using IceCraft.Core.Installation.Storage;

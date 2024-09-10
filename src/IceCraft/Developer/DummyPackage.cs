@@ -1,10 +1,13 @@
 namespace IceCraft.Developer;
 
 using System.Collections.Generic;
+using IceCraft.Api.Archive.Artefacts;
+using IceCraft.Api.Archive.Repositories;
+using IceCraft.Api.Installation.Dependency;
+using IceCraft.Api.Package;
 using IceCraft.Core.Archive;
 using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Dependency;
-using IceCraft.Core.Archive.Packaging;
 using Semver;
 
 public class DummyPackage : IPackage

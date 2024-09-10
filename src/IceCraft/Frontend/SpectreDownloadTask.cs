@@ -1,5 +1,6 @@
 namespace IceCraft.Frontend;
 using System;
+using IceCraft.Api.Network;
 using IceCraft.Core.Network;
 using Spectre.Console;
 

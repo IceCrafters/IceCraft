@@ -4,6 +4,8 @@ using Mond.Binding;
 
 namespace IceCraft.Extensions.CentralRepo.Api;
 
+using IceCraft.Api.Client;
+
 public class ScrOutputApi
 {
     public IOutputAdapter? OutputAdapter { get; set; }

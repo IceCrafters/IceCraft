@@ -2,6 +2,7 @@
 
 using System.IO;
 using System.Text.Json;
+using IceCraft.Api.Caching;
 using IceCraft.Core.Caching;
 using IceCraft.Frontend;
 using Serilog;

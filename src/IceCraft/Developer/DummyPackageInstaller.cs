@@ -1,6 +1,7 @@
 namespace IceCraft.Developer;
 
 using System.Threading.Tasks;
+using IceCraft.Api.Installation;
 using IceCraft.Core.Installation;
 using IceCraft.Frontend;
 

@@ -1,6 +1,8 @@
 namespace IceCraft.Frontend.Commands;
 
 using System.CommandLine;
+using IceCraft.Api.Client;
+using IceCraft.Api.Platform;
 using IceCraft.Core.Platform;
 using IceCraft.Frontend.Cli;
 

@@ -1,9 +1,11 @@
 namespace IceCraft.Repositories.Adoptium;
 
 using System.Threading.Tasks;
-using IceCraft.Core.Archive.Packaging;
-using IceCraft.Core.Installation;
+using IceCraft.Api.Installation;
+using IceCraft.Api.Package;
+using IceCraft.Api.Platform;
 using IceCraft.Core.Installation.Execution;
+using IceCraft.Core.Platform;
 
 public class AdoptiumConfigurator : IPackageConfigurator
 {

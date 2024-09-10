@@ -1,7 +1,8 @@
 namespace IceCraft.Tests;
 
 using System.IO.Abstractions.TestingHelpers;
-using IceCraft.Core.Archive.Packaging;
+using IceCraft.Api.Installation;
+using IceCraft.Api.Package;
 using IceCraft.Core.Installation;
 using IceCraft.Core.Installation.Execution;
 using IceCraft.Core.Platform;
