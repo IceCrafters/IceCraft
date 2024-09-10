@@ -1,25 +1,27 @@
 namespace IceCraft.Core.Archive.Artefacts;
 
+using System.IO.Abstractions;
 using System.Security.Cryptography;
 using System.Text;
 using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Client;
 using IceCraft.Api.Package;
-using IceCraft.Core.Archive.Checksums;
-using IceCraft.Core.Platform;
-using IceCraft.Core.Util;
 
 public class ArtefactManager : IArtefactManager
 {
     private readonly IChecksumRunner _checksumRunner;
     private readonly string _artefactDirectory;
+    private readonly IFileSystem _fileSystem;
 
-    public ArtefactManager(IFrontendApp frontendApp, IChecksumRunner checksumRunner)
+    public ArtefactManager(IFrontendApp frontendApp, 
+        IChecksumRunner checksumRunner,
+        IFileSystem fileSystem)
     {
         _checksumRunner = checksumRunner;
         _artefactDirectory = Path.Combine(frontendApp.DataBasePath, "artefacts");
+        _fileSystem = fileSystem;
 
-        Directory.CreateDirectory(_artefactDirectory);
+        _fileSystem.Directory.CreateDirectory(_artefactDirectory);
     }
     
     public async Task<bool> VerifyArtefactAsync(RemoteArtefact artefact, PackageMeta package)
@@ -31,7 +33,7 @@ public class ArtefactManager : IArtefactManager
     {
         var fileName = GetArtefactPath(artefact, package);
         
-        if (!File.Exists(fileName)
+        if (!_fileSystem.File.Exists(fileName)
             || !await _checksumRunner.ValidateLocal(artefact, fileName))
         {
             return null;
@@ -45,26 +47,26 @@ public class ArtefactManager : IArtefactManager
         var idString = $"{package.Id}-{artefact.ChecksumType}-{artefact.Checksum}";
         var strHash = Convert.ToHexString(SHA512.HashData(Encoding.UTF8.GetBytes(idString)));
 
-        return Path.Combine(_artefactDirectory,
+        return _fileSystem.Path.Combine(_artefactDirectory,
             strHash);
     }
 
     public Stream CreateArtefact(RemoteArtefact artefact, PackageMeta package)
     {
         var fileName = GetArtefactPath(artefact, package);
-        return File.Create(fileName);
+        return _fileSystem.File.Create(fileName);
     }
 
     public void CleanArtefacts()
     {
-        var files = Directory.GetFiles(_artefactDirectory);
+        var files = _fileSystem.Directory.GetFiles(_artefactDirectory);
         var now = DateTime.UtcNow;
         
         foreach (var file in files)
         {
-            if (now - File.GetCreationTimeUtc(file) > TimeSpan.FromDays(7))
+            if (now - _fileSystem.File.GetCreationTimeUtc(file) > TimeSpan.FromDays(7))
             {
-                File.Delete(file);
+                _fileSystem.File.Delete(file);
             }
         }
     }

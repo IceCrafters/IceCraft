@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <ProjectReference Include="..\IceCraft.Api.Plugin\IceCraft.Api.Plugin.csproj" />
     <ProjectReference Include="..\IceCraft.Core\IceCraft.Core.csproj" />
     <ProjectReference Include="..\IceCraft.Repositories.Adoptium\IceCraft.Repositories.Adoptium.csproj" />
     <ProjectReference Include="..\Package Extension\IceCraft.Extensions.CentralRepo\IceCraft.Extensions.CentralRepo.csproj" />

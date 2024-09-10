@@ -5,10 +5,7 @@ using IceCraft.Api.Client;
 using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
-using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Dependency;
-using IceCraft.Core.Installation;
-using IceCraft.Core.Platform;
 using IceCraft.Core.Util;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -45,13 +42,13 @@ public class DependencyResolverTests
     public async Task SelectBest_SelectLatestOne()
     {
         // Arrange
-        const string DependencyName = "dependency";
-        var dependency = new DependencyReference(DependencyName, SemVersionRange.AllRelease);
-        var toSelect = new PackageMeta(DependencyName, new SemVersion(0, 2, 0), DateTime.MinValue, MockPluginInfo);
+        const string dependencyName = "dependency";
+        var dependency = new DependencyReference(dependencyName, SemVersionRange.AllRelease);
+        var toSelect = new PackageMeta(dependencyName, new SemVersion(0, 2, 0), DateTime.MinValue, MockPluginInfo);
 
         PackageMeta[] versions =
         [
-            new PackageMeta(DependencyName, new SemVersion(0, 1, 0), DateTime.MinValue, MockPluginInfo),
+            new PackageMeta(dependencyName, new SemVersion(0, 1, 0), DateTime.MinValue, MockPluginInfo),
             toSelect
         ];
 

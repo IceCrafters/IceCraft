@@ -8,12 +8,6 @@ using IceCraft.Api.Archive.Indexing;
 using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
 using IceCraft.Api.Network;
-using IceCraft.Core.Archive.Artefacts;
-using IceCraft.Core.Archive.Checksums;
-using IceCraft.Core.Archive.Indexing;
-using IceCraft.Core.Platform;
-using IceCraft.Core.Util;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 public class DownloadManager : IDownloadManager
