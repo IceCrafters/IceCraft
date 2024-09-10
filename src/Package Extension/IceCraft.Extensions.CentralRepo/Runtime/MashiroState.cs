@@ -1,6 +1,5 @@
 namespace IceCraft.Extensions.CentralRepo.Runtime;
 
-using System.Collections;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using IceCraft.Api.Archive.Artefacts;
@@ -34,8 +33,30 @@ public class MashiroState : IDisposable
         }
     }
 
+    public IEnumerable<ArtefactMirrorInfo> CreateMirrorInfo()
+    {
+        EnsureRan();
+        var variables = _shell.Runspace.SessionStateProxy.PSVariable;
+
+        var origin = variables.GetRequiredString("origin");
+        var mirrors = variables.GetHashtable("mirrors");
+
+        return MashiroRuntime.EnumerateArtefacts(origin, mirrors);
+    }
+    
+    public RemoteArtefact CreateArtefact()
+    {
+        EnsureRan();
+        var variables = _shell.Runspace.SessionStateProxy.PSVariable;
+
+        var checksum = variables.GetRequiredString("SHA512");
+        
+        return new RemoteArtefact("sha512", checksum);
+    }
+    
     public PackageMeta CreateMeta()
     {
+        EnsureRan();
         var variables = _shell.Runspace.SessionStateProxy.PSVariable;
 
         // Transcript
@@ -59,7 +80,7 @@ public class MashiroState : IDisposable
         
         // Conflicts
         var conflictTable = variables.GetHashtable("ConflictsWith");
-        var conflicts = MashiroRuntime.CreateDependencies(dependencyTable);
+        var conflicts = MashiroRuntime.CreateDependencies(conflictTable);
         
         // Meta
         var id = variables.GetRequiredString("Id");

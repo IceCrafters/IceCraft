@@ -4,6 +4,7 @@ using System.Collections;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Net.Mail;
+using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Exceptions;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
@@ -24,6 +25,36 @@ public static class MashiroRuntime
         return new MashiroState(ps, rs);
     }
 
+    public static IEnumerable<ArtefactMirrorInfo> EnumerateArtefacts(string origin, Hashtable? mirrors)
+    {
+        yield return new ArtefactMirrorInfo
+        {
+            Name = origin,
+            DownloadUri = new Uri(origin),
+            IsOrigin = true
+        };
+
+        if (mirrors == null)
+        {
+            yield break;
+        }
+        
+        foreach (DictionaryEntry mirror in mirrors)
+        {
+            if (mirror.Key is not string name
+                || mirror.Value is not string url)
+            {
+                throw new FormatException("Mirror must be string = string");
+            }
+
+            yield return new ArtefactMirrorInfo
+            {
+                Name = name,
+                DownloadUri = new Uri(url)
+            };
+        }
+    }
+    
     public static DependencyCollection CreateDependencies(Hashtable? hashtable)
     {
         if (hashtable == null)
