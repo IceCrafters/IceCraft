@@ -1,139 +1,42 @@
 namespace IceCraft.Extensions.CentralRepo.Runtime;
 
-using System.Collections;
-using System.Management.Automation;
-using System.Management.Automation.Runspaces;
-using System.Net.Mail;
-using IceCraft.Api.Archive.Artefacts;
-using IceCraft.Api.Exceptions;
-using IceCraft.Api.Installation.Dependency;
-using IceCraft.Api.Package;
-using Semver;
+using System.Reflection;
+using System.Text.Json;
+using IceCraft.Extensions.CentralRepo.Api;
+using Jint;
+using Jint.Runtime.Interop;
 
 // Full Speed Astern!
 
 public static class MashiroRuntime
 {
-    public static MashiroState CreateState(string scriptFile)
+    private static readonly JsonNamingPolicy CamelCase = JsonNamingPolicy.CamelCase;
+
+    private static readonly TypeResolver JintTypeResolver = new()
     {
-        var ps = PowerShell.Create();
-        ps.AddScript(scriptFile);
-
-        var rs = RunspaceFactory.CreateRunspace();
-        rs.Open();
-
-        return new MashiroState(ps, rs);
-    }
-
-    public static IEnumerable<ArtefactMirrorInfo> EnumerateArtefacts(string origin, Hashtable? mirrors)
-    {
-        yield return new ArtefactMirrorInfo
-        {
-            Name = origin,
-            DownloadUri = new Uri(origin),
-            IsOrigin = true
-        };
-
-        if (mirrors == null)
-        {
-            yield break;
-        }
-        
-        foreach (DictionaryEntry mirror in mirrors)
-        {
-            if (mirror.Key is not string name
-                || mirror.Value is not string url)
-            {
-                throw new FormatException("Mirror must be string = string");
-            }
-
-            yield return new ArtefactMirrorInfo
-            {
-                Name = name,
-                DownloadUri = new Uri(url)
-            };
-        }
-    }
+        MemberNameCreator = NameCreator
+    };
     
-    public static DependencyCollection CreateDependencies(Hashtable? hashtable)
+    internal static readonly Options JintOptions = new()
     {
-        if (hashtable == null)
+        Interop =
         {
-            return [];
+            TypeResolver = JintTypeResolver
         }
-        
-        var list = new List<DependencyReference>(hashtable.Count);
+    };
 
-        foreach (DictionaryEntry entry in hashtable)
-        {
-            if (entry.Key is not string package || entry.Value is not string versionStr)
-            {
-                throw new FormatException("Dependencies hashtable must be consisted of only strings");
-            }
-
-            var version = SemVersionRange.Parse(versionStr);
-            
-            list.Add(new DependencyReference(package, version));
-        }
-
-        return new DependencyCollection(list);
-    }
-    
-    public static PackageTranscript CreateTranscript(Hashtable? authors, string? packageMaintainer,
-        string? pluginMaintainer, string? license, string? description)
+    private static IEnumerable<string> NameCreator(MemberInfo info)
     {
-        IReadOnlyList<PackageAuthorInfo>? authorInfos = null;
-        if (authors != null)
-        {
-            authorInfos = ParseAuthors(authors);
-        }
-
-        PackageAuthorInfo packageMaintainerInfo = default;
-        if (packageMaintainer != null)
-        {
-            packageMaintainerInfo = ParseAuthor(packageMaintainer);
-        }
-
-        PackageAuthorInfo pluginMaintainerInfo = default;
-        if (pluginMaintainer != null)
-        {
-            pluginMaintainerInfo = ParseAuthor(pluginMaintainer);
-        }
-
-        return new PackageTranscript
-        {
-            Authors = authorInfos ?? [],
-            PluginMaintainer = pluginMaintainerInfo,
-            Description = description,
-            License = license,
-            Maintainer = packageMaintainerInfo,
-        };
+        yield return CamelCase.ConvertName(info.Name);
     }
 
-    public static IReadOnlyList<PackageAuthorInfo> ParseAuthors(Hashtable hashtable)
+    public static Engine CreateJintEngine()
     {
-        var list = new List<PackageAuthorInfo>();
-        foreach (DictionaryEntry entry in hashtable)
-        {
-            if (entry.Key is not string author || entry.Value is not string email)
-            {
-                throw new FormatException("Authors hashtable must be consisted of only strings");
-            }
-            
-            list.Add(new PackageAuthorInfo(author, email));
-        }
+        var engine = new Engine(JintOptions);
+        engine.SetValue(MashiroMetaBuilder.JsName, TypeReference.CreateTypeReference<MashiroMetaBuilder>(engine));
+        engine.SetValue("SemVer", MashiroGlobals.SemVer);
+        engine.SetValue("Author", MashiroGlobals.Author);
 
-        return list.AsReadOnly();
-    }
-    
-    public static PackageAuthorInfo ParseAuthor(string authorStr)
-    {
-        MailAddress.TryCreate(authorStr, out var address);
-        if (address is null)
-        {
-            throw new KnownException($"Invalid email address: {authorStr}");
-        }
-
-        return new PackageAuthorInfo(address.User, address.Address);
+        return engine;
     }
 }
