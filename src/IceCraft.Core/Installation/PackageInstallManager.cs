@@ -194,7 +194,7 @@ public class PackageInstallManager : IPackageInstallManager
             var objective = tempExtraction ?? expandTo;
 
             fileSystem.Directory.CreateDirectory(objective);
-            await installer.ExpandPackageAsync(artefactPath, objective);
+            await installer.ExpandPackageAsync(artefactPath, objective, meta);
         }
         catch (Exception ex)
         {
@@ -334,7 +334,7 @@ public class PackageInstallManager : IPackageInstallManager
 
         _frontend.Output.Log("Removing package {0} ({1})...", meta.Id, meta.Version);
         await configurator.UnconfigurePackageAsync(directory, meta);
-        await installer.RemovePackageAsync(directory);
+        await installer.RemovePackageAsync(directory, meta);
 
         try
         {

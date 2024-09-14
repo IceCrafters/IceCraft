@@ -36,7 +36,7 @@ public class InstallManagerTests
             null);
 
         // Assert
-        installer.Verify(x => x.ExpandPackageAsync(from, to), Times.Once());
+        installer.Verify(x => x.ExpandPackageAsync(from, to, meta), Times.Once());
     }
 
     [Fact]
