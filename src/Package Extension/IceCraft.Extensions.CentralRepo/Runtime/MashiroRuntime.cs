@@ -2,6 +2,7 @@ namespace IceCraft.Extensions.CentralRepo.Runtime;
 
 using System.Reflection;
 using System.Text.Json;
+using IceCraft.Api.Package;
 using IceCraft.Extensions.CentralRepo.Api;
 using Jint;
 using Jint.Runtime.Interop;
@@ -10,6 +11,10 @@ using Jint.Runtime.Interop;
 
 public static class MashiroRuntime
 {
+    public delegate Task ExpandPackageAsync(string artefactFile, string targetDir, PackageMeta meta);
+
+    public delegate Task RemovePackageAsync(string targetDir, PackageMeta meta);
+    
     private static readonly JsonNamingPolicy CamelCase = JsonNamingPolicy.CamelCase;
 
     private static readonly TypeResolver JintTypeResolver = new()
@@ -30,7 +35,18 @@ public static class MashiroRuntime
         yield return CamelCase.ConvertName(info.Name);
     }
 
-    public static Engine CreateJintEngine()
+    public static MashiroState CreateState(string scriptFile)
+    {
+        var engine = CreateJintEngine();
+        var script = Engine.PrepareScript(scriptFile);
+
+        var result = new MashiroState(engine, script);
+        result.AddFunctions();
+
+        return result;
+    }
+    
+    private static Engine CreateJintEngine()
     {
         var engine = new Engine(JintOptions);
         engine.SetValue(MashiroMetaBuilder.JsName, TypeReference.CreateTypeReference<MashiroMetaBuilder>(engine));
