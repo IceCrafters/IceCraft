@@ -14,6 +14,15 @@ public static class VersioningExtensions
             .First();
     }
     
+    public static SemVersion? GetLatestSemVersionOrDefault(this IDictionary<string, CachedPackageInfo> cache,
+        bool includePrerelease = false)
+    {
+        return cache.Keys.Select(x => SemVersion.Parse(x, SemVersionStyles.Strict))
+            .Where(x => !x.IsPrerelease || includePrerelease)
+            .OrderByDescending(x => x)
+            .FirstOrDefault();
+    }
+    
     public static SemVersion GetLatestSemVersion(this PackageInstallationIndex cache,
         bool includePrerelease = false)
     {
