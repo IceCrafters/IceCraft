@@ -76,6 +76,11 @@ public class MashiroState : IDisposable
         RemovePackageDelegate = action;
     }
 
+    private void MashiroOnConfigure(MashiroRuntime.OnPreprocessAsync action)
+    {
+        PreprocessPackageDelegate = action;
+    }
+
     #endregion
 
     public void RunMetadata()
@@ -108,6 +113,7 @@ public class MashiroState : IDisposable
         
         _engine.SetValue("onExpand", MashiroOnExpand);
         _engine.SetValue("onRemove", MashiroOnRemove);
+        _engine.SetValue("onConfigure", MashiroOnConfigure);
     }
 
     public void Dispose()

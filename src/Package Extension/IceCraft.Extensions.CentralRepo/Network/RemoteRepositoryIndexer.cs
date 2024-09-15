@@ -25,6 +25,7 @@ public class RemoteRepositoryIndexer
             if (dict.TryGetValue(package.Metadata.Id, out var list))
             {
                 list.Add(package);
+                continue;
             }
             
             var newList = new List<RemotePackageInfo> { package };
