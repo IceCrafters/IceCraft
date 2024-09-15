@@ -9,6 +9,7 @@
     <ItemGroup>
       <PackageReference Include="Jint" Version="4.0.2" />
       <PackageReference Include="Mond" Version="0.10.2" />
+      <PackageReference Include="SharpCompress" Version="0.38.0" />
       <PackageReference Include="System.Management.Automation" Version="7.4.5" />
     </ItemGroup>
 

@@ -8,19 +8,23 @@ using IceCraft.Core.Archive;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Platform;
 using IceCraft.Extensions.CentralRepo.Models;
+using IceCraft.Extensions.CentralRepo.Network;
 
 public class RemoteRepositorySource : IRepositorySource
 {
     private readonly IFrontendApp _frontendApp;
     private readonly HttpClient _httpClient;
     private readonly ICacheStorage _cacheStorage;
+    private readonly RemoteRepositoryManager _remoteManager;
 
     private const string StorageUuid = "E5EFB74F-6F93-42C1-85D6-B15A9556B647";
     private const string IndexCacheObj = "remoteIndex";
 
-    public RemoteRepositorySource(IFrontendApp frontendApp, ICacheManager cacheManager)
+    public RemoteRepositorySource(IFrontendApp frontendApp, ICacheManager cacheManager,
+        RemoteRepositoryManager remoteManager)
     {
         _frontendApp = frontendApp;
+        _remoteManager = remoteManager;
         _httpClient = _frontendApp.GetClient();
 
         _cacheStorage = cacheManager.GetStorage(new Guid(StorageUuid));
