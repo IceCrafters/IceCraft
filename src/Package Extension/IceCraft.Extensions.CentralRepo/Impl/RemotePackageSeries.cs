@@ -1,24 +1,20 @@
 namespace IceCraft.Extensions.CentralRepo.Impl;
 
 using IceCraft.Api.Archive.Repositories;
-using IceCraft.Api.Package;
-using IceCraft.Core.Archive;
-using IceCraft.Extensions.CentralRepo.Models;
+using IceCraft.Extensions.CentralRepo.Network;
 using Semver;
 
 public class RemotePackageSeries : IPackageSeries
 {
-    private readonly RemoteSeriesEntry _seriesEntry;
+    private readonly IReadOnlyList<RemotePackageInfo> _packages;
 
-    public RemotePackageSeries(string id, RemoteSeriesEntry seriesEntry)
+    public RemotePackageSeries(string id, IReadOnlyList<RemotePackageInfo> packages)
     {
         Name = id;
-        _seriesEntry = seriesEntry;
+        _packages = packages;
     }
 
     public string Name { get; }
-    
-    public PackageTranscript? Transcript => _seriesEntry.Transcript;
 
     public Task<IPackage?> GetLatestAsync()
     {
@@ -27,10 +23,10 @@ public class RemotePackageSeries : IPackageSeries
 
     public IEnumerable<IPackage> EnumeratePackages(CancellationToken cancellationToken = default)
     {
-        foreach (var entry in _seriesEntry.Versions)
+        foreach (var package in _packages)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            yield return new RemotePackage(entry, this, Name);
+            yield return new RemotePackage(package, this);
         }
     }
 
@@ -41,6 +37,6 @@ public class RemotePackageSeries : IPackageSeries
 
     public Task<int> GetExpectedPackageCountAsync()
     {
-        return Task.FromResult(_seriesEntry.Versions.Count);
+        return Task.FromResult(_packages.Count);
     }
 }

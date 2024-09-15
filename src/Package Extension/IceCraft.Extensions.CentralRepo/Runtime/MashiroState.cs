@@ -4,6 +4,7 @@ using Acornima.Ast;
 using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Package;
 using Jint;
+using Jint.Runtime;
 
 public class MashiroState : IDisposable
 {
@@ -14,6 +15,7 @@ public class MashiroState : IDisposable
     
     internal MashiroRuntime.ExpandPackageAsync? ExpandPackageDelegate { get; private set; }
     internal MashiroRuntime.RemovePackageAsync? RemovePackageDelegate { get; private set; }
+    internal MashiroRuntime.OnPreprocessAsync? PreprocessPackageDelegate { get; private set; }
 
     public MashiroState(Engine engine, Prepared<Script> preparedScript)
     {
@@ -21,7 +23,7 @@ public class MashiroState : IDisposable
         _preparedScript = preparedScript;
     }
 
-    public PackageMeta? PackageMeta { get; private set; }
+    private PackageMeta? PackageMeta { get; set; }
 
     public RemoteArtefact? RemoteArtefact { get; private set; }
 
@@ -75,6 +77,27 @@ public class MashiroState : IDisposable
     }
 
     #endregion
+
+    public void RunMetadata()
+    {
+        _engine.Execute(_preparedScript);
+    }
+
+    public PackageMeta? GetPackageMeta()
+    {
+        if (PackageMeta == null)
+        {
+            return null;
+        }
+
+        var pluginInfo = new PackagePluginInfo("mashiro",
+            "mashiro",
+            PreprocessPackageDelegate != null ? "mashiro" : null);
+        return PackageMeta with
+        {
+            PluginInfo = pluginInfo
+        };
+    }
 
     internal void AddFunctions()
     {

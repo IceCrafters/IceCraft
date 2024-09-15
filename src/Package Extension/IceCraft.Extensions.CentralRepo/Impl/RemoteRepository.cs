@@ -3,14 +3,17 @@ namespace IceCraft.Extensions.CentralRepo.Impl;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Core.Archive;
 using IceCraft.Extensions.CentralRepo.Models;
+using IceCraft.Extensions.CentralRepo.Network;
 
 public class RemoteRepository : IRepository
 {
-    private readonly RemoteIndex _remoteIndex;
+    private readonly IEnumerable<RemotePackageSeries> _series;
+    private readonly int _count;
 
-    public RemoteRepository(RemoteIndex remoteIndex)
+    public RemoteRepository(IEnumerable<RemotePackageSeries> series, int count)
     {
-        _remoteIndex = remoteIndex;
+        _series = series;
+        _count = count;
     }
     
     [Obsolete("Always return null.")]
@@ -21,14 +24,11 @@ public class RemoteRepository : IRepository
 
     public IEnumerable<IPackageSeries> EnumerateSeries()
     {
-        foreach (var (key, series) in _remoteIndex)
-        {
-            yield return new RemotePackageSeries(key, series);
-        }
+        return _series;
     }
 
     public int GetExpectedSeriesCount()
     {
-        return _remoteIndex.Count;
+        return _count;
     }
 }

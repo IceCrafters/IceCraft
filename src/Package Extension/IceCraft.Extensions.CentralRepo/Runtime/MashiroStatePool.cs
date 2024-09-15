@@ -13,16 +13,16 @@ public class MashiroStatePool
         _remoteManager = remoteManager;
     }
     
-    public MashiroState Get(PackageMeta packageMeta)
+    public async Task<MashiroState> GetAsync(PackageMeta packageMeta)
     {
         if (_mashiroStates.TryGetValue(packageMeta, out var value)) return value;
         
-        var result = LoadLocalState(packageMeta);
+        var result = await LoadLocalStateAsync(packageMeta);
         _mashiroStates.Add(packageMeta, result);
         return result;
     }
 
-    private MashiroState LoadLocalState(PackageMeta packageMeta)
+    private async Task<MashiroState> LoadLocalStateAsync(PackageMeta packageMeta)
     {
         var path = Path.Combine(_remoteManager.LocalCachedRepoPath, $"{packageMeta.Id}-{packageMeta.Version}.js");
 
@@ -31,6 +31,6 @@ public class MashiroStatePool
             throw new InvalidOperationException("Package is non-existent on local cache");
         }
         
-        return MashiroRuntime.CreateState(path);
+        return await MashiroRuntime.CreateStateAsync(path);
     }
 }

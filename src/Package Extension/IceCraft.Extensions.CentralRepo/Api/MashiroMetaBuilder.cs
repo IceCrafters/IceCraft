@@ -56,7 +56,7 @@ public class MashiroMetaBuilder
         return this;
     }
 
-    public MashiroMetaBuilder ReleaseDate(DateTime releaseDate)
+    public MashiroMetaBuilder Date(DateTime releaseDate)
     {
         _releaseDate = releaseDate;
         return this;

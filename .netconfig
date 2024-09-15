@@ -2,3 +2,5 @@
 
 [source "dummy-test"]
 	enabled
+[source "csr"]
+	enabled

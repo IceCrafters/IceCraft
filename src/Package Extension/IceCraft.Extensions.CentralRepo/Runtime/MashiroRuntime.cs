@@ -11,9 +11,11 @@ using Jint.Runtime.Interop;
 
 public static class MashiroRuntime
 {
-    public delegate Task ExpandPackageAsync(string artefactFile, string targetDir, PackageMeta meta);
+    public delegate Task ExpandPackageAsync(string artefactFile, string targetDir);
 
-    public delegate Task RemovePackageAsync(string targetDir, PackageMeta meta);
+    public delegate Task RemovePackageAsync(string targetDir);
+    
+    public delegate Task OnPreprocessAsync(string tempDir, string to);
     
     private static readonly JsonNamingPolicy CamelCase = JsonNamingPolicy.CamelCase;
 
@@ -32,13 +34,20 @@ public static class MashiroRuntime
 
     private static IEnumerable<string> NameCreator(MemberInfo info)
     {
-        yield return CamelCase.ConvertName(info.Name);
+        if (info.MemberType is MemberTypes.Method or MemberTypes.Property)
+        {
+            yield return CamelCase.ConvertName(info.Name);
+        }
+        
+        yield return info.Name;
     }
 
-    public static MashiroState CreateState(string scriptFile)
+    public static async Task<MashiroState> CreateStateAsync(string scriptFile)
     {
         var engine = CreateJintEngine();
-        var script = Engine.PrepareScript(scriptFile);
+
+        var script = Engine.PrepareScript(await File.ReadAllTextAsync(scriptFile),
+            Path.GetFileNameWithoutExtension(scriptFile));   
 
         var result = new MashiroState(engine, script);
         result.AddFunctions();

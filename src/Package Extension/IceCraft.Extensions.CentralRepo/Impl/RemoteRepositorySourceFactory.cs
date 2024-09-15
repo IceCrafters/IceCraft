@@ -15,6 +15,7 @@ public class RemoteRepositorySourceFactory : IRepositorySourceFactory
         name = "csr";
         return new RemoteRepositorySource(provider.GetRequiredService<IFrontendApp>(),
                 provider.GetRequiredService<ICacheManager>(),
-                provider.GetRequiredService<RemoteRepositoryManager>());
+                provider.GetRequiredService<RemoteRepositoryManager>(),
+                provider.GetRequiredService<RemoteRepositoryIndexer>());
     }
 }

@@ -20,8 +20,23 @@ public class RemoteRepositoryManager
     
     internal string LocalCachedRepoPath { get; }
 
+    internal void CleanPrevious()
+    {
+        if (Directory.Exists(LocalCachedRepoPath))
+        {
+            Directory.Delete(LocalCachedRepoPath, true);   
+        }
+    }
+    
     internal async Task InitializeCacheAsync()
     {
+        if (Directory.Exists(LocalCachedRepoPath))
+        {
+            return;
+        }
+
+        Directory.CreateDirectory(LocalCachedRepoPath);
+        
         string downloadedPath;
         await using (var archiveStream = GetArchiveStream())
         {
