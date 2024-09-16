@@ -42,17 +42,23 @@ public static class MashiroRuntime
         yield return info.Name;
     }
 
-    public static async Task<MashiroState> CreateStateAsync(string scriptFile)
+    public static MashiroState CreateState(string scriptCode, string? fileName)
     {
         var engine = CreateJintEngine();
 
-        var script = Engine.PrepareScript(await File.ReadAllTextAsync(scriptFile),
-            Path.GetFileNameWithoutExtension(scriptFile));   
+        var script = Engine.PrepareScript(scriptCode,
+            fileName);   
 
         var result = new MashiroState(engine, script);
         result.AddFunctions();
 
         return result;
+    }
+    
+    public static async Task<MashiroState> CreateStateAsync(string scriptFile)
+    {
+        return CreateState(await File.ReadAllTextAsync(scriptFile), 
+            Path.GetFileNameWithoutExtension(scriptFile));
     }
     
     private static Engine CreateJintEngine()

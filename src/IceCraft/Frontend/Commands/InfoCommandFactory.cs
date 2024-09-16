@@ -63,7 +63,7 @@ public class InfoCommandFactory : ICommandFactory
         if (latestId == null)
         {
             Output.Shared.Error("No latest version found");
-            Output.Hint("Try adding --prerelease to include latest pre-releases");
+            Output.Hint("Try adding --include-prerelease to include latest pre-releases");
             return;
         }
 

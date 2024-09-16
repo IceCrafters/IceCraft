@@ -76,7 +76,7 @@ public class RemoteRepositoryIndexer
             {
                 Artefact = state.RemoteArtefact.Value,
                 Metadata = meta,
-                Mirrors = [state.Origin]
+                Mirrors = state.GetMirrors()
             };
             
             state.Dispose();

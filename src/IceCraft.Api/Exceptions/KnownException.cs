@@ -6,7 +6,7 @@ namespace IceCraft.Api.Exceptions;
 /// </summary>
 public class KnownException : Exception
 {
-    public KnownException()
+    protected KnownException()
     {
     }
 

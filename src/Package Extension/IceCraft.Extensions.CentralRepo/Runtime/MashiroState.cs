@@ -2,6 +2,7 @@ namespace IceCraft.Extensions.CentralRepo.Runtime;
 
 using Acornima.Ast;
 using IceCraft.Api.Archive.Artefacts;
+using IceCraft.Api.Exceptions;
 using IceCraft.Api.Package;
 using Jint;
 using Jint.Runtime;
@@ -61,7 +62,7 @@ public class MashiroState : IDisposable
         _mirrors.Add(new ArtefactMirrorInfo
         {
             Name = mirrorName,
-            IsOrigin = true,
+            IsOrigin = false,
             DownloadUri = new Uri(url)
         });
     }
@@ -86,6 +87,19 @@ public class MashiroState : IDisposable
     public void RunMetadata()
     {
         _engine.Execute(_preparedScript);
+    }
+
+    public IList<ArtefactMirrorInfo> GetMirrors()
+    {
+        if (Origin == null)
+        {
+            throw new KnownInvalidOperationException("Origin is not set");
+        }
+        
+        var list = new List<ArtefactMirrorInfo>(_mirrors.Count + 1);
+        list.AddRange(_mirrors);
+        list.Add(Origin);
+        return list;
     }
 
     public PackageMeta? GetPackageMeta()
