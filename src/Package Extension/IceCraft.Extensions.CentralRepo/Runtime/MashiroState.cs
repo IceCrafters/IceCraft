@@ -4,6 +4,8 @@ using Acornima.Ast;
 using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Exceptions;
 using IceCraft.Api.Package;
+using IceCraft.Extensions.CentralRepo.Api;
+using IceCraft.Extensions.CentralRepo.Runtime.Security;
 using Jint;
 using Jint.Runtime;
 
@@ -13,6 +15,7 @@ public class MashiroState : IDisposable
     private readonly Prepared<Script> _preparedScript;
     
     private readonly List<ArtefactMirrorInfo> _mirrors = [];
+    private readonly ContextApiRoot _apiRoot = new();
     
     internal MashiroRuntime.ExpandPackageAsync? ExpandPackageDelegate { get; private set; }
     internal MashiroRuntime.RemovePackageAsync? RemovePackageDelegate { get; private set; }
@@ -86,7 +89,8 @@ public class MashiroState : IDisposable
 
     public void RunMetadata()
     {
-        _engine.Execute(_preparedScript);
+        _apiRoot.DoContext(ExecutionContextType.Metadata,
+            () => _engine.Execute(_preparedScript));
     }
 
     public IList<ArtefactMirrorInfo> GetMirrors()
@@ -128,6 +132,8 @@ public class MashiroState : IDisposable
         _engine.SetValue("onExpand", MashiroOnExpand);
         _engine.SetValue("onRemove", MashiroOnRemove);
         _engine.SetValue("onConfigure", MashiroOnConfigure);
+
+        _engine.SetValue("fs", new MashiroFs(_apiRoot));
     }
 
     public void Dispose()

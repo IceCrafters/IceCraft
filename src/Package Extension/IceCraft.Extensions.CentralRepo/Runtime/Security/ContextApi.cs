@@ -18,7 +18,7 @@ public abstract class ContextApi
 
     protected void EnsureContext()
     {
-        if (_parent.CurrentContext != _contextType)
+        if (!_parent.CurrentContext.HasFlag(_contextType))
         {
             throw new SecurityException($"The current API is not allowed in context {_parent.CurrentContext}");
         }
