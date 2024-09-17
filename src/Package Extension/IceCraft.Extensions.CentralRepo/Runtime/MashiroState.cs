@@ -135,6 +135,7 @@ public class MashiroState : IDisposable
 
         _engine.SetValue("Fs", new MashiroFs(_apiRoot));
         _engine.SetValue("CompressedArchive", new MashiroCompressedArchive(_apiRoot));
+        _engine.SetValue("Os", new MashiroOs(_apiRoot));
     }
 
     public void Dispose()
