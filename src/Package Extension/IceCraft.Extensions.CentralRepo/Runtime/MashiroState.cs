@@ -133,7 +133,8 @@ public class MashiroState : IDisposable
         _engine.SetValue("onRemove", MashiroOnRemove);
         _engine.SetValue("onConfigure", MashiroOnConfigure);
 
-        _engine.SetValue("fs", new MashiroFs(_apiRoot));
+        _engine.SetValue("Fs", new MashiroFs(_apiRoot));
+        _engine.SetValue("CompressedArchive", new MashiroCompressedArchive(_apiRoot));
     }
 
     public void Dispose()
