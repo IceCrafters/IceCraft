@@ -26,6 +26,8 @@ internal static class CommandShell
             {
                 throw LibC.CreateForFork(errno);
             }
+
+            return status;
         }
 
         throw new PlatformNotSupportedException();
