@@ -36,12 +36,48 @@ public class ContextApiTests
     }
     
     [Fact]
-    public void ContextApi_InvalidContext()
+    public void ContextApi_IncludesContext()
+    {
+        // Arrange
+        var parent = new ContextApiRoot
+        {
+            CurrentContext = ExecutionContextType.Installation
+        };
+
+        var api = new MockContextApi(ExecutionContextType.Configuration | ExecutionContextType.Installation, parent);
+        
+        // Act
+        var exception = Record.Exception(() => api.EnsureContextWrapper());
+        
+        // Assert
+        Assert.Null(exception);
+    }
+    
+    [Fact]
+    public void ContextApi_NoneContext()
     {
         // Arrange
         var parent = new ContextApiRoot
         {
             CurrentContext = ExecutionContextType.None
+        };
+
+        var api = new MockContextApi(ExecutionContextType.Installation, parent);
+        
+        // Act
+        var exception = Record.Exception(() => api.EnsureContextWrapper());
+        
+        // Assert
+        Assert.IsType<SecurityException>(exception);
+    }
+    
+    [Fact]
+    public void ContextApi_InvalidContext()
+    {
+        // Arrange
+        var parent = new ContextApiRoot
+        {
+            CurrentContext = ExecutionContextType.Metadata
         };
 
         var api = new MockContextApi(ExecutionContextType.Installation, parent);
