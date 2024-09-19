@@ -60,7 +60,7 @@ public class MashiroRuntime
         var script = Engine.PrepareScript(scriptCode,
             fileName);   
 
-        var result = new MashiroState(_serviceProvider, engine, script);
+        var result = new MashiroState(_serviceProvider, engine, script, fileName);
         result.AddFunctions();
 
         return result;

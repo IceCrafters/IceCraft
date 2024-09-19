@@ -26,7 +26,16 @@ public class MashiroStatePool
 
     private async Task<MashiroState> LoadLocalStateAsync(PackageMeta packageMeta)
     {
-        var path = Path.Combine(_remoteManager.LocalCachedRepoPath, $"{packageMeta.Id}-{packageMeta.Version}.js");
+        var fileName = $"{packageMeta.Id}-{packageMeta.Version}.js";
+        if (packageMeta.AdditionalMetadata != null
+            && packageMeta.AdditionalMetadata.TryGetValue("FileName", out var realFileName)
+            && realFileName != null)
+        {
+            fileName = $"{realFileName}.js";
+        }
+        
+        var path = Path.Combine(_remoteManager.LocalCachedRepoPath, "packages", fileName);
+        Console.WriteLine(path);
 
         if (!File.Exists(path))
         {

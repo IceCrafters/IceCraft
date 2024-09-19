@@ -26,11 +26,13 @@ public class MashiroState : IDisposable
     internal MashiroRuntime.UnConfigureAsync? UnConfigurePackageDelegate { get; private set; }
     internal MashiroRuntime.OnPreprocessAsync? PreprocessPackageDelegate { get; private set; }
 
-    public MashiroState(IServiceProvider serviceProvider, Engine engine, Prepared<Script> preparedScript)
+    public MashiroState(IServiceProvider serviceProvider, Engine engine, Prepared<Script> preparedScript,
+        string? fileName = null)
     {
         _engine = engine;
         _preparedScript = preparedScript;
         _serviceProvider = serviceProvider;
+        FileName = fileName;
     }
 
     private PackageMeta? PackageMeta { get; set; }
@@ -38,6 +40,8 @@ public class MashiroState : IDisposable
     public RemoteArtefact? RemoteArtefact { get; private set; }
 
     public ArtefactMirrorInfo? Origin { get; private set; }
+    
+    public string? FileName { get; }
 
     #region Mashiro functions
 

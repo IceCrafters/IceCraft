@@ -21,7 +21,7 @@ public class RemoteRepositoryIndexer
     internal async Task<(int, IEnumerable<RemotePackageSeries>)> IndexSeries()
     {
         var dict = new Dictionary<string, List<RemotePackageInfo>>();
-        
+
         await foreach (var package in IndexPackagesAsync())
         {
             if (dict.TryGetValue(package.Metadata.Id, out var list))
@@ -29,11 +29,11 @@ public class RemoteRepositoryIndexer
                 list.Add(package);
                 continue;
             }
-            
+
             var newList = new List<RemotePackageInfo> { package };
             dict.Add(package.Metadata.Id, newList);
         }
-        
+
         return (dict.Count, dict.Select(x => new RemotePackageSeries(x.Key, x.Value)));
     }
 
@@ -44,7 +44,7 @@ public class RemoteRepositoryIndexer
         {
             yield break;
         }
-        
+
         foreach (var file in Directory.EnumerateFiles(baseDir))
         {
             if (!file.EndsWith(".js"))
@@ -60,10 +60,10 @@ public class RemoteRepositoryIndexer
             }
             catch (JavaScriptException e)
             {
-                 _output.Warning("Execution failure for {0}", e.Location.SourceFile);
-                 _output.Warning(e.Error.ToString());
-                 _output.Warning(e.JavaScriptStackTrace ?? "<none>");
-                 continue;
+                _output.Warning("Execution failure for {0}", e.Location.SourceFile);
+                _output.Warning(e.Error.ToString());
+                _output.Warning(e.JavaScriptStackTrace ?? "<none>");
+                continue;
             }
 
             try
@@ -87,10 +87,16 @@ public class RemoteRepositoryIndexer
             yield return new RemotePackageInfo
             {
                 Artefact = state.RemoteArtefact.Value,
-                Metadata = meta,
+                Metadata = meta with
+                {
+                    AdditionalMetadata = new Dictionary<string, string?>
+                    {
+                        { "FileName", state.FileName }
+                    }
+                },
                 Mirrors = state.GetMirrors()
             };
-            
+
             state.Dispose();
         }
     }

@@ -43,7 +43,7 @@ public sealed record PackageMeta
 
     public DependencyCollection? ConflictsWith { get; init; }
 
-    public IDictionary<string, string>? AdditionalMetadata { get; init; }
+    public IDictionary<string, string?>? AdditionalMetadata { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether this package should install to a fixed location and the previous version must be
