@@ -5,6 +5,6 @@ public enum ExecutionContextType
 {
     None,
     Metadata = 1,
-    Installation = 3,
-    Configuration = 7
+    Installation = 2,
+    Configuration = 4
 }
