@@ -1,7 +1,9 @@
 namespace IceCraft.Tests.CentralRepo;
 
 using IceCraft.Api.Exceptions;
+using IceCraft.Api.Platform;
 using IceCraft.Extensions.CentralRepo.Runtime;
+using Moq;
 
 public class ScriptEngineTests
 {
@@ -83,12 +85,25 @@ public class ScriptEngineTests
 
         """;
     #endregion
+
+    private static readonly IServiceProvider ServiceProvider = CreateServiceProvider();
+
+    private static IServiceProvider CreateServiceProvider()
+    {
+        var result = new Mock<IServiceProvider>();
+
+        result.Setup(x => x.GetService(typeof(IExecutableManager)))
+            .Returns(new Mock<IExecutableManager>().Object);
+
+        return result.Object;
+    }
     
     [Fact]
     public void MashiroState_Mirror_OriginNotSet()
     {
         // Arrange
-        var state = MashiroRuntime.CreateState(TestScriptMirrorOriginNotSet, nameof(TestScriptMirrorOriginNotSet));
+        var runtime = new MashiroRuntime(ServiceProvider);
+        var state = runtime.CreateState(TestScriptMirrorOriginNotSet, nameof(TestScriptMirrorOriginNotSet));
         
         // Act
         state.RunMetadata();
@@ -102,7 +117,8 @@ public class ScriptEngineTests
     public void MashiroState_Mirror_OriginAndMirror()
     {
         // Arrange
-        var state = MashiroRuntime.CreateState(TestScriptWithOriginMirror, nameof(TestScriptWithOriginMirror));
+        var runtime = new MashiroRuntime(ServiceProvider);
+        var state = runtime.CreateState(TestScriptWithOriginMirror, nameof(TestScriptWithOriginMirror));
         
         // Act
         state.RunMetadata();
@@ -118,7 +134,8 @@ public class ScriptEngineTests
     public void MashiroState_Mirror_OriginOnly()
     {
         // Arrange
-        var state = MashiroRuntime.CreateState(TestScriptWithOnlyOrigin, nameof(TestScriptWithOnlyOrigin));
+        var runtime = new MashiroRuntime(ServiceProvider);
+        var state = runtime.CreateState(TestScriptWithOnlyOrigin, nameof(TestScriptWithOnlyOrigin));
         
         // Act
         state.RunMetadata();

@@ -9,11 +9,13 @@ public class RemoteRepositoryIndexer
 {
     private readonly RemoteRepositoryManager _remoteManager;
     private readonly IOutputAdapter _output;
+    private readonly MashiroRuntime _runtime;
 
-    public RemoteRepositoryIndexer(RemoteRepositoryManager remoteManager, IFrontendApp frontend)
+    public RemoteRepositoryIndexer(RemoteRepositoryManager remoteManager, IFrontendApp frontend, MashiroRuntime runtime)
     {
         _remoteManager = remoteManager;
         _output = frontend.Output;
+        _runtime = runtime;
     }
 
     internal async Task<(int, IEnumerable<RemotePackageSeries>)> IndexSeries()
@@ -50,7 +52,7 @@ public class RemoteRepositoryIndexer
                 continue;
             }
 
-            var state = await MashiroRuntime.CreateStateAsync(file);
+            var state = await _runtime.CreateStateAsync(file);
 
             try
             {

@@ -7,10 +7,12 @@ public class MashiroStatePool
 {
     private readonly RemoteRepositoryManager _remoteManager;
     private readonly Dictionary<PackageMeta, MashiroState> _mashiroStates = new();
+    private readonly MashiroRuntime _runtime;
 
-    public MashiroStatePool(RemoteRepositoryManager remoteManager)
+    public MashiroStatePool(RemoteRepositoryManager remoteManager, MashiroRuntime runtime)
     {
         _remoteManager = remoteManager;
+        _runtime = runtime;
     }
     
     public async Task<MashiroState> GetAsync(PackageMeta packageMeta)
@@ -31,6 +33,6 @@ public class MashiroStatePool
             throw new InvalidOperationException("Package is non-existent on local cache");
         }
         
-        return await MashiroRuntime.CreateStateAsync(path);
+        return await _runtime.CreateStateAsync(path);
     }
 }

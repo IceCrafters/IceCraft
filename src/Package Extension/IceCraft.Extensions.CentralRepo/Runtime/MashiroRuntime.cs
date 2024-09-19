@@ -9,8 +9,15 @@ using Jint.Runtime.Interop;
 
 // Full Speed Astern!
 
-public static class MashiroRuntime
+public class MashiroRuntime
 {
+    private readonly IServiceProvider _serviceProvider;
+
+    public MashiroRuntime(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+    
     public delegate Task ExpandPackageAsync(string artefactFile, string targetDir);
 
     public delegate Task RemovePackageAsync(string targetDir);
@@ -42,20 +49,20 @@ public static class MashiroRuntime
         yield return info.Name;
     }
 
-    public static MashiroState CreateState(string scriptCode, string? fileName)
+    public MashiroState CreateState(string scriptCode, string? fileName)
     {
         var engine = CreateJintEngine();
 
         var script = Engine.PrepareScript(scriptCode,
             fileName);   
 
-        var result = new MashiroState(engine, script);
+        var result = new MashiroState(_serviceProvider, engine, script);
         result.AddFunctions();
 
         return result;
     }
     
-    public static async Task<MashiroState> CreateStateAsync(string scriptFile)
+    public async Task<MashiroState> CreateStateAsync(string scriptFile)
     {
         return CreateState(await File.ReadAllTextAsync(scriptFile), 
             Path.GetFileNameWithoutExtension(scriptFile));

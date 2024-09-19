@@ -4,15 +4,18 @@ using Acornima.Ast;
 using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Exceptions;
 using IceCraft.Api.Package;
+using IceCraft.Api.Platform;
 using IceCraft.Extensions.CentralRepo.Api;
 using IceCraft.Extensions.CentralRepo.Runtime.Security;
 using Jint;
 using Jint.Runtime;
+using Microsoft.Extensions.DependencyInjection;
 
 public class MashiroState : IDisposable
 {
     private readonly Engine _engine;
     private readonly Prepared<Script> _preparedScript;
+    private readonly IServiceProvider _serviceProvider;
     
     private readonly List<ArtefactMirrorInfo> _mirrors = [];
     private readonly ContextApiRoot _apiRoot = new();
@@ -21,10 +24,11 @@ public class MashiroState : IDisposable
     internal MashiroRuntime.RemovePackageAsync? RemovePackageDelegate { get; private set; }
     internal MashiroRuntime.OnPreprocessAsync? PreprocessPackageDelegate { get; private set; }
 
-    public MashiroState(Engine engine, Prepared<Script> preparedScript)
+    public MashiroState(IServiceProvider serviceProvider, Engine engine, Prepared<Script> preparedScript)
     {
         _engine = engine;
         _preparedScript = preparedScript;
+        _serviceProvider = serviceProvider;
     }
 
     private PackageMeta? PackageMeta { get; set; }
@@ -136,6 +140,9 @@ public class MashiroState : IDisposable
         _engine.SetValue("Fs", new MashiroFs(_apiRoot));
         _engine.SetValue("CompressedArchive", new MashiroCompressedArchive(_apiRoot));
         _engine.SetValue("Os", new MashiroOs(_apiRoot));
+        _engine.SetValue("Binary", new MashiroBinary(_apiRoot,
+            _serviceProvider.GetRequiredService<IExecutableManager>(),
+            this));
     }
 
     public void Dispose()
