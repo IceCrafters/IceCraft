@@ -1,6 +1,7 @@
 namespace IceCraft.Extensions.CentralRepo;
 
 using IceCraft.Api.Archive.Repositories;
+using IceCraft.Api.Installation;
 using IceCraft.Extensions.CentralRepo.Impl;
 using IceCraft.Extensions.CentralRepo.Network;
 using IceCraft.Extensions.CentralRepo.Runtime;
@@ -15,8 +16,8 @@ public static class CsrDependencyExtensions
             .AddSingleton<RemoteRepositoryIndexer>()
             .AddSingleton<MashiroStatePool>()
             .AddSingleton<MashiroRuntime>()
-            .AddKeyedSingleton<MashiroInstaller>("mashiro")
-            .AddKeyedSingleton<MashiroPreprocessor>("mashiro")
-            .AddKeyedSingleton<MashiroInstaller>("mashiro");
+            .AddKeyedSingleton<IPackageInstaller, MashiroInstaller>("mashiro")
+            .AddKeyedSingleton<IArtefactPreprocessor, MashiroPreprocessor>("mashiro")
+            .AddKeyedSingleton<IPackageConfigurator, MashiroConfigurator>("mashiro");
     }
 }
