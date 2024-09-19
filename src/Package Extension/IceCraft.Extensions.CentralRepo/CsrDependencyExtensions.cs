@@ -13,6 +13,7 @@ public static class CsrDependencyExtensions
         return services.AddKeyedSingleton<IRepositorySourceFactory, RemoteRepositorySourceFactory>(null)
             .AddSingleton<RemoteRepositoryManager>()
             .AddSingleton<RemoteRepositoryIndexer>()
-            .AddSingleton<MashiroStatePool>();
+            .AddSingleton<MashiroStatePool>()
+            .AddSingleton<MashiroRuntime>();
     }
 }

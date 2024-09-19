@@ -84,6 +84,65 @@ public class ScriptEngineTests
         })
 
         """;
+    
+    // Intentionally same as TestScriptWithOnlyOrigin for clarity
+    private const string TestScriptWithNoPreprocessor =
+        """
+        setMeta(MetaBuilder
+                .id("example-no-preproc")
+                .version(SemVer("0.1.0-alpha"))
+                .authors(Author("foo", "foo@gmail.com"),
+                         Author("bar", "bar@gmail.com"))
+                .maintainer(Author("maintainer", "maintainer@example.com"))
+                .pluginMaintainer(Author("plugin", "plugin@example.com"))
+                .license("MIT")
+                .date(new Date())
+                .build()
+        )
+
+        setOrigin("https://example.com/src.zip")
+
+        onExpand(function (artefact, to) {
+            CompressedArchive.expand(atrefact, to)
+        })
+
+        onConfigure(function (meta, path) {
+            Binary.register("example", "example")
+        })
+
+        """;
+    
+    private const string TestScriptWithPreprocessor =
+        """
+        setMeta(MetaBuilder
+                .id("example-no-preproc")
+                .version(SemVer("0.1.0-alpha"))
+                .authors(Author("foo", "foo@gmail.com"),
+                         Author("bar", "bar@gmail.com"))
+                .maintainer(Author("maintainer", "maintainer@example.com"))
+                .pluginMaintainer(Author("plugin", "plugin@example.com"))
+                .license("MIT")
+                .date(new Date())
+                .build()
+        )
+
+        setOrigin("https://example.com/src.zip")
+
+        onExpand(function (artefact, to) {
+            CompressedArchive.expand(atrefact, to)
+        })
+        
+        onPreprocess(function (temp, to) {
+            let projFile = Fs.combinePath(temp, "Example/Example.csproj")
+        
+            Os.system(`dotnet build ${projFile} --configuration Release`)
+        })
+
+        onConfigure(function (meta, path) {
+            Binary.register("example", "example")
+        })
+
+        """;
     #endregion
 
     private static readonly IServiceProvider ServiceProvider = CreateServiceProvider();
@@ -96,6 +155,38 @@ public class ScriptEngineTests
             .Returns(new Mock<IExecutableManager>().Object);
 
         return result.Object;
+    }
+
+    [Fact]
+    public void MashiroState_Meta_NoPreprocessor()
+    {
+        // Arrange
+        var runtime = new MashiroRuntime(ServiceProvider);
+        var state = runtime.CreateState(TestScriptWithNoPreprocessor, nameof(TestScriptWithNoPreprocessor));
+        
+        // Act
+        state.RunMetadata();
+        var metadata = state.GetPackageMeta();
+        
+        // Assert
+        Assert.NotNull(metadata);
+        Assert.Null(metadata.PluginInfo.PreProcessorRef);
+    }
+    
+    [Fact]
+    public void MashiroState_Meta_WithPreprocessor()
+    {
+        // Arrange
+        var runtime = new MashiroRuntime(ServiceProvider);
+        var state = runtime.CreateState(TestScriptWithPreprocessor, nameof(TestScriptWithPreprocessor));
+        
+        // Act
+        state.RunMetadata();
+        var metadata = state.GetPackageMeta();
+        
+        // Assert
+        Assert.NotNull(metadata);
+        Assert.NotNull(metadata.PluginInfo.PreProcessorRef);
     }
     
     [Fact]

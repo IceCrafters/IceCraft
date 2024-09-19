@@ -22,6 +22,8 @@ public class MashiroState : IDisposable
     
     internal MashiroRuntime.ExpandPackageAsync? ExpandPackageDelegate { get; private set; }
     internal MashiroRuntime.RemovePackageAsync? RemovePackageDelegate { get; private set; }
+    internal MashiroRuntime.ConfigureAsync? ConfigurePackageDelegate { get; private set; }
+    internal MashiroRuntime.UnConfigureAsync? UnConfigurePackageDelegate { get; private set; }
     internal MashiroRuntime.OnPreprocessAsync? PreprocessPackageDelegate { get; private set; }
 
     public MashiroState(IServiceProvider serviceProvider, Engine engine, Prepared<Script> preparedScript)
@@ -83,10 +85,21 @@ public class MashiroState : IDisposable
     {
         RemovePackageDelegate = action;
     }
-
-    private void MashiroOnConfigure(MashiroRuntime.OnPreprocessAsync action)
+    
+    private void MashiroOnPreprocess(MashiroRuntime.OnPreprocessAsync action)
     {
         PreprocessPackageDelegate = action;
+    }
+
+
+    private void MashiroOnConfigure(MashiroRuntime.ConfigureAsync action)
+    {
+        ConfigurePackageDelegate = action;
+    }
+    
+    private void MashiroOnUnConfigure(MashiroRuntime.UnConfigureAsync action)
+    {
+        UnConfigurePackageDelegate = action;
     }
 
     #endregion
@@ -136,6 +149,7 @@ public class MashiroState : IDisposable
         _engine.SetValue("onExpand", MashiroOnExpand);
         _engine.SetValue("onRemove", MashiroOnRemove);
         _engine.SetValue("onConfigure", MashiroOnConfigure);
+        _engine.SetValue("onPreprocess", MashiroOnPreprocess);
 
         _engine.SetValue("Fs", new MashiroFs(_apiRoot));
         _engine.SetValue("CompressedArchive", new MashiroCompressedArchive(_apiRoot));

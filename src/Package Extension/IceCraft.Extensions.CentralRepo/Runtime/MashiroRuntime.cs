@@ -23,6 +23,10 @@ public class MashiroRuntime
     public delegate Task RemovePackageAsync(string targetDir);
     
     public delegate Task OnPreprocessAsync(string tempDir, string to);
+
+    public delegate Task ConfigureAsync(string installDir);
+    
+    public delegate Task UnConfigureAsync(string installDir);
     
     private static readonly JsonNamingPolicy CamelCase = JsonNamingPolicy.CamelCase;
 
