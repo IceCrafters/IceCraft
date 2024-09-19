@@ -14,6 +14,9 @@ public static class CsrDependencyExtensions
             .AddSingleton<RemoteRepositoryManager>()
             .AddSingleton<RemoteRepositoryIndexer>()
             .AddSingleton<MashiroStatePool>()
-            .AddSingleton<MashiroRuntime>();
+            .AddSingleton<MashiroRuntime>()
+            .AddKeyedSingleton<MashiroInstaller>("mashiro")
+            .AddKeyedSingleton<MashiroPreprocessor>("mashiro")
+            .AddKeyedSingleton<MashiroInstaller>("mashiro");
     }
 }
