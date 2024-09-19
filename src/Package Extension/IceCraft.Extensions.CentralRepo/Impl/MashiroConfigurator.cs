@@ -3,6 +3,7 @@ namespace IceCraft.Extensions.CentralRepo.Impl;
 using IceCraft.Api.Installation;
 using IceCraft.Api.Package;
 using IceCraft.Extensions.CentralRepo.Runtime;
+using IceCraft.Extensions.CentralRepo.Runtime.Security;
 
 public class MashiroConfigurator : IPackageConfigurator
 {
@@ -16,24 +17,26 @@ public class MashiroConfigurator : IPackageConfigurator
     public async Task ConfigurePackageAsync(string installDir, PackageMeta meta)
     {
         var state = await _statePool.GetAsync(meta);
-        state.RunMetadata();
+        state.EnsureMetadata();
         if (state.ConfigurePackageDelegate == null)
         {
             throw new InvalidOperationException($"No preprocessor registered for package {meta.Id} ({meta.Version})");
         }
         
-        await state.ConfigurePackageDelegate(installDir);
+        state.DoContext(ExecutionContextType.Configuration,
+            () => state.ConfigurePackageDelegate(installDir));
     }
 
     public async Task UnconfigurePackageAsync(string installDir, PackageMeta meta)
     {
         var state = await _statePool.GetAsync(meta);
-        state.RunMetadata();
+        state.EnsureMetadata();
         if (state.UnConfigurePackageDelegate == null)
         {
             throw new InvalidOperationException($"No preprocessor registered for package {meta.Id} ({meta.Version})");
         }
         
-        await state.UnConfigurePackageDelegate(installDir);
+        state.DoContext(ExecutionContextType.Configuration,
+            () => state.UnConfigurePackageDelegate(installDir));
     }
 }

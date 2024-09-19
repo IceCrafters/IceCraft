@@ -3,6 +3,7 @@ namespace IceCraft.Extensions.CentralRepo.Impl;
 using IceCraft.Api.Installation;
 using IceCraft.Api.Package;
 using IceCraft.Extensions.CentralRepo.Runtime;
+using IceCraft.Extensions.CentralRepo.Runtime.Security;
 
 public class MashiroPreprocessor : IArtefactPreprocessor
 {
@@ -16,12 +17,13 @@ public class MashiroPreprocessor : IArtefactPreprocessor
     public async Task Preprocess(string tempExpandDir, string installDir, PackageMeta meta)
     {
         var state = await _statePool.GetAsync(meta);
-        state.RunMetadata();
+        state.EnsureMetadata();
         if (state.PreprocessPackageDelegate == null)
         {
             throw new InvalidOperationException($"No preprocessor registered for package {meta.Id} ({meta.Version})");
         }
         
-        await state.PreprocessPackageDelegate(tempExpandDir, installDir);
+        state.DoContext(ExecutionContextType.Installation,
+            () => state.PreprocessPackageDelegate(tempExpandDir, installDir));
     }
 }

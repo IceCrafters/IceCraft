@@ -1,13 +1,27 @@
 namespace IceCraft.Extensions.CentralRepo.Api;
 
 using IceCraft.Extensions.CentralRepo.Runtime.Security;
+using JetBrains.Annotations;
 
+[PublicAPI]
 public class MashiroFs : ContextApi
 {
     public MashiroFs(ContextApiRoot parent) : base(ExecutionContextType.Installation | ExecutionContextType.Configuration, parent)
     {
     }
 
+    public string JoinPath(string path1, string path2)
+    {
+        EnsureContext();
+        return Path.Combine(path1, path2);
+    }
+    
+    public string JoinPath(params string[] paths)
+    {
+        EnsureContext();
+        return Path.Combine(paths);
+    }
+    
     public void CopyFile(string source, string destination)
     {
         EnsureContext();

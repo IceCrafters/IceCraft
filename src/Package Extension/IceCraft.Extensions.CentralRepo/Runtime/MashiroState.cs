@@ -8,7 +8,6 @@ using IceCraft.Api.Platform;
 using IceCraft.Extensions.CentralRepo.Api;
 using IceCraft.Extensions.CentralRepo.Runtime.Security;
 using Jint;
-using Jint.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 
 public class MashiroState : IDisposable
@@ -19,12 +18,14 @@ public class MashiroState : IDisposable
     
     private readonly List<ArtefactMirrorInfo> _mirrors = [];
     private readonly ContextApiRoot _apiRoot = new();
+
+    private bool _metadataRan;
     
-    internal MashiroRuntime.ExpandPackageAsync? ExpandPackageDelegate { get; private set; }
-    internal MashiroRuntime.RemovePackageAsync? RemovePackageDelegate { get; private set; }
-    internal MashiroRuntime.ConfigureAsync? ConfigurePackageDelegate { get; private set; }
-    internal MashiroRuntime.UnConfigureAsync? UnConfigurePackageDelegate { get; private set; }
-    internal MashiroRuntime.OnPreprocessAsync? PreprocessPackageDelegate { get; private set; }
+    internal MashiroRuntime.ExpandPackageDelegate? ExpandPackageDelegate { get; private set; }
+    internal MashiroRuntime.RemovePackageDelegate? RemovePackageDelegate { get; private set; }
+    internal MashiroRuntime.ConfigureDelegate? ConfigurePackageDelegate { get; private set; }
+    internal MashiroRuntime.UnConfigureDelegate? UnConfigurePackageDelegate { get; private set; }
+    internal MashiroRuntime.OnPreprocessDelegate? PreprocessPackageDelegate { get; private set; }
 
     public MashiroState(IServiceProvider serviceProvider, Engine engine, Prepared<Script> preparedScript,
         string? fileName = null)
@@ -80,38 +81,44 @@ public class MashiroState : IDisposable
         });
     }
 
-    private void MashiroOnExpand(MashiroRuntime.ExpandPackageAsync action)
+    private void MashiroOnExpand(MashiroRuntime.ExpandPackageDelegate action)
     {
         ExpandPackageDelegate = action;
     }
 
-    private void MashiroOnRemove(MashiroRuntime.RemovePackageAsync action)
+    private void MashiroOnRemove(MashiroRuntime.RemovePackageDelegate action)
     {
         RemovePackageDelegate = action;
     }
     
-    private void MashiroOnPreprocess(MashiroRuntime.OnPreprocessAsync action)
+    private void MashiroOnPreprocess(MashiroRuntime.OnPreprocessDelegate action)
     {
         PreprocessPackageDelegate = action;
     }
 
 
-    private void MashiroOnConfigure(MashiroRuntime.ConfigureAsync action)
+    private void MashiroOnConfigure(MashiroRuntime.ConfigureDelegate action)
     {
         ConfigurePackageDelegate = action;
     }
     
-    private void MashiroOnUnConfigure(MashiroRuntime.UnConfigureAsync action)
+    private void MashiroOnUnConfigure(MashiroRuntime.UnConfigureDelegate action)
     {
         UnConfigurePackageDelegate = action;
     }
 
     #endregion
 
-    public void RunMetadata()
+    public void EnsureMetadata()
     {
+        if (_metadataRan)
+        {
+            return;
+        }
+        
         _apiRoot.DoContext(ExecutionContextType.Metadata,
             () => _engine.Execute(_preparedScript));
+        _metadataRan = true;
     }
 
     public IList<ArtefactMirrorInfo> GetMirrors()
@@ -185,5 +192,15 @@ public class MashiroState : IDisposable
         VerifyDelegate(RemovePackageDelegate, "onRemove");
         VerifyDelegate(ConfigurePackageDelegate, "onConfigure");
         VerifyDelegate(UnConfigurePackageDelegate, "onUnConfigure");
+    }
+
+    public void DoContext(ExecutionContextType contextType, Action action)
+    {
+        _apiRoot.DoContext(contextType, action);
+    }
+    
+    public async Task DoContextAsync(ExecutionContextType contextType, Func<Task> action)
+    {
+        await _apiRoot.DoContextAsync(contextType, action);
     }
 }

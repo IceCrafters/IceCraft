@@ -56,7 +56,7 @@ public class RemoteRepositoryIndexer
 
             try
             {
-                state.RunMetadata();
+                state.EnsureMetadata();
             }
             catch (JavaScriptException e)
             {

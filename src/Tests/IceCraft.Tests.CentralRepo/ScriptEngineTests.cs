@@ -216,7 +216,7 @@ public class ScriptEngineTests
         var state = runtime.CreateState(TestScriptWithNoPreprocessor, nameof(TestScriptWithNoPreprocessor));
         
         // Act
-        state.RunMetadata();
+        state.EnsureMetadata();
         var metadata = state.GetPackageMeta();
         
         // Assert
@@ -232,7 +232,7 @@ public class ScriptEngineTests
         var state = runtime.CreateState(TestScriptWithPreprocessor, nameof(TestScriptWithPreprocessor));
         
         // Act
-        state.RunMetadata();
+        state.EnsureMetadata();
         var metadata = state.GetPackageMeta();
         
         // Assert
@@ -248,7 +248,7 @@ public class ScriptEngineTests
         var state = runtime.CreateState(TestScriptMirrorOriginNotSet, nameof(TestScriptMirrorOriginNotSet));
         
         // Act
-        state.RunMetadata();
+        state.EnsureMetadata();
         var exception = Record.Exception(() => state.GetMirrors());
         
         // Assert
@@ -263,7 +263,7 @@ public class ScriptEngineTests
         var state = runtime.CreateState(TestScriptWithOriginMirror, nameof(TestScriptWithOriginMirror));
         
         // Act
-        state.RunMetadata();
+        state.EnsureMetadata();
         var mirrors = state.GetMirrors();
         
         // Assert
@@ -280,7 +280,7 @@ public class ScriptEngineTests
         var state = runtime.CreateState(TestScriptWithOnlyOrigin, nameof(TestScriptWithOnlyOrigin));
         
         // Act
-        state.RunMetadata();
+        state.EnsureMetadata();
         var mirrors = state.GetMirrors();
         
         // Assert
@@ -296,7 +296,7 @@ public class ScriptEngineTests
         var state = runtime.CreateState(TestScriptWithNoDelegates, nameof(TestScriptWithNoDelegates));
         
         // Act
-        state.RunMetadata();
+        state.EnsureMetadata();
         var exception = Record.Exception(() => state.VerifyRequiredDelegates());
         
         // Assert
@@ -311,7 +311,7 @@ public class ScriptEngineTests
         var state = runtime.CreateState(TestScriptWithRequiredDelegates, nameof(TestScriptWithRequiredDelegates));
         
         // Act
-        state.RunMetadata();
+        state.EnsureMetadata();
         var exception = Record.Exception(() => state.VerifyRequiredDelegates());
         
         // Assert

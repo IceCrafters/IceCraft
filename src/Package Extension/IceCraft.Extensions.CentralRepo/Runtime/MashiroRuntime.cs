@@ -18,15 +18,15 @@ public class MashiroRuntime
         _serviceProvider = serviceProvider;
     }
     
-    public delegate Task ExpandPackageAsync(string artefactFile, string targetDir);
+    public delegate void ExpandPackageDelegate(string artefactFile, string targetDir);
 
-    public delegate Task RemovePackageAsync(string targetDir);
+    public delegate void RemovePackageDelegate(string targetDir);
     
-    public delegate Task OnPreprocessAsync(string tempDir, string to);
+    public delegate void OnPreprocessDelegate(string tempDir, string to);
 
-    public delegate Task ConfigureAsync(string installDir);
+    public delegate void ConfigureDelegate(string installDir);
     
-    public delegate Task UnConfigureAsync(string installDir);
+    public delegate void UnConfigureDelegate(string installDir);
     
     private static readonly JsonNamingPolicy CamelCase = JsonNamingPolicy.CamelCase;
 
