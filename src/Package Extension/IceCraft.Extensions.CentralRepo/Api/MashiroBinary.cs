@@ -31,4 +31,10 @@ public class MashiroBinary : ContextApi
             path,
             envVars);
     }
+
+    public async Task Unregister(string fileName)
+    {
+        await _executableManager.UnregisterAsync(_state.GetPackageMeta()!,
+            fileName);
+    }
 }
