@@ -149,6 +149,7 @@ public class MashiroState : IDisposable
         _engine.SetValue("onExpand", MashiroOnExpand);
         _engine.SetValue("onRemove", MashiroOnRemove);
         _engine.SetValue("onConfigure", MashiroOnConfigure);
+        _engine.SetValue("onUnConfigure", MashiroOnUnConfigure);
         _engine.SetValue("onPreprocess", MashiroOnPreprocess);
 
         _engine.SetValue("Fs", new MashiroFs(_apiRoot));
@@ -163,5 +164,22 @@ public class MashiroState : IDisposable
     {
         _engine.Dispose();
         GC.SuppressFinalize(this);
+    }
+
+    private static void VerifyDelegate<T>(T? dlg, string name)
+        where T: Delegate
+    {
+        if (dlg == null)
+        {
+            throw new InvalidOperationException($"{name} must be called and set with a required value.");
+        }
+    }
+    
+    public void VerifyRequiredDelegates()
+    {
+        VerifyDelegate(ExpandPackageDelegate, "onExpand");
+        VerifyDelegate(RemovePackageDelegate, "onRemove");
+        VerifyDelegate(ConfigurePackageDelegate, "onConfigure");
+        VerifyDelegate(UnConfigurePackageDelegate, "onUnConfigure");
     }
 }

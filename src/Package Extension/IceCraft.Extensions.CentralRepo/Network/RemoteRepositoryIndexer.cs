@@ -66,6 +66,16 @@ public class RemoteRepositoryIndexer
                  continue;
             }
 
+            try
+            {
+                state.VerifyRequiredDelegates();
+            }
+            catch (InvalidOperationException e)
+            {
+                _output.Warning(e.Message);
+                continue;
+            }
+
             var meta = state.GetPackageMeta();
             if (!state.RemoteArtefact.HasValue
                 || state.Origin == null
