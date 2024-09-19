@@ -18,6 +18,34 @@ public class ContextApiTests
     }
     
     [Fact]
+    public void ContextApi_DoContext()
+    {
+        // Arrange
+        var parent = new ContextApiRoot();
+
+        // Act
+        var contextType = ExecutionContextType.None;
+        parent.DoContext(ExecutionContextType.Installation, () => contextType = parent.CurrentContext);
+        
+        // Assert
+        Assert.Equal(ExecutionContextType.Installation, contextType);
+    }
+    
+    [Fact]
+    public async Task ContextApi_DoContextAsync()
+    {
+        // Arrange
+        var parent = new ContextApiRoot();
+
+        // Act
+        var contextType = ExecutionContextType.None;
+        await parent.DoContextAsync(ExecutionContextType.Installation, () => Task.FromResult(contextType = parent.CurrentContext));
+        
+        // Assert
+        Assert.Equal(ExecutionContextType.Installation, contextType);
+    }
+    
+    [Fact]
     public void ContextApi_SameContext()
     {
         // Arrange
