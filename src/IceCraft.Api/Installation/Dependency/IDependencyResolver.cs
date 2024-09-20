@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Api.Installation.Dependency;
 
 using IceCraft.Api.Archive.Indexing;
@@ -13,6 +17,7 @@ public interface IDependencyResolver
     /// <param name="meta">The package to resolve dependencies for.</param>
     /// <param name="index">The package index to resolve dependencies from.</param>
     /// <param name="setToAppend">The set to append dependencies from. A growable list like <see cref="HashSet{T}"/> is recommended.</param>
+    /// <param name="cancellationToken">The token to cancel the operation.</param>
     /// <exception cref="DependencyException">Dependency is either invalid or cannot be satisfied.</exception>
     /// <exception cref="OperationCanceledException">Operation is cancelled.</exception>
     Task ResolveTree(PackageMeta meta, PackageIndex index, ISet<PackageMeta> setToAppend, CancellationToken cancellationToken = default);
@@ -22,6 +27,7 @@ public interface IDependencyResolver
     /// </summary>
     /// <param name="meta">The package to resolve dependencies for.</param>
     /// <param name="index">The package index to resolve dependencies from.</param>
+    /// <param name="cancellationToken">The token to cancel the operation.</param>
     /// <exception cref="DependencyException">Dependency is either invalid or cannot be satisfied.</exception>
     /// <exception cref="OperationCanceledException">Operation is cancelled.</exception>
     IAsyncEnumerable<PackageMeta> ResolveDependencies(PackageMeta meta, PackageIndex index, CancellationToken cancellationToken = default);

@@ -1,4 +1,8 @@
-﻿namespace IceCraft.Api.Package;
+﻿// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
+namespace IceCraft.Api.Package;
 
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;

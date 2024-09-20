@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Api.Archive.Indexing;
 
 using IceCraft.Api.Installation;
@@ -26,7 +30,7 @@ public static class VersioningExtensions
     public static SemVersion GetLatestSemVersion(this PackageInstallationIndex cache,
         bool includePrerelease = false)
     {
-        return Enumerable.Select<string, SemVersion>(cache.Keys, x => SemVersion.Parse(x, SemVersionStyles.Strict))
+        return cache.Keys.Select<string, SemVersion>(x => SemVersion.Parse(x, SemVersionStyles.Strict))
             .Where(x => !x.IsPrerelease || includePrerelease)
             .OrderByDescending(x => x)
             .First();

@@ -1,4 +1,8 @@
-﻿namespace IceCraft.Api.Archive.Artefacts;
+﻿// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
+namespace IceCraft.Api.Archive.Artefacts;
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -24,12 +28,32 @@ public readonly struct RemoteArtefact : IEquatable<RemoteArtefact>
 
     public bool Equals(RemoteArtefact other)
     {
-        return other.ChecksumType == this.ChecksumType
-            && other.Checksum.Equals(this.Checksum, StringComparison.OrdinalIgnoreCase);
+        return other.ChecksumType == ChecksumType
+            && other.Checksum.Equals(Checksum, StringComparison.OrdinalIgnoreCase);
     }
 
     private string GetDebuggerDisplay()
     {
         return $"RemoteArtefact{{Checksum={Checksum},Validator=(is {ChecksumType.GetType()})}}";
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is RemoteArtefact artefact && Equals(artefact);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Checksum, ChecksumType);
+    }
+
+    public static bool operator ==(RemoteArtefact left, RemoteArtefact right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(RemoteArtefact left, RemoteArtefact right)
+    {
+        return !(left == right);
     }
 }
