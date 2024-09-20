@@ -1,8 +1,8 @@
 namespace IceCraft.Extensions.CentralRepo.Runtime;
 
+using System.IO.Abstractions;
 using System.Reflection;
 using System.Text.Json;
-using IceCraft.Api.Package;
 using IceCraft.Extensions.CentralRepo.Api;
 using Jint;
 using Jint.Runtime.Interop;
@@ -12,10 +12,12 @@ using Jint.Runtime.Interop;
 public class MashiroRuntime
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly IFileSystem _fileSystem;
 
-    public MashiroRuntime(IServiceProvider serviceProvider)
+    public MashiroRuntime(IServiceProvider serviceProvider, IFileSystem fileSystem)
     {
         _serviceProvider = serviceProvider;
+        _fileSystem = fileSystem;
     }
     
     public delegate void ExpandPackageDelegate(string artefactFile, string targetDir);
@@ -35,7 +37,7 @@ public class MashiroRuntime
         MemberNameCreator = NameCreator
     };
     
-    internal static readonly Options JintOptions = new()
+    private static readonly Options JintOptions = new()
     {
         Interop =
         {
@@ -68,8 +70,8 @@ public class MashiroRuntime
     
     public async Task<MashiroState> CreateStateAsync(string scriptFile)
     {
-        return CreateState(await File.ReadAllTextAsync(scriptFile), 
-            Path.GetFileNameWithoutExtension(scriptFile));
+        return CreateState(await _fileSystem.File.ReadAllTextAsync(scriptFile), 
+            _fileSystem.Path.GetFileNameWithoutExtension(scriptFile));
     }
     
     private static Engine CreateJintEngine()

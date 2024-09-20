@@ -1,5 +1,6 @@
 namespace IceCraft.Extensions.CentralRepo.Network;
 
+using System.IO.Abstractions;
 using IceCraft.Api.Client;
 using IceCraft.Extensions.CentralRepo.Impl;
 using IceCraft.Extensions.CentralRepo.Runtime;
@@ -10,12 +11,17 @@ public class RemoteRepositoryIndexer
     private readonly RemoteRepositoryManager _remoteManager;
     private readonly IOutputAdapter _output;
     private readonly MashiroRuntime _runtime;
+    private readonly IFileSystem _fileSystem;
 
-    public RemoteRepositoryIndexer(RemoteRepositoryManager remoteManager, IFrontendApp frontend, MashiroRuntime runtime)
+    public RemoteRepositoryIndexer(RemoteRepositoryManager remoteManager, 
+        IFrontendApp frontend, 
+        MashiroRuntime runtime, 
+        IFileSystem fileSystem)
     {
         _remoteManager = remoteManager;
         _output = frontend.Output;
         _runtime = runtime;
+        _fileSystem = fileSystem;
     }
 
     internal async Task<(int, IEnumerable<RemotePackageSeries>)> IndexSeries()
@@ -39,13 +45,13 @@ public class RemoteRepositoryIndexer
 
     private async IAsyncEnumerable<RemotePackageInfo> IndexPackagesAsync()
     {
-        var baseDir = Path.Combine(_remoteManager.LocalCachedRepoPath, "packages");
-        if (!Directory.Exists(baseDir))
+        var baseDir = _fileSystem.Path.Combine(_remoteManager.LocalCachedRepoPath, "packages");
+        if (!_fileSystem.Directory.Exists(baseDir))
         {
             yield break;
         }
 
-        foreach (var file in Directory.EnumerateFiles(baseDir))
+        foreach (var file in _fileSystem.Directory.EnumerateFiles(baseDir))
         {
             if (!file.EndsWith(".js"))
             {

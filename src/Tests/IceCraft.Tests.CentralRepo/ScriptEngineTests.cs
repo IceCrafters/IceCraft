@@ -1,5 +1,6 @@
 namespace IceCraft.Tests.CentralRepo;
 
+using System.IO.Abstractions.TestingHelpers;
 using IceCraft.Api.Exceptions;
 using IceCraft.Api.Platform;
 using IceCraft.Extensions.CentralRepo.Runtime;
@@ -212,7 +213,7 @@ public class ScriptEngineTests
     public void MashiroState_Meta_NoPreprocessor()
     {
         // Arrange
-        var runtime = new MashiroRuntime(ServiceProvider);
+        var runtime = new MashiroRuntime(ServiceProvider, new MockFileSystem());
         var state = runtime.CreateState(TestScriptWithNoPreprocessor, nameof(TestScriptWithNoPreprocessor));
         
         // Act
@@ -228,7 +229,7 @@ public class ScriptEngineTests
     public void MashiroState_Meta_WithPreprocessor()
     {
         // Arrange
-        var runtime = new MashiroRuntime(ServiceProvider);
+        var runtime = new MashiroRuntime(ServiceProvider, new MockFileSystem());
         var state = runtime.CreateState(TestScriptWithPreprocessor, nameof(TestScriptWithPreprocessor));
         
         // Act
@@ -244,7 +245,7 @@ public class ScriptEngineTests
     public void MashiroState_Mirror_OriginNotSet()
     {
         // Arrange
-        var runtime = new MashiroRuntime(ServiceProvider);
+        var runtime = new MashiroRuntime(ServiceProvider, new MockFileSystem());
         var state = runtime.CreateState(TestScriptMirrorOriginNotSet, nameof(TestScriptMirrorOriginNotSet));
         
         // Act
@@ -259,7 +260,7 @@ public class ScriptEngineTests
     public void MashiroState_Mirror_OriginAndMirror()
     {
         // Arrange
-        var runtime = new MashiroRuntime(ServiceProvider);
+        var runtime = new MashiroRuntime(ServiceProvider, new MockFileSystem());
         var state = runtime.CreateState(TestScriptWithOriginMirror, nameof(TestScriptWithOriginMirror));
         
         // Act
@@ -276,7 +277,7 @@ public class ScriptEngineTests
     public void MashiroState_Mirror_OriginOnly()
     {
         // Arrange
-        var runtime = new MashiroRuntime(ServiceProvider);
+        var runtime = new MashiroRuntime(ServiceProvider, new MockFileSystem());
         var state = runtime.CreateState(TestScriptWithOnlyOrigin, nameof(TestScriptWithOnlyOrigin));
         
         // Act
@@ -292,7 +293,7 @@ public class ScriptEngineTests
     public void MashiroState_Delegate_WithNone()
     {
         // Arrange
-        var runtime = new MashiroRuntime(ServiceProvider);
+        var runtime = new MashiroRuntime(ServiceProvider, new MockFileSystem());
         var state = runtime.CreateState(TestScriptWithNoDelegates, nameof(TestScriptWithNoDelegates));
         
         // Act
@@ -307,7 +308,7 @@ public class ScriptEngineTests
     public void MashiroState_Delegate_WithRequired()
     {
         // Arrange
-        var runtime = new MashiroRuntime(ServiceProvider);
+        var runtime = new MashiroRuntime(ServiceProvider, new MockFileSystem());
         var state = runtime.CreateState(TestScriptWithRequiredDelegates, nameof(TestScriptWithRequiredDelegates));
         
         // Act

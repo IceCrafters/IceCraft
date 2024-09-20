@@ -1,5 +1,6 @@
 namespace IceCraft.Extensions.CentralRepo.Runtime;
 
+using System.IO.Abstractions;
 using IceCraft.Api.Package;
 using IceCraft.Extensions.CentralRepo.Network;
 
@@ -8,11 +9,15 @@ public class MashiroStatePool
     private readonly RemoteRepositoryManager _remoteManager;
     private readonly Dictionary<PackageMeta, MashiroState> _mashiroStates = new();
     private readonly MashiroRuntime _runtime;
+    private readonly IFileSystem _fileSystem;
 
-    public MashiroStatePool(RemoteRepositoryManager remoteManager, MashiroRuntime runtime)
+    public MashiroStatePool(RemoteRepositoryManager remoteManager, 
+        MashiroRuntime runtime,
+        IFileSystem fileSystem)
     {
         _remoteManager = remoteManager;
         _runtime = runtime;
+        _fileSystem = fileSystem;
     }
     
     public async Task<MashiroState> GetAsync(PackageMeta packageMeta)
@@ -34,14 +39,15 @@ public class MashiroStatePool
             fileName = $"{realFileName}.js";
         }
         
-        var path = Path.Combine(_remoteManager.LocalCachedRepoPath, "packages", fileName);
+        var path = _fileSystem.Path.Combine(_remoteManager.LocalCachedRepoPath, "packages", fileName);
         Console.WriteLine(path);
 
-        if (!File.Exists(path))
+        if (!_fileSystem.File.Exists(path))
         {
             throw new InvalidOperationException("Package is non-existent on local cache");
         }
         
-        return await _runtime.CreateStateAsync(path);
+        return _runtime.CreateState(await _fileSystem.File.ReadAllTextAsync(path), 
+            Path.GetFileNameWithoutExtension(path));
     }
 }

@@ -1,5 +1,6 @@
 namespace IceCraft.Extensions.CentralRepo.Impl;
 
+using System.IO.Abstractions;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Caching;
 using IceCraft.Api.Client;
