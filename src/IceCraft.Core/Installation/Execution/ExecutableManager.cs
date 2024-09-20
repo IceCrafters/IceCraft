@@ -7,7 +7,6 @@ using IceCraft.Api.Client;
 using IceCraft.Api.Installation;
 using IceCraft.Api.Package;
 using IceCraft.Api.Platform;
-using IceCraft.Core.Platform;
 using IceCraft.Core.Serialization;
 using Microsoft.Extensions.Logging;
 

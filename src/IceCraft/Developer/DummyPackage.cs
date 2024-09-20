@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Developer;
 
 using System.Collections.Generic;
@@ -5,9 +9,6 @@ using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
-using IceCraft.Core.Archive;
-using IceCraft.Core.Archive.Artefacts;
-using IceCraft.Core.Archive.Dependency;
 using Semver;
 
 public class DummyPackage : IPackage
@@ -55,7 +56,7 @@ public class DummyPackage : IPackage
         };
     }
 
-    public IEnumerable<ArtefactMirrorInfo>? GetMirrors()
+    public IEnumerable<ArtefactMirrorInfo> GetMirrors()
     {
         return
         [

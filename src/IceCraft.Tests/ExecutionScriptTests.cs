@@ -1,14 +1,17 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Tests;
 
 using System.Text;
 using IceCraft.Api.Platform;
-using IceCraft.Core.Installation.Execution;
 using IceCraft.Core.Platform;
 using IceCraft.Tests.Helpers;
 
 public class ExecutionScriptTests
 {
-    private static readonly ExecutableRegistrationEntry DummyEntry_NoArgs = new()
+    private static readonly ExecutableRegistrationEntry DummyEntryNoArgs = new()
     {
         LinkTarget = "test",
         PackageRef = "test"
@@ -24,7 +27,7 @@ public class ExecutionScriptTests
 
         // Act
         var stream = new MemoryStream();
-        await generator.WriteExecutionScriptAsync(DummyEntry_NoArgs, FilePath, stream);
+        await generator.WriteExecutionScriptAsync(DummyEntryNoArgs, FilePath, stream);
         stream.Close();
 
         // Assert

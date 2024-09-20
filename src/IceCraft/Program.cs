@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.Diagnostics;
@@ -8,10 +12,6 @@ using IceCraft.Api.Caching;
 using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
 using IceCraft.Core;
-using IceCraft.Core.Archive.Repositories;
-using IceCraft.Core.Caching;
-using IceCraft.Core.Platform;
-using IceCraft.Core.Util;
 using IceCraft.Developer;
 using IceCraft.Extensions.CentralRepo;
 using IceCraft.Extensions.DotNet;
@@ -21,12 +21,6 @@ using IceCraft.Repositories.Adoptium;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Spectre.Console;
-
-#if LEGACY_INTERFACE
-using IceCraft.Core.Util;
-using IceCraft.Frontend.Commands;
-using Spectre.Console.Cli;
-#endif
 
 IceCraftApp.Initialize();
 var appServices = new ServiceCollection();

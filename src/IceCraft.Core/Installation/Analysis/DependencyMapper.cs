@@ -8,8 +8,6 @@ using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
 using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Caching;
-using IceCraft.Core.Installation.Storage;
-using IceCraft.Core.Platform;
 using IceCraft.Core.Serialization;
 
 public class DependencyMapper : IDependencyMapper, ICacheClearable

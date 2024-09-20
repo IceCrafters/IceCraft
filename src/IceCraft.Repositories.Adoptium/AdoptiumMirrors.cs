@@ -1,8 +1,11 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Repositories.Adoptium;
 using System.Runtime.InteropServices;
 using Flurl;
 using IceCraft.Api.Archive.Artefacts;
-using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Repositories.Adoptium.Models;
 
 public static class AdoptiumMirrors

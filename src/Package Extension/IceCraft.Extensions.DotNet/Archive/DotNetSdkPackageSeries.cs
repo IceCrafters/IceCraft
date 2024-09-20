@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Extensions.DotNet.Archive;
 
 using System.Collections.Generic;
@@ -5,7 +9,6 @@ using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using IceCraft.Api.Archive.Repositories;
-using IceCraft.Core.Archive;
 using IceCraft.Core.Archive.Repositories;
 using Microsoft.Deployment.DotNet.Releases;
 using Semver;

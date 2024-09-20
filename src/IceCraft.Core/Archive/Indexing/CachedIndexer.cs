@@ -1,4 +1,8 @@
-﻿namespace IceCraft.Core.Archive.Indexing;
+﻿// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
+namespace IceCraft.Core.Archive.Indexing;
 
 using System.Threading.Tasks;
 using IceCraft.Api.Archive.Artefacts;
@@ -6,10 +10,8 @@ using IceCraft.Api.Archive.Indexing;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Caching;
 using IceCraft.Api.Client;
-using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
-using IceCraft.Core.Platform;
 using IceCraft.Core.Serialization;
 using Microsoft.Extensions.Logging;
 
@@ -98,8 +100,8 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
         _cacheStorage.DeleteObject(PackageIndexStorage);
     }
 
-    private void IterateSeriesInternal(IPackageSeries series,
-        IDictionary<string, CachedPackageInfo> versions,
+    private void IterateSeriesInternal(IPackageSeries series, 
+        Dictionary<string, CachedPackageInfo> versions,
         CancellationToken cancellationToken = default)
     {
         foreach (var package in series.EnumeratePackages(cancellationToken))
@@ -134,7 +136,7 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
     }
     
     private async Task IterateSeriesInternalAsync(AsyncPackageSeries series,
-        IDictionary<string, CachedPackageInfo> versions,
+        Dictionary<string, CachedPackageInfo> versions,
         CancellationToken cancellationToken = default)
     {
         await foreach (var package in series.EnumeratePackagesAsync(cancellationToken))

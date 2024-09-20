@@ -1,9 +1,12 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Frontend.Cli;
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using IceCraft.Api.Exceptions;
-using IceCraft.Core.Util;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;

@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Interactive;
 
 using IceCraft.Api.Archive.Artefacts;
@@ -8,14 +12,6 @@ using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Network;
 using IceCraft.Api.Package;
-using IceCraft.Core.Archive.Artefacts;
-using IceCraft.Core.Archive.Checksums;
-using IceCraft.Core.Archive.Indexing;
-using IceCraft.Core.Caching;
-using IceCraft.Core.Installation;
-using IceCraft.Core.Installation.Analysis;
-using IceCraft.Core.Network;
-using IceCraft.Core.Util;
 using IceCraft.Frontend;
 using Spectre.Console;
 
@@ -69,7 +65,7 @@ public class InteractiveInstaller
                 // Go through every packages to install and queue download for them.
                 foreach (var package in packages)
                 {
-                    var packageInfo = index!.GetPackageInfo(package);
+                    var packageInfo = index.GetPackageInfo(package);
 
                     var artefactFile = await _artefactManager.GetSafeArtefactPathAsync(packageInfo.Artefact,
                         packageInfo.Metadata);

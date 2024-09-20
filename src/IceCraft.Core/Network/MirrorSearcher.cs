@@ -1,14 +1,10 @@
 namespace IceCraft.Core.Network;
 
 using System.Diagnostics;
-using System.Net;
 using System.Net.NetworkInformation;
-using System.Text;
 using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Client;
 using IceCraft.Api.Network;
-using IceCraft.Core.Archive.Artefacts;
-using IceCraft.Core.Platform;
 using Microsoft.Extensions.Logging;
 
 public class MirrorSearcher : IMirrorSearcher

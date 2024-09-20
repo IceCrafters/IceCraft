@@ -1,11 +1,13 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Developer;
 
 using System;
 using System.Threading.Tasks;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Installation;
-using IceCraft.Core.Archive;
-using IceCraft.Core.Installation;
 using Microsoft.Extensions.DependencyInjection;
 
 public class DummyRepositorySource : IRepositorySource

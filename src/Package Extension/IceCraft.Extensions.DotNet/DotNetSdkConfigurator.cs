@@ -1,13 +1,13 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Extensions.DotNet;
 
 using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
 using IceCraft.Api.Platform;
-using IceCraft.Core.Installation;
-using IceCraft.Core.Installation.Analysis;
-using IceCraft.Core.Installation.Execution;
-using IceCraft.Core.Platform;
 using IceCraft.Extensions.DotNet.Archive;
 using Semver;
 

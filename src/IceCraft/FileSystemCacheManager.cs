@@ -1,10 +1,13 @@
-﻿namespace IceCraft;
+﻿// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
+namespace IceCraft;
 
 using System;
 using System.Collections.Generic;
 using IceCraft.Api.Caching;
 using IceCraft.Api.Client;
-using IceCraft.Core.Caching;
 using Serilog;
 
 internal class FileSystemCacheManager : ICacheManager

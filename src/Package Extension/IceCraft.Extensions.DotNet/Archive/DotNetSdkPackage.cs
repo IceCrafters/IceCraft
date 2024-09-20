@@ -1,12 +1,13 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Extensions.DotNet.Archive;
 
 using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
-using IceCraft.Core.Archive;
-using IceCraft.Core.Archive.Artefacts;
-using IceCraft.Core.Archive.Dependency;
 using Microsoft.Deployment.DotNet.Releases;
 using Semver;
 
@@ -64,7 +65,7 @@ public class DotNetSdkPackage : IPackage
             Version = GetSemanticVersion(version),
             PluginInfo = new PackagePluginInfo("dotnet-sdk", "dotnet-sdk"),
             ReleaseDate = _sdkRelease.Release.ReleaseDate,
-            AdditionalMetadata = new Dictionary<string, string>
+            AdditionalMetadata = new Dictionary<string, string?>
             {
                 { MetadataRuntimeVersion, new SemVersion(rtVersion.Major, rtVersion.Minor, rtVersion.Patch).ToString() }
             },

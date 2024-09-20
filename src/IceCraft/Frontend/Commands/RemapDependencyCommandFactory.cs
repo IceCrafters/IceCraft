@@ -1,10 +1,12 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Frontend.Commands;
 
 using System.CommandLine;
 using IceCraft.Api.Caching;
 using IceCraft.Api.Installation.Dependency;
-using IceCraft.Core.Caching;
-using IceCraft.Core.Installation.Analysis;
 using IceCraft.Frontend.Cli;
 
 public class RemapDependencyCommandFactory : ICommandFactory

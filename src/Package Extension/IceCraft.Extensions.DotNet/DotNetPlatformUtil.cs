@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Extensions.DotNet;
 
 using System.Runtime.InteropServices;
@@ -10,15 +14,7 @@ public static class DotNetPlatformUtil
         Architecture.X64,
         Architecture.Arm64
     ];
-
-    public static string GetDotNetRid()
-    {
-        var system = GetDotNetRidSystemAsync();
-        var arch = GetDotNetRidArchitecture(RuntimeInformation.OSArchitecture);
-
-        return $"{system}-{arch}";
-    }
-
+    
     public static async Task<string> GetDotNetRidAsync()
     {
         var system = await GetDotNetRidSystemAsync();

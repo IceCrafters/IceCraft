@@ -1,8 +1,11 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Tests.Helpers;
 
 using System;
 using IceCraft.Api.Client;
-using IceCraft.Core.Platform;
 using Xunit.Abstractions;
 
 public class OutputHelper : IOutputAdapter

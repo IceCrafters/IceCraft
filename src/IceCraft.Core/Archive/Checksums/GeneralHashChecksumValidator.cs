@@ -4,7 +4,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using IceCraft.Api.Archive.Artefacts;
-using IceCraft.Core.Archive.Artefacts;
 
 public abstract class GeneralHashChecksumValidator : IChecksumValidator
 {

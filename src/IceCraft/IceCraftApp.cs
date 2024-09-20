@@ -1,4 +1,8 @@
-﻿namespace IceCraft;
+﻿// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
+namespace IceCraft;
 
 using System.Diagnostics;
 using System.Net.Http;
@@ -7,8 +11,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using IceCraft.Api.Client;
 using IceCraft.Api.Network;
-using IceCraft.Core.Network;
-using IceCraft.Core.Platform;
 using IceCraft.Frontend;
 using Serilog;
 using Spectre.Console;
@@ -17,12 +19,21 @@ internal class IceCraftApp : IFrontendApp
 {
     private static readonly string DefaultUserRootDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "IceCraft");
-    private static string? CurrentUserRoot;
+    private static string? _currentUserRoot;
 
     internal static string? UserDataOverride { get; set; }
 
-    private static readonly CancellationTokenSource _tokenSource = new();
+    private static readonly CancellationTokenSource TokenSource = new();
 
+    /// <summary>
+    /// Gets the product version information of the IceCraft driver.
+    /// </summary>
+    /// <value>
+    /// The <see cref="FileVersionInfo.ProductVersion"/> property acquired from the assembly file, 
+    /// or <see langword="null"/> if assembly file is not found or does not contain version information.
+    /// </value>
+    internal static readonly string ProductVersion = GetProductVersion();
+    
     private static readonly HttpClient HttpClient = new()
     {
         DefaultRequestHeaders =
@@ -34,15 +45,6 @@ internal class IceCraftApp : IFrontendApp
         },
         Timeout = new TimeSpan(0, 0, 20)
     };
-
-    /// <summary>
-    /// Gets the product version information of the IceCraft driver.
-    /// </summary>
-    /// <value>
-    /// The <see cref="FileVersionInfo.ProductVersion"/> property acquired from the assembly file, 
-    /// or <see langword="null"/> if assembly file is not found or does not contain version information.
-    /// </value>
-    internal static readonly string ProductVersion = GetProductVersion();
 
     public string ProductName => "IceCraft";
 
@@ -76,14 +78,14 @@ internal class IceCraftApp : IFrontendApp
         Console.WriteLine("-----------------------");
         Console.WriteLine();
         Log.Warning("Cancelled");
-        _tokenSource.Cancel();
+        TokenSource.Cancel();
     }
 
     public HttpClient GetClient() => HttpClient;
 
     public CancellationToken GetCancellationToken()
     {
-        return _tokenSource.Token;
+        return TokenSource.Token;
     }
 
     public async Task DoProgressedTaskAsync(string description, Func<IProgressedTask, Task> action)
@@ -115,9 +117,9 @@ internal class IceCraftApp : IFrontendApp
 
     private static string GetActiveUserRoot()
     {
-        if (CurrentUserRoot != null)
+        if (_currentUserRoot != null)
         {
-            return CurrentUserRoot;
+            return _currentUserRoot;
         }
 
         var envVar = Environment.GetEnvironmentVariable("ICECRAFT_ROOT");
@@ -148,7 +150,7 @@ internal class IceCraftApp : IFrontendApp
         Frontend.Output.Shared.Log("Selected data directory '{0}'", result);
         #endif
 
-        CurrentUserRoot = result;
+        _currentUserRoot = result;
         return result;
     }
 }

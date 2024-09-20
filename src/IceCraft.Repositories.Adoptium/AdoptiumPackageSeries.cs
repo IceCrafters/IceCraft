@@ -1,11 +1,14 @@
-﻿namespace IceCraft.Repositories.Adoptium;
+﻿// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
+namespace IceCraft.Repositories.Adoptium;
 
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using IceCraft.Api.Archive.Repositories;
-using IceCraft.Core.Archive;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Core.Caching;
 using IceCraft.Repositories.Adoptium.Models;

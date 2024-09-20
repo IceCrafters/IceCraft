@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Frontend.Commands;
 
 using System.CommandLine;
@@ -5,9 +9,6 @@ using System.CommandLine.Invocation;
 using IceCraft.Api.Archive.Indexing;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Network;
-using IceCraft.Core.Archive.Indexing;
-using IceCraft.Core.Archive.Repositories;
-using IceCraft.Core.Network;
 using IceCraft.Frontend.Cli;
 
 public class BestMirrorCommandFactory

@@ -1,7 +1,10 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Developer;
 
 using IceCraft.Api.Installation.Dependency;
-using IceCraft.Core.Archive.Dependency;
 using Semver;
 
 public class DummyPackageBuilder
@@ -9,10 +12,6 @@ public class DummyPackageBuilder
     private readonly DependencyCollection _dependencies = [];
     private SemVersion? _version;
     private bool _unitary;
-
-    public DummyPackageBuilder()
-    {
-    }
 
     public DummyPackageBuilder WithVersion(SemVersion version)
     {

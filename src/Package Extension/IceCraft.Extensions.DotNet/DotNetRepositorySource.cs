@@ -1,18 +1,17 @@
-﻿namespace IceCraft.Extensions.DotNet;
+﻿// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
+namespace IceCraft.Extensions.DotNet;
 
 using System.Threading.Tasks;
 using IceCraft.Api.Archive.Repositories;
-using IceCraft.Core.Archive;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Extensions.DotNet.Archive;
 using Microsoft.Deployment.DotNet.Releases;
 
 public class DotNetRepositorySource : IRepositorySource
 {
-    public DotNetRepositorySource()
-    {
-    }
-
     public async Task<IRepository?> CreateRepositoryAsync()
     {
         var selfRid = await DotNetPlatformUtil.GetDotNetRidAsync();

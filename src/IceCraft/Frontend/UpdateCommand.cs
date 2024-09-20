@@ -1,30 +1,17 @@
-﻿namespace IceCraft.Frontend;
+﻿// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
+namespace IceCraft.Frontend;
 
 using System.CommandLine;
 using IceCraft.Api.Archive.Indexing;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Caching;
-using IceCraft.Core.Archive.Indexing;
-using IceCraft.Core.Archive.Repositories;
-using IceCraft.Core.Caching;
-
-#if LEGACY_INTERFACE
-using System.ComponentModel;
-using JetBrains.Annotations;
-using Spectre.Console.Cli;
-#endif
 
 using CliCommand = System.CommandLine.Command;
 
-#if LEGACY_INTERFACE
-[Description("Regenerate all package refs")]
-[UsedImplicitly(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature)]
-#endif
-
 public class UpdateCommand
-#if LEGACY_INTERFACE
-    : AsyncCommand<UpdateCommand.Settings>
-#endif
 {
     private static readonly Option<bool> IndexOnly = new("--index-only",
         "Instruct package source providers to reindex package sources but do not refresh caches");
@@ -74,15 +61,6 @@ public class UpdateCommand
         return 0;
     }
 
-#if LEGACY_INTERFACE
-    public sealed class Settings : BaseSettings
-    {
-        [CommandOption("--index-only")]
-        [Description("Only reindex the packages but do not refresh the sources.")]
-        public bool IndexOnly { get; init; }
-    }
-#endif
-
     private readonly IRepositorySourceManager _sourceManager;
     private readonly IPackageIndexer _indexer;
 
@@ -92,11 +70,4 @@ public class UpdateCommand
         _sourceManager = sourceManager;
         _indexer = indexer;
     }
-
-#if LEGACY_INTERFACE
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
-    {
-        return await ExecuteAsync(settings.IndexOnly);
-    }
-#endif
 }

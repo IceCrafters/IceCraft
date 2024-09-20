@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Frontend.Cli;
 
 using System;
@@ -10,13 +14,6 @@ using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Network;
 using IceCraft.Api.Platform;
-using IceCraft.Core.Archive.Indexing;
-using IceCraft.Core.Archive.Repositories;
-using IceCraft.Core.Caching;
-using IceCraft.Core.Installation;
-using IceCraft.Core.Installation.Analysis;
-using IceCraft.Core.Network;
-using IceCraft.Core.Platform;
 using IceCraft.Frontend.Commands;
 using Microsoft.Extensions.DependencyInjection;
 

@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Tests.Helpers;
 
 using System;
@@ -6,8 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using IceCraft.Api.Client;
 using IceCraft.Api.Network;
-using IceCraft.Core.Network;
-using IceCraft.Core.Platform;
 using Xunit.Abstractions;
 
 public class FrontendAppHelper : IFrontendApp

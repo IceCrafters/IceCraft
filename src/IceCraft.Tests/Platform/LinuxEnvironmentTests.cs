@@ -1,9 +1,12 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Tests.Platform;
 
 using System.IO.Abstractions.TestingHelpers;
 using System.Runtime.Versioning;
 using IceCraft.Api.Platform;
-using IceCraft.Core;
 using IceCraft.Core.Platform.Linux;
 using IceCraft.Tests.Helpers;
 using Moq;

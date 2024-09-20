@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Extensions.CentralRepo.Network;
 
 using IceCraft.Api.Client;
@@ -8,14 +12,12 @@ public class RemoteRepositoryManager
 {
     private readonly IOutputAdapter _output;
 
-    private readonly string _csrDataPath;
-
     public RemoteRepositoryManager(IFrontendApp frontendApp)
     {
         _output = frontendApp.Output;
 
-        _csrDataPath = Path.Combine(frontendApp.DataBasePath, "csr");
-        LocalCachedRepoPath = Path.Combine(_csrDataPath, "repository");
+        var csrDataPath = Path.Combine(frontendApp.DataBasePath, "csr");
+        LocalCachedRepoPath = Path.Combine(csrDataPath, "repository");
     }
     
     internal string LocalCachedRepoPath { get; }

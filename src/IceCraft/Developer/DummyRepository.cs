@@ -1,8 +1,11 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Developer;
 
 using System.Collections.Generic;
 using IceCraft.Api.Archive.Repositories;
-using IceCraft.Core.Archive;
 using Semver;
 
 public class DummyRepository : IRepository
@@ -13,11 +16,11 @@ public class DummyRepository : IRepository
             "dummy-test", new DummyPackageSeries("dummy-test",
             [
                 new DummyPackageBuilder()
-                    .WithVersion(new(0, 1, 0, null, ["dummy1"])),
+                    .WithVersion(new SemVersion(0, 1, 0, null, ["dummy1"])),
                 new DummyPackageBuilder()
-                    .WithVersion(new(0, 1, 1, null, ["dummy2"])),
+                    .WithVersion(new SemVersion(0, 1, 1, null, ["dummy2"])),
                 new DummyPackageBuilder()
-                    .WithVersion(new(0, 2, 0, ["beta"], ["dummy3"]))
+                    .WithVersion(new SemVersion(0, 2, 0, ["beta"], ["dummy3"]))
             ])
         },
         {

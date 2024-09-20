@@ -6,8 +6,6 @@ using IceCraft.Api.Client;
 using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
-using IceCraft.Core.Installation.Analysis;
-using IceCraft.Core.Platform;
 using IceCraft.Core.Serialization;
 using Microsoft.Extensions.Logging;
 using Semver;
