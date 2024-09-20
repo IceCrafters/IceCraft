@@ -16,6 +16,7 @@ public class ChecksumTests
     #region Setup Helpers
     private static readonly byte[] TestData = Encoding.UTF8.GetBytes("Hello World");
     private static readonly string TestHashSha256 = Convert.ToHexString(SHA256.HashData(TestData));
+    private static readonly string TestHashSha512 = Convert.ToHexString(SHA512.HashData(TestData));
 
     private static readonly RemoteArtefact TestArtefactSha256 = new RemoteArtefact
     {
@@ -54,6 +55,25 @@ public class ChecksumTests
         
         // Assert
         Assert.Equal(TestHashSha256, checkResult, StringComparer.OrdinalIgnoreCase);
+    }
+    
+    [Fact]
+    public async Task Sha512_Run()
+    {
+        // Arrange
+        var validator = new Sha512ChecksumValidator();
+        
+        // Act
+        string checkResult;
+
+        await using (var memStream = new MemoryStream(TestData))
+        {
+            var checkCode = await validator.GetChecksumBinaryAsync(memStream);
+            checkResult = validator.GetChecksumString(checkCode);
+        }
+        
+        // Assert
+        Assert.Equal(TestHashSha512, checkResult, StringComparer.OrdinalIgnoreCase);
     }
     
     [Fact]
