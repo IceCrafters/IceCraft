@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Core.Installation.Analysis;
 
 using System.Collections.Generic;
@@ -35,9 +39,9 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
 
         await Task.Run(async () =>
         {
-            foreach (var (key, index) in database)
+            foreach (var (_, index) in database)
             {
-                await ProcessIndex(key, database, index, map);
+                await ProcessIndex(database, index, map);
             }
         });
 
@@ -51,13 +55,10 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
             IceCraftCoreContext.Default.DependencyMap);
     }
 
-    private async ValueTask ProcessIndex(string key,
-        IPackageInstallDatabase database,
+    private async ValueTask ProcessIndex(IPackageInstallDatabase database,
         PackageInstallationIndex index,
         DependencyMap map)
     {
-        var branch = new DependencyMapBranch(index.Count);
-
         foreach (var (version, info) in index)
         {
             var entry = map.GetEntry(info.Metadata);
@@ -70,8 +71,7 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
             foreach (var dependency in info.Metadata.Dependencies)
             {
                 var best = await DependencyResolver.SelectBestPackageDependencyOrDefault(database.EnumeratePackages(),
-                    dependency,
-                    default);
+                    dependency);
 
                 if (best == null)
                 {
@@ -81,15 +81,15 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
 
                 var bestEntry = map.GetEntry(best);
 
-                entry.Dependencies!.Add(new PackageReference(best.Id,
+                entry.Dependencies.Add(new PackageReference(best.Id,
                     best.Version));
-                bestEntry.Dependents!.Add(new PackageReference(info.Metadata.Id,
+                bestEntry.Dependents.Add(new PackageReference(info.Metadata.Id,
                     info.Metadata.Version));
             }
 
             if (entry.HasUnsatisifiedDependencies)
             {
-                _output.Warning("Package '{0}' ({1}) has UNSATISIFIED dependencies", info.Metadata.Id, version);
+                _output.Warning("Package '{0}' ({1}) has UNSATISFIED dependencies", info.Metadata.Id, version);
             }
         }
     }
@@ -104,13 +104,11 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
         var database = await _databaseFactory.GetAsync();
         var map = new DependencyMap(database.Count);
 
-        foreach (var (key, index) in database)
+        foreach (var (_, index) in database)
         {
-            var branch = new DependencyMapBranch(index.Count);
-
-            foreach (var (version, info) in index)
+            foreach (var (_, info) in index)
             {
-                var entry = map.GetEntry(info.Metadata);
+                map.GetEntry(info.Metadata);
 
                 if (info.Metadata.Dependencies == null)
                 {
@@ -120,8 +118,7 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
                 foreach (var dependency in info.Metadata.Dependencies)
                 {
                     var best = await DependencyResolver.SelectBestPackageDependencyOrDefault(database.EnumeratePackages(),
-                        dependency,
-                        default);
+                        dependency);
 
                     if (best == null)
                     {
@@ -137,13 +134,11 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
         var database = await _databaseFactory.GetAsync();
         var map = new DependencyMap(database.Count);
 
-        foreach (var (key, index) in database)
+        foreach (var (_, index) in database)
         {
-            var branch = new DependencyMapBranch(index.Count);
-
-            foreach (var (version, info) in index)
+            foreach (var (_, info) in index)
             {
-                var entry = map.GetEntry(info.Metadata);
+                map.GetEntry(info.Metadata);
 
                 if (info.Metadata.Dependencies == null)
                 {
@@ -154,8 +149,7 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
                 foreach (var dependency in info.Metadata.Dependencies)
                 {
                     var best = await DependencyResolver.SelectBestPackageDependencyOrDefault(database.EnumeratePackages(),
-                        dependency,
-                        default);
+                        dependency);
 
                     if (best == null)
                     {
@@ -167,7 +161,6 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
 
                 if (noBest)
                 {
-                    continue;
                 }
             }
         }

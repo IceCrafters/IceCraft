@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Core.Installation;
 
 using System.Diagnostics;
@@ -10,14 +14,12 @@ using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Network;
 using IceCraft.Api.Package;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Semver;
 
 public class PackageInstallManager : IPackageInstallManager
 {
     public const string PackagePath = "packages";
 
-    private readonly ILogger<PackageInstallManager> _logger;
     private readonly IDownloadManager _downloadManager;
     private readonly IFrontendApp _frontend;
     private readonly IServiceProvider _serviceProvider;
@@ -26,14 +28,12 @@ public class PackageInstallManager : IPackageInstallManager
 
     private readonly string _packagesPath;
 
-    public PackageInstallManager(ILogger<PackageInstallManager> logger,
-        IFrontendApp frontend,
+    public PackageInstallManager(IFrontendApp frontend,
         IDownloadManager downloadManager,
         IServiceProvider serviceProvider,
         IPackageInstallDatabaseFactory databaseFactory,
         IFileSystem fileSystem)
     {
-        _logger = logger;
         _frontend = frontend;
         _downloadManager = downloadManager;
         _serviceProvider = serviceProvider;
@@ -155,8 +155,9 @@ public class PackageInstallManager : IPackageInstallManager
     /// <param name="artefactPath">The path where the artefact is stored at.</param>
     /// <param name="expandTo">The path where the artefact will be expanded to.</param>
     /// <param name="fileSystem">The file system.</param>
-    /// <param name="serviceProvider">The service provider where <see cref="IPackageInstaller"/> (and <see cref="IArtefactPreprocessor"/> if applicable) will be sourced from.</param>
-    /// <param name="output"></param>
+    /// <param name="preprocessor">The artefact preprocessor to preprocess the artefact with.</param>
+    /// <param name="output">The output adapter to write user-friendly output to.</param>
+    /// <param name="installer">The installer which is used to expand the artefact and remove the installed package files.</param>
     /// <returns><see langword="true"/> if should continue; <see langword="false"/> if should store package as expanded not configured and abort.</returns>
     /// <exception cref="ArgumentException">The service provide failed to provide necessary services.</exception>
     /// <exception cref="KnownException">Expanding or reprocessing failed.</exception>
@@ -222,10 +223,9 @@ public class PackageInstallManager : IPackageInstallManager
     private async Task InternalInstallAsync(IPackageInstallDatabase database, PackageMeta meta, string artefactPath)
     {
         var pkgDir = GetPackageDirectory(meta);
-        string? tempExtraction = null;
 
         var installer = _serviceProvider.GetKeyedService<IPackageInstaller>(meta.PluginInfo.InstallerRef)
-            ?? throw new ArgumentException($"Installer '{meta.PluginInfo.InstallerRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta));
+                        ?? throw new ArgumentException($"Installer '{meta.PluginInfo.InstallerRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta));
         var configurator = _serviceProvider.GetKeyedService<IPackageConfigurator>(meta.PluginInfo.ConfiguratorRef)
             ?? throw new ArgumentException($"Configurator '{meta.PluginInfo.ConfiguratorRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta));
 
@@ -239,7 +239,7 @@ public class PackageInstallManager : IPackageInstallManager
         // If preprocessor is specified, create a temp directory that will await preprocessing
         if (preprocessor != null)
         {
-            tempExtraction = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+            var tempExtraction = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
             Directory.CreateDirectory(tempExtraction);
         }
 
@@ -390,12 +390,9 @@ public class PackageInstallManager : IPackageInstallManager
             return null;
         }
 
-        if (!index!.TryGetValue(version.ToString(), out var result))
-        {
-            return null;
-        }
-
-        return result.Metadata;
+        return !index.TryGetValue(version.ToString(), out var result)
+            ? null
+            : result.Metadata;
     }
 
     public async Task<PackageInstallationIndex?> GetIndexOrDefaultAsync(string metaId)

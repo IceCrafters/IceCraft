@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Core.Installation.Execution;
 
 using System;
@@ -8,7 +12,6 @@ using IceCraft.Api.Installation;
 using IceCraft.Api.Package;
 using IceCraft.Api.Platform;
 using IceCraft.Core.Serialization;
-using Microsoft.Extensions.Logging;
 
 public class ExecutableManager : IExecutableManager
 {
@@ -16,20 +19,17 @@ public class ExecutableManager : IExecutableManager
     private readonly IFileSystem _fileSystem;
     private readonly IPackageInstallManager _installManager;
     private readonly IExecutionScriptGenerator _scriptGenerator;
-    private readonly ILogger<ExecutableManager>? _logger;
     private readonly string _dataFilePath;
     private readonly string _runPath;
 
     public ExecutableManager(IFrontendApp frontendApp, 
         IFileSystem fileSystem, 
         IPackageInstallManager installManager,
-        IExecutionScriptGenerator scriptGenerator,
-        ILogger<ExecutableManager>? logger = null)
+        IExecutionScriptGenerator scriptGenerator)
     {
         _fileSystem = fileSystem;
         _dataFilePath = _fileSystem.Path.Combine(frontendApp.DataBasePath, "runInfo.json");
         _scriptGenerator = scriptGenerator;
-        _logger = logger;
 
         _executables = GetDataFile(_dataFilePath);
         _runPath = _fileSystem.Path.Combine(frontendApp.DataBasePath, "run");
@@ -40,8 +40,8 @@ public class ExecutableManager : IExecutableManager
 
     public async Task RegisterAsync(PackageMeta meta, string linkName, string linkTo, EnvironmentVariableDictionary? variables = null)
     {
-        var data = await _executables;
-        var packageRoot = await _installManager.GetInstalledPackageDirectoryAsync(meta);
+        await _executables;
+        await _installManager.GetInstalledPackageDirectoryAsync(meta);
 
         if (_fileSystem.Path.GetInvalidFileNameChars().Any(linkName.Contains)
             || linkName.Contains("..")
@@ -84,7 +84,7 @@ public class ExecutableManager : IExecutableManager
         var linkFileName = _fileSystem.Path.Combine(_runPath, linkName);
         var targetName = _fileSystem.Path.GetFullPath(registerInfo.LinkTarget, packageRoot);
 
-        using (var stream = _fileSystem.File.Create(tempFileName))
+        await using (var stream = _fileSystem.File.Create(tempFileName))
         {
             await _scriptGenerator.WriteExecutionScriptAsync(registerInfo, targetName, stream);
         }

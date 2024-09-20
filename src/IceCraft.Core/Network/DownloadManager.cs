@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Core.Network;
 
 using System;
@@ -8,23 +12,19 @@ using IceCraft.Api.Archive.Indexing;
 using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
 using IceCraft.Api.Network;
-using Microsoft.Extensions.Logging;
 
 public class DownloadManager : IDownloadManager
 {
     private readonly IFrontendApp _frontendApp;
     private readonly DownloadConfiguration _downloadConfig;
-    private readonly ILogger<DownloadManager> _logger;
     private readonly IMirrorSearcher _mirrorSearcher;
     private readonly IChecksumRunner _checksumRunner;
 
     public DownloadManager(IFrontendApp frontendApp,
-        ILogger<DownloadManager> logger,
         IMirrorSearcher mirrorSearcher,
         IChecksumRunner checksumRunner)
     {
         _frontendApp = frontendApp;
-        _logger = logger;
         _mirrorSearcher = mirrorSearcher;
 
         _downloadConfig = new DownloadConfiguration()
@@ -97,7 +97,7 @@ public class DownloadManager : IDownloadManager
     {
         var downloader = new DownloadService(_downloadConfig);
 
-        downloader.DownloadProgressChanged += (sender, args) =>
+        downloader.DownloadProgressChanged += (_, args) =>
         {
             task?.SetDefinitePrecentage(args.ProgressPercentage);
             UpdateSpeed(task, fileName, args.BytesPerSecondSpeed, args.TotalBytesToReceive, args.ReceivedBytesSize);
@@ -123,7 +123,7 @@ public class DownloadManager : IDownloadManager
     public async Task<DownloadResult> DownloadAsync(Uri from, Stream toStream, IProgressedTask? task = null, string? fileName = null)
     {
         var downloader = new DownloadService(_downloadConfig);
-        downloader.DownloadProgressChanged += (sender, args) =>
+        downloader.DownloadProgressChanged += (_, args) =>
         {
             task?.SetDefinitePrecentage(args.ProgressPercentage);
             UpdateSpeed(task, fileName, args.BytesPerSecondSpeed, args.TotalBytesToReceive, args.ReceivedBytesSize);

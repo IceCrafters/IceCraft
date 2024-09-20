@@ -1,4 +1,8 @@
-﻿namespace IceCraft.Core.Serialization;
+﻿// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
+namespace IceCraft.Core.Serialization;
 
 using System.Text.Json.Serialization;
 using IceCraft.Api.Archive.Artefacts;

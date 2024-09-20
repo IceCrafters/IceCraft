@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Core.Platform.Linux;
 
 using System.IO.Abstractions;
@@ -17,9 +21,9 @@ public class LinuxEnvironmentManager : IEnvironmentManager
 
     private static readonly bool DryEnvRuns = Environment.GetEnvironmentVariable("ICECRAFT_DRY_ENV") != null;
 
-    private readonly string PathScriptFile;
-    private readonly string EnvConfigFile;
-    private readonly string EnvScriptFile;
+    private readonly string _pathScriptFile;
+    private readonly string _envConfigFile;
+    private readonly string _envScriptFile;
 
     private const string PathScriptFileName = ".ice_craft_paths";
     private const string PathScriptImport = $". $HOME/{PathScriptFileName}";
@@ -52,13 +56,13 @@ public class LinuxEnvironmentManager : IEnvironmentManager
         _fileSystem = fileSystem;
         _envProvider = envProvider;
 
-        PathScriptFile = Path.Combine(
+        _pathScriptFile = Path.Combine(
             _envProvider.GetUserProfile(),
             PathScriptFileName);
-        EnvConfigFile = Path.Combine(
+        _envConfigFile = Path.Combine(
             _envProvider.GetUserProfile(),
             EnvConfigFileName);
-        EnvScriptFile = Path.Combine(
+        _envScriptFile = Path.Combine(
             _envProvider.GetUserProfile(),
             EnvScriptFileName);
 
@@ -72,13 +76,13 @@ public class LinuxEnvironmentManager : IEnvironmentManager
             return [];
         }
 
-        if (!_fileSystem.File.Exists(EnvConfigFile))
+        if (!_fileSystem.File.Exists(_envConfigFile))
         {
             return CreateRegistryFile();
         }
 
         Dictionary<string, string>? result;
-        using (var stream = File.OpenRead(EnvConfigFile))
+        using (var stream = File.OpenRead(_envConfigFile))
         {
             result = JsonSerializer.Deserialize(stream,
                 IceCraftCoreContext.Default.DictionaryStringString);
@@ -95,7 +99,7 @@ public class LinuxEnvironmentManager : IEnvironmentManager
         }
 
         var result = new Dictionary<string,string>();
-        using var stream = _fileSystem.File.Create(EnvConfigFile);
+        using var stream = _fileSystem.File.Create(_envConfigFile);
         JsonSerializer.SerializeAsync(stream, result, IceCraftCoreContext.Default.DictionaryStringString);
 
         return result;
@@ -108,7 +112,7 @@ public class LinuxEnvironmentManager : IEnvironmentManager
             return;
         }
 
-        using var stream = _fileSystem.File.Create(EnvConfigFile);
+        using var stream = _fileSystem.File.Create(_envConfigFile);
         JsonSerializer.SerializeAsync(stream, _envRegistry, IceCraftCoreContext.Default.DictionaryStringString);
     }
 
@@ -165,7 +169,7 @@ public class LinuxEnvironmentManager : IEnvironmentManager
             return;
         }
 
-        using var envScript = _fileSystem.File.Create(EnvScriptFile);
+        using var envScript = _fileSystem.File.Create(_envScriptFile);
         var writer = new StreamWriter(envScript);
         
         writer.WriteLine("# This script is auto-generated.");
@@ -196,7 +200,7 @@ public class LinuxEnvironmentManager : IEnvironmentManager
             return;
         }
 
-        using var pathScript = _fileSystem.File.Create(PathScriptFile);
+        using var pathScript = _fileSystem.File.Create(_pathScriptFile);
         var writer = new StreamWriter(pathScript);
         writer.WriteLine("# This script is auto-generated.");
         writer.WriteLine("# Changes to contents WILL BE LOST if this file is refreshed.");

@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Core.Installation.Storage;
 
 using System;
@@ -16,7 +20,6 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
     private readonly ILogger<PackageInstallDatabaseFactory> _logger;
     private readonly IFrontendApp _frontend;
     private readonly string _databasePath;
-    private readonly string _packagesPath;
 
     private ValueMap? _map;
 
@@ -26,10 +29,10 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
         _logger = logger;
         _frontend = frontend;
 
-        _packagesPath = Path.Combine(_frontend.DataBasePath, PackageInstallManager.PackagePath);
-        _databasePath = Path.Combine(_packagesPath, "db.json");
+        var packagesPath = Path.Combine(_frontend.DataBasePath, PackageInstallManager.PackagePath);
+        _databasePath = Path.Combine(packagesPath, "db.json");
 
-        Directory.CreateDirectory(_packagesPath);
+        Directory.CreateDirectory(packagesPath);
     }
 
     public async Task<IPackageInstallDatabase> GetAsync()

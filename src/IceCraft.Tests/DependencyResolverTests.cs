@@ -123,7 +123,6 @@ public class DependencyResolverTests
         #endregion
 
         var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
-            _loggerFactory.CreateLogger<DependencyResolver>(),
             Mock.Of<IFrontendApp>());
         var hashSet = new HashSet<PackageMeta>();
 
@@ -172,7 +171,6 @@ public class DependencyResolverTests
         #endregion
 
         var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
-            _loggerFactory.CreateLogger<DependencyResolver>(),
             Mock.Of<IFrontendApp>());
         var hashSet = new HashSet<PackageMeta>();
 
@@ -206,7 +204,6 @@ public class DependencyResolverTests
         #endregion
 
         var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
-            _loggerFactory.CreateLogger<DependencyResolver>(),
             Mock.Of<IFrontendApp>());
         var hashSet = new HashSet<PackageMeta>();
 
@@ -254,7 +251,6 @@ public class DependencyResolverTests
         #endregion
 
         var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
-            _loggerFactory.CreateLogger<DependencyResolver>(),
             Mock.Of<IFrontendApp>());
         var hashSet = new HashSet<PackageMeta>();
 
@@ -310,7 +306,6 @@ public class DependencyResolverTests
         #endregion
 
         var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
-            _loggerFactory.CreateLogger<DependencyResolver>(),
             Mock.Of<IFrontendApp>());
         var hashSet = new HashSet<PackageMeta>();
 

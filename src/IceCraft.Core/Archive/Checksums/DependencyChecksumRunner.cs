@@ -1,25 +1,20 @@
-﻿namespace IceCraft.Core.Archive.Checksums;
+﻿// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
+namespace IceCraft.Core.Archive.Checksums;
 
 using System.Diagnostics;
 using IceCraft.Api.Archive.Artefacts;
-using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 public class DependencyChecksumRunner : IChecksumRunner
 {
     private readonly IServiceProvider _provider;
-    private readonly ILogger _logger;
-    private readonly IManagerConfiguration _config;
-    private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-    public DependencyChecksumRunner(IServiceProvider provider,
-        IManagerConfiguration config,
-        ILogger<DependencyChecksumRunner> logger)
+    public DependencyChecksumRunner(IServiceProvider provider)
     {
-        _logger = logger;
-        _config = config;
         _provider = provider;
     }
 

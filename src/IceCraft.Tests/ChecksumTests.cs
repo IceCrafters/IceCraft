@@ -87,9 +87,7 @@ public class ChecksumTests
         diMock.Setup(x => x.GetKeyedService(typeof(IChecksumValidator), "sha256"))
             .Returns(new Sha256ChecksumValidator());
         
-        var runner = new DependencyChecksumRunner(diMock.Object,
-            Mock.Of<IManagerConfiguration>(),
-            _loggerFactory.CreateLogger<DependencyChecksumRunner>());
+        var runner = new DependencyChecksumRunner(diMock.Object);
         
         var memStream = new MemoryStream(TestData);
         

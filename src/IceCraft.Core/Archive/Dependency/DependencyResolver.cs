@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Core.Archive.Dependency;
 
 using System.Runtime.CompilerServices;
@@ -6,13 +10,11 @@ using IceCraft.Api.Client;
 using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
-using Microsoft.Extensions.Logging;
 using Semver;
 
 public class DependencyResolver : IDependencyResolver
 {
     private readonly IPackageInstallManager _installManager;
-    private readonly ILogger<DependencyResolver> _logger;
     private readonly IOutputAdapter _output;
 
     private readonly record struct StackBranch
@@ -28,30 +30,10 @@ public class DependencyResolver : IDependencyResolver
     }
 
     public DependencyResolver(IPackageInstallManager installManager,
-        ILogger<DependencyResolver> logger,
         IFrontendApp frontendApp)
     {
         _installManager = installManager;
-        _logger = logger;
         _output = frontendApp.Output;
-    }
-
-    private static PackageMeta? SelectLatest(ParallelQuery<PackageMeta> packages, 
-        CancellationToken cancellationToken = default)
-    {
-        PackageMeta? best = null;
-
-        foreach (var meta in packages)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (meta.Version.CompareSortOrderTo(best?.Version) > 0)
-            {
-                best = meta;
-            }
-        }
-
-        return best;
     }
 
     public async Task ResolveTree(PackageMeta meta, PackageIndex index, ISet<PackageMeta> setToAppend, CancellationToken cancellationToken = default)
@@ -67,7 +49,7 @@ public class DependencyResolver : IDependencyResolver
 
         // The current layer of dependencies.
         // Main branches are at layer 1.
-        var layer = 0;
+        int layer;
 
         const int mainBranchLayer = 1;
         
@@ -92,7 +74,7 @@ public class DependencyResolver : IDependencyResolver
                     continue;
                 }
                 
-                var deps = ResolveDependencies(branch.Package, index);
+                var deps = ResolveDependencies(branch.Package, index, cancellationToken);
                 
                 // Add into dependency trunk and push the dependency package into the resolving
                 // stack.
@@ -105,7 +87,8 @@ public class DependencyResolver : IDependencyResolver
                     await foreach (var dependency in deps)
                     {
                         // Detect circular references to parents of the current parent.
-                        if (depTreeParents.Where(x => x.Layer < layer)
+                        var layer1 = layer;
+                        if (depTreeParents.Where(x => x.Layer < layer1)
                             .Any(x => x.Package.Id == dependency.Id))
                         {
                             throw DependencyException.Circular(dependency.Id, dependency.Version.ToString(), meta.Id);
@@ -214,7 +197,7 @@ public class DependencyResolver : IDependencyResolver
                 .Where(x => dependency.PackageId.Equals(x.Id) && dependency.VersionRange.Contains(x.Version))
                 .AsParallel()
                 .WithCancellation(cancellationToken)
-                .MaxBy(x => x.Version, SemVersion.SortOrderComparer));
+                .MaxBy(x => x.Version, SemVersion.SortOrderComparer), cancellationToken);
     }
 
     internal static async Task<PackageMeta> SelectBestPackageDependency(IEnumerable<PackageMeta> metas, 

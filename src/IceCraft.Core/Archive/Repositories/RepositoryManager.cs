@@ -1,28 +1,28 @@
-﻿namespace IceCraft.Core.Archive.Repositories;
+﻿// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
+namespace IceCraft.Core.Archive.Repositories;
 
 using System;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Client;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 public class RepositoryManager : IRepositorySourceManager
 {
     private readonly IManagerConfiguration _config;
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<RepositoryManager> _logger;
     private readonly IRepositoryDefaultsSupplier? _defaults;
     private readonly IOutputAdapter _output;
 
     public RepositoryManager(IManagerConfiguration config, 
         IServiceProvider serviceProvider,
-        ILogger<RepositoryManager> logger,
         IRepositoryDefaultsSupplier? defaults,
         IFrontendApp frontendApp)
     {
         _config = config;
         _serviceProvider = serviceProvider;
-        _logger = logger;
         _defaults = defaults;
         _output = frontendApp.Output;
 

@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Core.Network;
 
 using System.Diagnostics;
@@ -5,16 +9,13 @@ using System.Net.NetworkInformation;
 using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Client;
 using IceCraft.Api.Network;
-using Microsoft.Extensions.Logging;
 
 public class MirrorSearcher : IMirrorSearcher
 {
-    private readonly ILogger<MirrorSearcher> _logger;
     private readonly IFrontendApp _frontend;
 
-    public MirrorSearcher(ILogger<MirrorSearcher> logger, IFrontendApp frontend)
+    public MirrorSearcher(IFrontendApp frontend)
     {
-        _logger = logger;
         _frontend = frontend;
     }
 
@@ -28,7 +29,6 @@ public class MirrorSearcher : IMirrorSearcher
         ArtefactMirrorInfo? bestMirror = null;
         long bestPing = 0;
 
-        var stop = new Stopwatch();
         var pingSender = new Ping();
 
         foreach (var mirror in mirrors)
