@@ -6,51 +6,32 @@ using IceCraft.Api.Package;
 using IceCraft.Core.Archive;
 using IceCraft.Core.Archive.Artefacts;
 using IceCraft.Extensions.CentralRepo.Models;
+using IceCraft.Extensions.CentralRepo.Network;
 
 public class RemotePackage : IPackage
 {
-    private readonly RemoteVersionEntry _versionEntry;
-    private readonly string _id;
-    private readonly RemotePackageSeries _series;
+    private readonly RemotePackageInfo _remotePackageInfo;
 
-    private static readonly PackagePluginInfo PluginInfo = new PackagePluginInfo()
+    public RemotePackage(RemotePackageInfo remotePackageInfo, RemotePackageSeries packageSeries)
     {
-        ConfiguratorRef = "ic_csr",
-        InstallerRef = "ic_csr",
-        PreProcessorRef = "ic_csr"
-    };
-
-    public RemotePackage(RemoteVersionEntry versionEntry, RemotePackageSeries packageSeries, string id)
-    {
-        _versionEntry = versionEntry;
-        _series = packageSeries;
-        _id = id;
+        Series = packageSeries;
+        _remotePackageInfo = remotePackageInfo;
     }
 
-    public IPackageSeries Series => _series;
+    public IPackageSeries Series { get; }
 
     public RemoteArtefact GetArtefact()
     {
-        return _versionEntry.Artefact;
+        return _remotePackageInfo.Artefact;
     }
 
     public PackageMeta GetMeta()
     {
-        return new PackageMeta
-        {
-            Version = _versionEntry.Version,
-            Id = _id,
-            PluginInfo = PluginInfo,
-            ReleaseDate = _versionEntry.ReleaseDate,
-            Transcript = _versionEntry.Transcript ?? _series.Transcript,
-            Unitary = _versionEntry.Unitary,
-            Dependencies = _versionEntry.Dependencies,
-            ConflictsWith = _versionEntry.ConflictsWith
-        };
+        return _remotePackageInfo.Metadata;
     }
 
-    public IEnumerable<ArtefactMirrorInfo>? GetMirrors()
+    public IEnumerable<ArtefactMirrorInfo> GetMirrors()
     {
-        return _versionEntry.Mirrors;
+        return _remotePackageInfo.Mirrors;
     }
 }

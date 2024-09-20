@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IceCraft.Api", "IceCraft.Ap
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{A8F5D3BC-9969-45EC-819B-5D1A6D5C5FEA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IceCraft.Tests.CentralRepo", "Tests\IceCraft.Tests.CentralRepo\IceCraft.Tests.CentralRepo.csproj", "{541FDDC5-9229-41F1-9CBF-820D59F21F15}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,10 @@ Global
 		{3BACD5E1-BADB-4D02-8422-23C7EDE4E859}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3BACD5E1-BADB-4D02-8422-23C7EDE4E859}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3BACD5E1-BADB-4D02-8422-23C7EDE4E859}.Release|Any CPU.Build.0 = Release|Any CPU
+		{541FDDC5-9229-41F1-9CBF-820D59F21F15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{541FDDC5-9229-41F1-9CBF-820D59F21F15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{541FDDC5-9229-41F1-9CBF-820D59F21F15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{541FDDC5-9229-41F1-9CBF-820D59F21F15}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -70,5 +76,6 @@ Global
 		{FE56D128-F58B-4A0B-924C-93207A7DED86} = {4DE70D51-5DBE-4AD9-BC7C-604BE9794E0E}
 		{3EBCBC15-0A99-4280-ADCF-EC20048FD1C2} = {4DE70D51-5DBE-4AD9-BC7C-604BE9794E0E}
 		{D7B0E057-24BA-41B2-B43E-363139C0D7F8} = {A8F5D3BC-9969-45EC-819B-5D1A6D5C5FEA}
+		{541FDDC5-9229-41F1-9CBF-820D59F21F15} = {A8F5D3BC-9969-45EC-819B-5D1A6D5C5FEA}
 	EndGlobalSection
 EndGlobal

@@ -59,7 +59,13 @@ public class InfoCommandFactory : ICommandFactory
             return;
         }
 
-        var latestId = await Task.Run(() => result.Versions.GetLatestSemVersion(includePrerelease));
+        var latestId = await Task.Run(() => result.Versions.GetLatestSemVersionOrDefault(includePrerelease));
+        if (latestId == null)
+        {
+            Output.Shared.Error("No latest version found");
+            Output.Hint("Try adding --include-prerelease to include latest pre-releases");
+            return;
+        }
 
         if (!result.Versions.TryGetValue(latestId.ToString(), out var latest))
         {

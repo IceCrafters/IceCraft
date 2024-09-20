@@ -1,108 +1,86 @@
 namespace IceCraft.Extensions.CentralRepo.Runtime;
 
-using System.Collections;
-using System.Management.Automation;
-using System.Management.Automation.Runspaces;
-using System.Net.Mail;
-using IceCraft.Api.Exceptions;
-using IceCraft.Api.Installation.Dependency;
-using IceCraft.Api.Package;
-using Semver;
+using System.IO.Abstractions;
+using System.Reflection;
+using System.Text.Json;
+using IceCraft.Extensions.CentralRepo.Api;
+using Jint;
+using Jint.Runtime.Interop;
 
 // Full Speed Astern!
 
-public static class MashiroRuntime
+public class MashiroRuntime
 {
-    public static MashiroState CreateState(string scriptFile)
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IFileSystem _fileSystem;
+
+    public MashiroRuntime(IServiceProvider serviceProvider, IFileSystem fileSystem)
     {
-        var ps = PowerShell.Create();
-        ps.AddScript(scriptFile);
-
-        var rs = RunspaceFactory.CreateRunspace();
-        rs.Open();
-
-        return new MashiroState(ps, rs);
+        _serviceProvider = serviceProvider;
+        _fileSystem = fileSystem;
     }
+    
+    public delegate void ExpandPackageDelegate(string artefactFile, string targetDir);
 
-    public static DependencyCollection CreateDependencies(Hashtable? hashtable)
+    public delegate void RemovePackageDelegate(string targetDir);
+    
+    public delegate void OnPreprocessDelegate(string tempDir, string to);
+
+    public delegate void ConfigureDelegate(string installDir);
+    
+    public delegate void UnConfigureDelegate(string installDir);
+    
+    private static readonly JsonNamingPolicy CamelCase = JsonNamingPolicy.CamelCase;
+
+    private static readonly TypeResolver JintTypeResolver = new()
     {
-        if (hashtable == null)
+        MemberNameCreator = NameCreator
+    };
+    
+    private static readonly Options JintOptions = new()
+    {
+        Interop =
         {
-            return [];
+            TypeResolver = JintTypeResolver
+        }
+    };
+
+    private static IEnumerable<string> NameCreator(MemberInfo info)
+    {
+        if (info.MemberType is MemberTypes.Method or MemberTypes.Property)
+        {
+            yield return CamelCase.ConvertName(info.Name);
         }
         
-        var list = new List<DependencyReference>(hashtable.Count);
+        yield return info.Name;
+    }
 
-        foreach (DictionaryEntry entry in hashtable)
-        {
-            if (entry.Key is not string package || entry.Value is not string versionStr)
-            {
-                throw new FormatException("Dependencies hashtable must be consisted of only strings");
-            }
+    public MashiroState CreateState(string scriptCode, string? fileName)
+    {
+        var engine = CreateJintEngine();
 
-            var version = SemVersionRange.Parse(versionStr);
-            
-            list.Add(new DependencyReference(package, version));
-        }
+        var script = Engine.PrepareScript(scriptCode,
+            fileName);   
 
-        return new DependencyCollection(list);
+        var result = new MashiroState(_serviceProvider, engine, script, fileName);
+        result.AddFunctions();
+
+        return result;
     }
     
-    public static PackageTranscript CreateTranscript(Hashtable? authors, string? packageMaintainer,
-        string? pluginMaintainer, string? license, string? description)
+    public async Task<MashiroState> CreateStateAsync(string scriptFile)
     {
-        IReadOnlyList<PackageAuthorInfo>? authorInfos = null;
-        if (authors != null)
-        {
-            authorInfos = ParseAuthors(authors);
-        }
-
-        PackageAuthorInfo packageMaintainerInfo = default;
-        if (packageMaintainer != null)
-        {
-            packageMaintainerInfo = ParseAuthor(packageMaintainer);
-        }
-
-        PackageAuthorInfo pluginMaintainerInfo = default;
-        if (pluginMaintainer != null)
-        {
-            pluginMaintainerInfo = ParseAuthor(pluginMaintainer);
-        }
-
-        return new PackageTranscript
-        {
-            Authors = authorInfos ?? [],
-            PluginMaintainer = pluginMaintainerInfo,
-            Description = description,
-            License = license,
-            Maintainer = packageMaintainerInfo,
-        };
-    }
-
-    public static IReadOnlyList<PackageAuthorInfo> ParseAuthors(Hashtable hashtable)
-    {
-        var list = new List<PackageAuthorInfo>();
-        foreach (DictionaryEntry entry in hashtable)
-        {
-            if (entry.Key is not string author || entry.Value is not string email)
-            {
-                throw new FormatException("Authors hashtable must be consisted of only strings");
-            }
-            
-            list.Add(new PackageAuthorInfo(author, email));
-        }
-
-        return list.AsReadOnly();
+        return CreateState(await _fileSystem.File.ReadAllTextAsync(scriptFile), 
+            _fileSystem.Path.GetFileNameWithoutExtension(scriptFile));
     }
     
-    public static PackageAuthorInfo ParseAuthor(string authorStr)
+    private static Engine CreateJintEngine()
     {
-        MailAddress.TryCreate(authorStr, out var address);
-        if (address is null)
-        {
-            throw new KnownException($"Invalid email address: {authorStr}");
-        }
+        var engine = new Engine(JintOptions);
+        engine.SetValue(MashiroMetaBuilder.JsName, TypeReference.CreateTypeReference<MashiroMetaBuilder>(engine));
+        engine.SetValue("SemVer", MashiroGlobals.SemVer);
+        engine.SetValue("Author", MashiroGlobals.Author);
 
-        return new PackageAuthorInfo(address.User, address.Address);
+        return engine;
     }
 }

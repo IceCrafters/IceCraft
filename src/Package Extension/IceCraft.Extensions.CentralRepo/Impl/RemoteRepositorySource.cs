@@ -1,56 +1,46 @@
 namespace IceCraft.Extensions.CentralRepo.Impl;
 
-using System.Net.Http.Json;
+using System.IO.Abstractions;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Caching;
 using IceCraft.Api.Client;
-using IceCraft.Core.Archive;
-using IceCraft.Core.Caching;
-using IceCraft.Core.Platform;
-using IceCraft.Extensions.CentralRepo.Models;
+using IceCraft.Extensions.CentralRepo.Network;
 
 public class RemoteRepositorySource : IRepositorySource
 {
     private readonly IFrontendApp _frontendApp;
     private readonly HttpClient _httpClient;
     private readonly ICacheStorage _cacheStorage;
+    private readonly RemoteRepositoryManager _remoteManager;
+    private readonly RemoteRepositoryIndexer _repositoryIndexer;
 
     private const string StorageUuid = "E5EFB74F-6F93-42C1-85D6-B15A9556B647";
     private const string IndexCacheObj = "remoteIndex";
 
-    public RemoteRepositorySource(IFrontendApp frontendApp, ICacheManager cacheManager)
+    public RemoteRepositorySource(IFrontendApp frontendApp, 
+        ICacheManager cacheManager,
+        RemoteRepositoryManager remoteManager, 
+        RemoteRepositoryIndexer repositoryIndexer)
     {
         _frontendApp = frontendApp;
+        _remoteManager = remoteManager;
+        _repositoryIndexer = repositoryIndexer;
         _httpClient = _frontendApp.GetClient();
 
         _cacheStorage = cacheManager.GetStorage(new Guid(StorageUuid));
     }
     
-    private static string GetConfigureRepoUrl()
-    {
-        return Environment.GetEnvironmentVariable("ICECRAFT_CSR_INDEX_URL")
-               ?? ""; // TODO do real CSR
-    }
-    
     public async Task<IRepository?> CreateRepositoryAsync()
     {
-        var indexUrl = GetConfigureRepoUrl();
-        if (string.IsNullOrWhiteSpace(indexUrl))
-        {
-            return null;
-        }
-        
-        var index = await _cacheStorage.RollJsonAsync(IndexCacheObj, 
-            async () => await _httpClient.GetFromJsonAsync<RemoteIndex>(indexUrl));
-        
-        return index == null
-            ? null
-            : new RemoteRepository(index);
+        await _remoteManager.InitializeCacheAsync();
+        var (count, series) = await _repositoryIndexer.IndexSeries();
+
+        return new RemoteRepository(series, count);
     }
 
     public Task RefreshAsync()
     {
-        _cacheStorage.DeleteObject(IndexCacheObj);
+        _remoteManager.CleanPrevious();
         return Task.CompletedTask;
     }
 }

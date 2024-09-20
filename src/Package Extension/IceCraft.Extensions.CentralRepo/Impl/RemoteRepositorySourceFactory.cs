@@ -1,10 +1,12 @@
 namespace IceCraft.Extensions.CentralRepo.Impl;
 
+using System.IO.Abstractions;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Caching;
 using IceCraft.Api.Client;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Platform;
+using IceCraft.Extensions.CentralRepo.Network;
 using Microsoft.Extensions.DependencyInjection;
 
 public class RemoteRepositorySourceFactory : IRepositorySourceFactory
@@ -13,6 +15,8 @@ public class RemoteRepositorySourceFactory : IRepositorySourceFactory
     {
         name = "csr";
         return new RemoteRepositorySource(provider.GetRequiredService<IFrontendApp>(),
-                provider.GetRequiredService<ICacheManager>());
+                provider.GetRequiredService<ICacheManager>(),
+                provider.GetRequiredService<RemoteRepositoryManager>(),
+                provider.GetRequiredService<RemoteRepositoryIndexer>());
     }
 }
