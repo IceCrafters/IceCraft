@@ -23,6 +23,8 @@ public interface IPackageInstallManager
     /// <param name="meta">The package to uninstall.</param>
     Task UninstallAsync(PackageMeta meta);
 
+    Task<bool> IsInstalledAsync(PackageMeta meta);
+    
     /// <summary>
     /// Determines whether at least one version of the specified package is installed.
     /// </summary>
@@ -70,4 +72,7 @@ public interface IPackageInstallManager
     Task<PackageInstallationIndex?> GetIndexOrDefaultAsync(string metaId);
 
     Task RegisterVirtualPackageAsync(PackageMeta virtualMeta, PackageReference origin);
+
+    Task PutPackageAsync(InstalledPackageInfo info);
+    Task UnregisterPackageAsync(PackageMeta meta);
 }

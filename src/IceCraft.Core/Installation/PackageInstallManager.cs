@@ -92,11 +92,9 @@ public class PackageInstallManager : IPackageInstallManager
                 preprocessor,
                 _frontend.Output);
 
-            database.Put(entry);
+            await PutPackageAsync(entry);
             dictionary.Add(meta, pkgDir);
         }
-
-        await _databaseFactory.SaveAsync();
 
         // Configure package.
         // DependencyResolver resolves dependencies top-down, and thus the most safe way is to
@@ -126,10 +124,8 @@ public class PackageInstallManager : IPackageInstallManager
                 throw new KnownException("Failed to set up package", ex);
             }
 
-            database.Put(entry);
+            await PutPackageAsync(entry);
         }
-
-        await _databaseFactory.SaveAsync();
     }
     
     public async Task InstallAsync(PackageMeta meta, string artefactPath)
@@ -267,19 +263,18 @@ public class PackageInstallManager : IPackageInstallManager
         {
             // Save the fact that the package is expanded but couldn't be set up.
             entry.State = InstallationState.Expanded;
-            database.Put(entry);
+            await PutPackageAsync(entry);
 
             throw new KnownException("Failed to set up package", ex);
         }
 
         entry.State = InstallationState.Configured;
-        database.Put(entry);
+        await PutPackageAsync(entry);
     }
 
     public async Task<string> GetInstalledPackageDirectoryAsync(PackageMeta meta)
     {
-        var database = await _databaseFactory.GetAsync();
-        if (!database.ContainsMeta(meta))
+        if (!await IsInstalledAsync(meta))
         {
             throw new ArgumentException("The specified package was not installed.", nameof(meta));
         }
@@ -305,8 +300,7 @@ public class PackageInstallManager : IPackageInstallManager
 
     public async Task UninstallAsync(PackageMeta meta)
     {
-        var database = await _databaseFactory.GetAsync();
-        if (!database.ContainsMeta(meta))
+        if (!await IsInstalledAsync(meta))
         {
             throw new ArgumentException("No such package meta installed.", nameof(meta));
         }
@@ -334,8 +328,14 @@ public class PackageInstallManager : IPackageInstallManager
             Directory.Delete(directory, true);
         }
 
-        database[meta.Id].Remove(meta.Version.ToString());
-        await _databaseFactory.MaintainAndSaveAsync();
+        await UnregisterPackageAsync(meta);
+    }
+
+    public async Task<bool> IsInstalledAsync(PackageMeta meta)
+    {
+        var database = await _databaseFactory.GetAsync();
+
+        return database.ContainsMeta(meta);
     }
 
     public async Task<bool> IsInstalledAsync(string packageName)
@@ -397,13 +397,29 @@ public class PackageInstallManager : IPackageInstallManager
     {
         var database = await _databaseFactory.GetAsync();
 
-        database.Put(new InstalledPackageInfo()
+        database.Put(new InstalledPackageInfo
         {
             Metadata = virtualMeta,
             State = InstallationState.Virtual,
             ProvidedBy = origin
         });
 
+        await _databaseFactory.MaintainAndSaveAsync();
+    }
+
+    public async Task PutPackageAsync(InstalledPackageInfo info)
+    {
+        var database = await _databaseFactory.GetAsync();
+        database.Put(info);
+        
+        await _databaseFactory.SaveAsync();
+    }
+
+    public async Task UnregisterPackageAsync(PackageMeta meta)
+    {
+        var database = await _databaseFactory.GetAsync();
+        
+        database[meta.Id].Remove(meta.Version.ToString());
         await _databaseFactory.MaintainAndSaveAsync();
     }
 
