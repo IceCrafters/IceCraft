@@ -11,7 +11,6 @@ using Semver;
 
 public interface IPackageInstallManager
 {
-    Task InstallAsync(CachedPackageInfo packageInfo);
     Task InstallAsync(PackageMeta meta, string artefactPath);
 
     Task BulkInstallAsync(IAsyncEnumerable<DueInstallTask> packages, int expectedCount);

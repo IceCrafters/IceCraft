@@ -6,12 +6,10 @@ namespace IceCraft.Core.Installation;
 
 using System.Diagnostics;
 using System.IO.Abstractions;
-using IceCraft.Api.Archive.Indexing;
 using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
 using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Dependency;
-using IceCraft.Api.Network;
 using IceCraft.Api.Package;
 using Microsoft.Extensions.DependencyInjection;
 using Semver;
@@ -19,8 +17,7 @@ using Semver;
 public class PackageInstallManager : IPackageInstallManager
 {
     public const string PackagePath = "packages";
-
-    private readonly IDownloadManager _downloadManager;
+    
     private readonly IFrontendApp _frontend;
     private readonly IServiceProvider _serviceProvider;
     private readonly IPackageInstallDatabaseFactory _databaseFactory;
@@ -29,13 +26,11 @@ public class PackageInstallManager : IPackageInstallManager
     private readonly string _packagesPath;
 
     public PackageInstallManager(IFrontendApp frontend,
-        IDownloadManager downloadManager,
         IServiceProvider serviceProvider,
         IPackageInstallDatabaseFactory databaseFactory,
         IFileSystem fileSystem)
     {
         _frontend = frontend;
-        _downloadManager = downloadManager;
         _serviceProvider = serviceProvider;
         _databaseFactory = databaseFactory;
         _fileSystem = fileSystem;
@@ -136,14 +131,7 @@ public class PackageInstallManager : IPackageInstallManager
 
         await _databaseFactory.SaveAsync();
     }
-
-    public async Task InstallAsync(CachedPackageInfo packageInfo)
-    {
-        var meta = packageInfo.Metadata;
-        var tempFilePath = await _downloadManager.DownloadTemporaryArtefactAsync(packageInfo);
-        await InstallAsync(meta, tempFilePath);
-    }
-
+    
     public async Task InstallAsync(PackageMeta meta, string artefactPath)
     {
         var database = await _databaseFactory.GetAsync();
@@ -439,8 +427,7 @@ public class PackageInstallManager : IPackageInstallManager
                 }
 
                 if (index.Any(x => reference.VersionRange.Contains(x.Value.Metadata.Version)
-                    && !(x.Value.State == InstallationState.Virtual
-                         && x.Value.ProvidedBy.HasValue
+                    && !(x.Value is { State: InstallationState.Virtual, ProvidedBy: not null }
                          && x.Value.ProvidedBy.Value.DoesPointTo(package))))
                 {
                     _frontend.Output.Warning("Package {0} ({1}) conflicts with {2} {3}",
