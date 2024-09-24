@@ -17,6 +17,7 @@ using IceCraft.Extensions.CentralRepo;
 using IceCraft.Extensions.DotNet;
 using IceCraft.Frontend;
 using IceCraft.Frontend.Cli;
+using IceCraft.Plugin;
 using IceCraft.Repositories.Adoptium;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -31,13 +32,18 @@ appServices
     .AddSingleton<ICacheManager, FileSystemCacheManager>()
     .AddSingleton<IRepositoryDefaultsSupplier, DefaultSource>()
     .AddSingleton<IFileSystem, FileSystem>()
+    .AddSingleton<ICustomConfig, CustomConfigImpl>()
     .AddLogging(configure => configure.AddSerilog())
     // Core
     .AddIceCraftDefaults()
     // Sources
     .AddAdoptiumSource()
-    .AddDotNetExtension()
-    .AddCsrExtension();
+    .AddDotNetExtension();
+
+var pluginManager = new PluginManager();
+pluginManager.Add(new CsrPlugin());
+
+pluginManager.InitializeAll(new ServiceRegistry(appServices));
 
 #if DEBUG
 if (!Debugger.IsAttached && args.Contains("--debug"))

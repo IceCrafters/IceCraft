@@ -4,13 +4,20 @@
 
 namespace IceCraft.Api.Plugin;
 
+using JetBrains.Annotations;
+
 public interface IServiceRegistry
 {
-    void RegisterSingleton<TInterface, TImplementation>()
+    IServiceRegistry RegisterSingleton<TInterface, 
+        [MeansImplicitUse(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature)] TImplementation>()
         where TInterface : class
         where TImplementation : class, TInterface;
+
+    IServiceRegistry RegisterSingleton<[MeansImplicitUse(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature)] T>()
+        where T : class;
     
-    void RegisterKeyedSingleton<TInterface, TImplementation>(string? key)
+    IServiceRegistry RegisterKeyedSingleton<TInterface, 
+        [MeansImplicitUse(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature)] TImplementation>(string? key)
         where TInterface : class
         where TImplementation : class, TInterface;
 }

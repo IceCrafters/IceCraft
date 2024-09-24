@@ -4,41 +4,22 @@
 
 namespace IceCraft.Plugin;
 
-using System.Reflection;
 using IceCraft.Api.Plugin;
 
 public class PluginManager
 {
-    private readonly string _pluginsDir;
+    private readonly List<IPlugin> _plugins = [];
 
-    public PluginManager(string pluginsDir)
+    public void Add(IPlugin plugin)
     {
-        _pluginsDir = Path.GetFullPath(pluginsDir);
-    }
-    
-    private Assembly LoadPlugin(string relativePath)
-    {
-        var pluginLocation = Path.GetFullPath(Path.Combine(_pluginsDir, 
-            relativePath.Replace('\\', Path.DirectorySeparatorChar)));
-        
-        var pluginContext = new PluginLoadContext(pluginLocation);
-        return pluginContext.LoadFromAssemblyName(new AssemblyName(Path.GetFileNameWithoutExtension(pluginLocation)));
+        _plugins.Add(plugin);
     }
 
-    public IEnumerable<IEnumerable<IPlugin>> LoadPlugins(IEnumerable<string> fileNames)
+    public void InitializeAll(IServiceRegistry serviceRegistry)
     {
-        return fileNames.Select(LoadPlugin).Select(CreatePluginInstance);
-    }
-
-    private static IEnumerable<IPlugin> CreatePluginInstance(Assembly pluginAssembly)
-    {
-        foreach (var type in pluginAssembly.GetExportedTypes())
+        foreach (var plugin in _plugins)
         {
-            if (!typeof(IPlugin).IsAssignableFrom(type)) continue;
-            if (Activator.CreateInstance(type) is IPlugin result)
-            {
-                yield return result;
-            }
+            plugin.Initialize(serviceRegistry);
         }
     }
 }

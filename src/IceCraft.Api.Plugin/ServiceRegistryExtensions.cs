@@ -10,10 +10,10 @@ using IceCraft.Api.Package;
 
 public static class ServiceRegistryExtensions
 {
-    public static void RegisterRepositorySource<T>(this IServiceRegistry registry)
+    public static IServiceRegistry RegisterRepositorySource<T>(this IServiceRegistry registry)
         where T : class, IRepositorySourceFactory
     {
-        registry.RegisterKeyedSingleton<IRepositorySourceFactory, T>(null);
+        return registry.RegisterKeyedSingleton<IRepositorySourceFactory, T>(null);
     }
 
     /// <summary>

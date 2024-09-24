@@ -16,17 +16,25 @@ public class ServiceRegistry : IServiceRegistry
         _serviceCollection = serviceCollection;
     }
 
-    public void RegisterSingleton<TInterface, TImplementation>()
+    public IServiceRegistry RegisterSingleton<TInterface, TImplementation>()
         where TInterface : class
         where TImplementation : class, TInterface
     {
         _serviceCollection.AddSingleton<TInterface, TImplementation>();
+        return this;
     }
 
-    public void RegisterKeyedSingleton<TInterface, TImplementation>(string? key)
+    public IServiceRegistry RegisterSingleton<T>() where T : class
+    {
+        _serviceCollection.AddSingleton<T>();
+        return this;
+    }
+
+    public IServiceRegistry RegisterKeyedSingleton<TInterface, TImplementation>(string? key)
         where TInterface : class
         where TImplementation : class, TInterface
     {
         _serviceCollection.AddKeyedSingleton<TInterface, TImplementation>(key);
+        return this;
     }
 }
