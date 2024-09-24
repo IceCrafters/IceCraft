@@ -10,10 +10,17 @@ using SharpCompress.Readers;
 
 public class RemoteRepositoryManager
 {
+    private readonly IFrontendApp _frontendApp;
     private readonly IOutputAdapter _output;
+    private readonly ICustomConfig _customConfig;
 
-    public RemoteRepositoryManager(IFrontendApp frontendApp)
+    private const string OfficialRepository =
+        "https://gitlab.com/icecrafters/repository/-/archive/main/repository-main.tar.gz";
+
+    public RemoteRepositoryManager(IFrontendApp frontendApp, ICustomConfig customConfig)
     {
+        _frontendApp = frontendApp;
+        _customConfig = customConfig;
         _output = frontendApp.Output;
 
         var csrDataPath = Path.Combine(frontendApp.DataBasePath, "csr");
@@ -40,7 +47,7 @@ public class RemoteRepositoryManager
         Directory.CreateDirectory(LocalCachedRepoPath);
         
         string downloadedPath;
-        await using (var archiveStream = GetArchiveStream())
+        await using (var archiveStream = await GetArchiveStreamAsync())
         {
             downloadedPath = await DownloadArchiveTempAsync(archiveStream);
         }
@@ -66,7 +73,7 @@ public class RemoteRepositoryManager
         return tempPath;
     }
     
-    private static Stream GetArchiveStream()
+    private async Task<Stream> GetArchiveStreamAsync()
     {
         #if DEBUG
         var envVar = Environment.GetEnvironmentVariable("ICECRAFT_DBG_CSR_ARCHIVE_PATH");
@@ -76,6 +83,14 @@ public class RemoteRepositoryManager
         }
         #endif
         
-        throw new NotImplementedException();
+        var link = _customConfig.GetScope("csr")
+                       .Get("info-archive")
+                   ?? OfficialRepository;
+
+        var client = _frontendApp.GetClient();
+        var response = await client.GetAsync(link);
+        response.EnsureSuccessStatusCode();
+        
+        return await response.Content.ReadAsStreamAsync();
     }
 }
