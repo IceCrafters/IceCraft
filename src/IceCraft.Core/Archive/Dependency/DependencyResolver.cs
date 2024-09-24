@@ -36,10 +36,10 @@ public class DependencyResolver : IDependencyResolver
         _output = frontendApp.Output;
     }
 
-    public async Task ResolveTree(PackageMeta meta, PackageIndex index, ISet<PackageMeta> setToAppend, CancellationToken cancellationToken = default)
+    public async Task ResolveTree(PackageMeta meta, PackageIndex index, ISet<DependencyLeaf> setToAppend, CancellationToken cancellationToken = default)
     {
         // The dependency tree trunk.
-        var depTrunk = new HashSet<PackageMeta>(meta.Dependencies?.Count ?? 10);
+        var depTrunk = new HashSet<DependencyLeaf>(meta.Dependencies?.Count ?? 10);
 
         // Keep track of all parents in the dependency tree.
         var depTreeParents = new HashSet<StackBranch>(meta.Dependencies?.Count ?? 10);
@@ -104,7 +104,7 @@ public class DependencyResolver : IDependencyResolver
                         }
 
                         resolvingStack.Push(new StackBranch(dependency, layer + 1));
-                        depTrunk.Add(dependency);
+                        depTrunk.Add(new DependencyLeaf(dependency, false));
                     }
 
                     if (currentIsParent)
@@ -116,7 +116,7 @@ public class DependencyResolver : IDependencyResolver
         }, cancellationToken);
         
         // Faster logic for expandable lists.
-        if (setToAppend is HashSet<PackageMeta> expandableList)
+        if (setToAppend is HashSet<DependencyLeaf> expandableList)
         {
             await Task.Run(() =>
             {

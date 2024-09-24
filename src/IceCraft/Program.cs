@@ -6,6 +6,7 @@ using System.CommandLine;
 using System.CommandLine.Builder;
 using System.Diagnostics;
 using System.IO.Abstractions;
+using DotNetConfig;
 using IceCraft;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Caching;
@@ -24,9 +25,12 @@ using Serilog;
 using Spectre.Console;
 
 IceCraftApp.Initialize();
+var config = Config.Build();
+
 var appServices = new ServiceCollection();
 appServices
     // Application
+    .AddSingleton(config)
     .AddSingleton<IManagerConfiguration, DotNetConfigServiceImpl>()
     .AddSingleton<IFrontendApp, IceCraftApp>()
     .AddSingleton<ICacheManager, FileSystemCacheManager>()

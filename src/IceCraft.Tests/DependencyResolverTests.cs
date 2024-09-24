@@ -11,10 +11,8 @@ using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
 using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Util;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Semver;
-using Xunit.Abstractions;
 
 public class DependencyResolverTests
 {
@@ -27,20 +25,6 @@ public class DependencyResolverTests
         Checksum = "",
         ChecksumType = ""
     };
-    
-    private readonly ILoggerFactory _loggerFactory;
-
-    public DependencyResolverTests(ITestOutputHelper outputHelper)
-    {
-        _loggerFactory = LoggerFactory
-            .Create(builder =>
-            {
-                builder
-                    .AddXunit(outputHelper);
-                // Add other loggers, e.g.: AddConsole, AddDebug, etc.
-            });
-
-    }
     
     [Fact]
     public async Task SelectBest_SelectLatestOne()
@@ -68,9 +52,9 @@ public class DependencyResolverTests
     public async Task SelectBest_SelectSameName()
     {
         // Arrange
-        const string DependencyName = "dependency";
-        var dependency = new DependencyReference(DependencyName, SemVersionRange.AllRelease);
-        var toSelect = new PackageMeta(DependencyName, new SemVersion(0, 1, 0), DateTime.MinValue, MockPluginInfo);
+        const string dependencyName = "dependency";
+        var dependency = new DependencyReference(dependencyName, SemVersionRange.AllRelease);
+        var toSelect = new PackageMeta(dependencyName, new SemVersion(0, 1, 0), DateTime.MinValue, MockPluginInfo);
 
         PackageMeta[] versions =
         [
@@ -124,7 +108,7 @@ public class DependencyResolverTests
 
         var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
             Mock.Of<IFrontendApp>());
-        var hashSet = new HashSet<PackageMeta>();
+        var hashSet = new HashSet<DependencyLeaf>();
 
         // Act
         var exception = await Record.ExceptionAsync(async () 
@@ -172,7 +156,7 @@ public class DependencyResolverTests
 
         var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
             Mock.Of<IFrontendApp>());
-        var hashSet = new HashSet<PackageMeta>();
+        var hashSet = new HashSet<DependencyLeaf>();
 
         // Act
         var exception = await Record.ExceptionAsync(async () 
@@ -205,7 +189,7 @@ public class DependencyResolverTests
 
         var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
             Mock.Of<IFrontendApp>());
-        var hashSet = new HashSet<PackageMeta>();
+        var hashSet = new HashSet<DependencyLeaf>();
 
         // Act
         var exception = await Record.ExceptionAsync(async () 
@@ -252,15 +236,15 @@ public class DependencyResolverTests
 
         var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
             Mock.Of<IFrontendApp>());
-        var hashSet = new HashSet<PackageMeta>();
+        var hashSet = new HashSet<DependencyLeaf>();
 
         var expectedList =
-        new PackageMeta[] 
+        new DependencyLeaf[] 
         {
-            dep1,
-            dep2,
-            dep3,
-            dep4
+            new(dep1, false),
+            new(dep2, false),
+            new(dep3, false),
+            new(dep4, false)
         };
         
         // Act
@@ -307,7 +291,7 @@ public class DependencyResolverTests
 
         var resolver = new DependencyResolver(Mock.Of<IPackageInstallManager>(),
             Mock.Of<IFrontendApp>());
-        var hashSet = new HashSet<PackageMeta>();
+        var hashSet = new HashSet<DependencyLeaf>();
 
         // Act
         var exception = await Record.ExceptionAsync(async () 

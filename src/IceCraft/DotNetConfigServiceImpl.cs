@@ -9,12 +9,13 @@ using IceCraft.Api.Client;
 
 internal class DotNetConfigServiceImpl : IManagerConfiguration
 {
-    private readonly Config _config = Config.Build();
+    private readonly Config _config;
     private readonly IFrontendApp _frontend;
 
-    public DotNetConfigServiceImpl(IFrontendApp frontend)
+    public DotNetConfigServiceImpl(IFrontendApp frontend, Config config)
     {
         _frontend = frontend;
+        _config = config;
     }
 
     private const string SectionSources = "source";

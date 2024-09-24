@@ -14,7 +14,7 @@ public interface IPackageInstallManager
     Task InstallAsync(CachedPackageInfo packageInfo);
     Task InstallAsync(PackageMeta meta, string artefactPath);
 
-    Task BulkInstallAsync(IAsyncEnumerable<KeyValuePair<PackageMeta, string>> packages, int expectedCount);
+    Task BulkInstallAsync(IAsyncEnumerable<DueInstallTask> packages, int expectedCount);
 
     Task<string> GetInstalledPackageDirectoryAsync(PackageMeta meta);
 

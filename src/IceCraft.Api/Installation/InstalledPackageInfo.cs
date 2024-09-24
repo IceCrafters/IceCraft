@@ -12,4 +12,10 @@ public sealed record InstalledPackageInfo
     public required PackageMeta Metadata { get; init; }
     public required InstallationState State { get; set; }
     public PackageReference? ProvidedBy { get; init; }
+    
+    /// <summary>
+    /// Gets a value indicating whether this package is installed explicitly rather than
+    /// being installed as a dependency.
+    /// </summary>
+    public bool IsExplicitlyInstalled { get; init; }
 }

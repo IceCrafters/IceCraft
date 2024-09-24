@@ -49,7 +49,7 @@ public class PackageInstallManager : IPackageInstallManager
         Directory.CreateDirectory(_packagesPath);
     }
 
-    public async Task BulkInstallAsync(IAsyncEnumerable<KeyValuePair<PackageMeta, string>> packages,
+    public async Task BulkInstallAsync(IAsyncEnumerable<DueInstallTask> packages,
         int expectedCount)
     {
         // Key   : Meta 
@@ -59,19 +59,22 @@ public class PackageInstallManager : IPackageInstallManager
         var database = await _databaseFactory.GetAsync();
 
         // Configure and expand package.
-        await foreach (var (meta, artefactPath) in packages)
+        await foreach (var installTask in packages)
         {
-            var entry = new InstalledPackageInfo()
+            var meta = installTask.Package;
+            
+            var entry = new InstalledPackageInfo
             {
-                Metadata = meta,
-                State = InstallationState.Expanded
+                Metadata = installTask.Package,
+                State = InstallationState.Expanded,
+                IsExplicitlyInstalled = installTask.IsExplicit
             };
 
             var installer = _serviceProvider.GetKeyedService<IPackageInstaller>(meta.PluginInfo.InstallerRef)
                 ?? throw new ArgumentException($"Installer '{meta.PluginInfo.InstallerRef}' not found for package '{meta.Id}' '{meta.Version}'.");
-            var preprocessor = meta.PluginInfo.PreProcessorRef != null
+            var preprocessor = installTask.Package.PluginInfo.PreProcessorRef != null
             ? _serviceProvider.GetKeyedService<IArtefactPreprocessor>(meta.PluginInfo.PreProcessorRef)
-                ?? throw new ArgumentException($"Preprocessor '{meta.PluginInfo.PreProcessorRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta))
+                ?? throw new ArgumentException($"Preprocessor '{meta.PluginInfo.PreProcessorRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(packages))
             : null;
             var pkgDir = GetPackageDirectory(meta);
 
@@ -87,7 +90,7 @@ public class PackageInstallManager : IPackageInstallManager
 
             // Expand package.
             await InternalExpandAsync(meta,
-                artefactPath,
+                installTask.ArtefactPath,
                 pkgDir,
                 _fileSystem,
                 installer,

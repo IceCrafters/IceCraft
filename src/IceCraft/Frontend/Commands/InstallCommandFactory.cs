@@ -92,7 +92,7 @@ public class InstallCommandFactory : ICommandFactory
         SemVersion? selectedVersion;
         PackageMeta? meta;
         PackageIndex? index = null;
-        HashSet<PackageMeta> allPackagesSet = [];
+        HashSet<DependencyLeaf> allPackagesSet = [];
 
         await AnsiConsole.Status()
             .StartAsync("Indexing remote packages",
@@ -132,14 +132,14 @@ public class InstallCommandFactory : ICommandFactory
 
                     // STEP: Resolve all dependencies.
                     ctx.Status("Resolving dependencies");
-                    allPackagesSet.Add(meta);
+                    allPackagesSet.Add(new DependencyLeaf(meta, true));
                     await _dependencyResolver.ResolveTree(meta, index!, allPackagesSet,
                         _frontend.GetCancellationToken());
 
                     ctx.Status("Checking for conflicts");
                     foreach (var package in allPackagesSet)
                     {
-                        if (!await _installManager.CheckForConflictAsync(package))
+                        if (!await _installManager.CheckForConflictAsync(package.Package))
                         {
                             throw new KnownException("Package conflict detected.");
                         }
@@ -147,7 +147,7 @@ public class InstallCommandFactory : ICommandFactory
                 });
 
         // Step 2: Confirmation
-        if (!_interactiveInstaller.AskConfirmation(allPackagesSet))
+        if (!InteractiveInstaller.AskConfirmation(allPackagesSet))
         {
             return 0;
         }

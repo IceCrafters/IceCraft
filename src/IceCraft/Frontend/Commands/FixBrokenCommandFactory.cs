@@ -11,7 +11,6 @@ using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Network;
-using IceCraft.Api.Package;
 using IceCraft.Frontend.Cli;
 using IceCraft.Interactive;
 using Microsoft.Extensions.DependencyInjection;
@@ -56,7 +55,7 @@ public class FixBrokenCommandFactory : ICommandFactory
     
     private async Task<int> ExecuteAsync(bool dryRun)
     {
-        var packages = new HashSet<PackageMeta>();
+        var packages = new HashSet<DependencyLeaf>();
         var index = await _indexer.IndexAsync(_sourceManager);
 
         await foreach (var package in _dependencyMapper.EnumerateUnsatisifiedPackages())
@@ -72,11 +71,11 @@ public class FixBrokenCommandFactory : ICommandFactory
 
         if (dryRun)
         {
-            AnsiConsole.Write(new Columns(packages.Select(p => p.Id)));
+            AnsiConsole.Write(new Columns(packages.Select(p => p.Package.Id)));
             return ExitCodes.Ok;
         }
 
-        if (!_installer.AskConfirmation(packages))
+        if (!InteractiveInstaller.AskConfirmation(packages))
         {
             return ExitCodes.Ok;
         }

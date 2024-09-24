@@ -20,7 +20,7 @@ public interface IDependencyResolver
     /// <param name="cancellationToken">The token to cancel the operation.</param>
     /// <exception cref="DependencyException">Dependency is either invalid or cannot be satisfied.</exception>
     /// <exception cref="OperationCanceledException">Operation is cancelled.</exception>
-    Task ResolveTree(PackageMeta meta, PackageIndex index, ISet<PackageMeta> setToAppend, CancellationToken cancellationToken = default);
+    Task ResolveTree(PackageMeta meta, PackageIndex index, ISet<DependencyLeaf> setToAppend, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Resolves a single layer of dependencies.

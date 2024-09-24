@@ -43,17 +43,18 @@ public class InteractiveInstaller
         internal required PackageMeta Metadata { get; init; }
         internal required string Objective { get; init; }
         internal Stream? Stream { get; init; }
+        internal required bool IsExplicit { get; init; }
     }
 
-    public bool AskConfirmation(ISet<PackageMeta> packages)
+    public static bool AskConfirmation(ISet<DependencyLeaf> packages)
     {
         AnsiConsole.MarkupLineInterpolated($":star: Total {packages.Count} packages");
-        AnsiConsole.Write(new Columns(packages.Select(p => p.Id)));
+        AnsiConsole.Write(new Columns(packages.Select(p => p.Package.Id)));
 
         return AnsiConsole.Confirm("Install packages?", defaultValue: false);
     }
 
-    public async Task<int> InstallAsync(ISet<PackageMeta> packages, PackageIndex index)
+    public async Task<int> InstallAsync(ISet<DependencyLeaf> packages, PackageIndex index)
     {
         QueuedDownloadTask[] artefactTasks = [];
         await AnsiConsole.Progress()
@@ -62,10 +63,10 @@ public class InteractiveInstaller
             {
                 var artefactList = new List<QueuedDownloadTask>(packages.Count);
 
-                // Go through every packages to install and queue download for them.
+                // Go through every package to install and queue download for them.
                 foreach (var package in packages)
                 {
-                    var packageInfo = index.GetPackageInfo(package);
+                    var packageInfo = index.GetPackageInfo(package.Package);
 
                     var artefactFile = await _artefactManager.GetSafeArtefactPathAsync(packageInfo.Artefact,
                         packageInfo.Metadata);
@@ -78,7 +79,8 @@ public class InteractiveInstaller
                             Task = Task.FromResult(DownloadResult.Succeeded),
                             ArtefactInfo = packageInfo.Artefact,
                             Metadata = packageInfo.Metadata,
-                            Objective = artefactFile
+                            Objective = artefactFile,
+                            IsExplicit = package.IsExplicit
                         }
                         );
 
@@ -86,7 +88,7 @@ public class InteractiveInstaller
                     }
 
                     // Download new artefact.
-                    var task = ctx.AddTask(package.Id);
+                    var task = ctx.AddTask(package.Package.Id);
                     var stream = _artefactManager.CreateArtefact(packageInfo.Artefact,
                         packageInfo.Metadata);
 
@@ -100,7 +102,8 @@ public class InteractiveInstaller
                         Metadata = packageInfo.Metadata,
                         Objective = _artefactManager.GetArtefactPath(packageInfo.Artefact,
                             packageInfo.Metadata),
-                        Stream = stream
+                        Stream = stream,
+                        IsExplicit = package.IsExplicit
                     }
                     );
                 }
@@ -132,7 +135,7 @@ public class InteractiveInstaller
         return 0;
     }
 
-    private async IAsyncEnumerable<KeyValuePair<PackageMeta, string>> ValidateAndInsertInternalAsync(
+    private async IAsyncEnumerable<DueInstallTask> ValidateAndInsertInternalAsync(
         StatusContext status,
         IEnumerable<QueuedDownloadTask> tasks)
     {
@@ -158,7 +161,7 @@ public class InteractiveInstaller
                 throw new KnownException("Artefact hash mismatches downloaded file.");
             }
 
-            yield return new KeyValuePair<PackageMeta, string>(task.Metadata, path);
+            yield return new DueInstallTask(task.Metadata, path, task.IsExplicit);
         }
     }
 }
