@@ -82,12 +82,12 @@ internal class IceCraftApp : IFrontendApp
         TokenSource.Cancel();
     }
 
-    internal async Task<DatabaseObject> ReadDatabaseObject()
+    internal async Task<DatabaseFile> ReadDatabase()
     {
         var dbPath = Path.Combine(DataBasePath, "packages", "db.json");
         var file = await DatabaseFile.LoadDatabaseAsync(dbPath);
 
-        return file;
+        return new DatabaseFile(file, Output, dbPath);
     }
 
     public HttpClient GetClient() => HttpClient;

@@ -29,7 +29,7 @@ IceCraftApp.Initialize();
 var app = new IceCraftApp();
 var config = Config.Build();
 
-var dbFile = new DatabaseFile(await app.ReadDatabaseObject(), Output.Shared);
+var dbFile = await app.ReadDatabase();
 
 var appServices = new ServiceCollection();
 appServices

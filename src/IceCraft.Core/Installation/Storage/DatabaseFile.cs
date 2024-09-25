@@ -10,21 +10,20 @@ using IceCraft.Core.Serialization;
 
 public sealed class DatabaseFile
 {
-    private readonly DatabaseObject _database;
     private readonly IOutputAdapter _output;
+    private readonly string _writeTo;
 
     public DatabaseFile(DatabaseObject database,
-        IOutputAdapter output)
+        IOutputAdapter output,
+        string writeTo)
     {
-        _database = database;
+        Value = database;
         _output = output;
+        _writeTo = writeTo;
     }
 
-    public DatabaseObject Get()
-    {
-        return _database;
-    }
-    
+    public DatabaseObject Value { get; }
+
     private static async Task<DatabaseObject> CreateDatabaseFileAsync(string filePath)
     {
         var retVal = new DatabaseObject();
@@ -76,5 +75,20 @@ public sealed class DatabaseFile
         outputAdapter?.Verbose("{0} packages currently installed", retVal.Count);
 
         return retVal;
+    }
+
+    public async Task StoreAsync()
+    {
+        _output.Verbose("Saving database");
+
+        try
+        {
+            await using var fileStream = File.Create(_writeTo);
+            await JsonSerializer.SerializeAsync(fileStream, Value, IceCraftCoreContext.Default.DatabaseObject);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Failed to save installation database.", ex);
+        }
     }
 }

@@ -38,11 +38,9 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
         if (_map != null) return _map;
         
         _frontend.Output.Log("Loading package database...");
-
-        var packagesPath = Path.Combine(_frontend.DataBasePath, PackageInstallManager.PackagePath);
         
         var loader = _serviceProvider.GetRequiredService<DatabaseFile>();
-        return loader.Get();
+        return loader.Value;
     }
 
     public async Task SaveAsync()
@@ -103,7 +101,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
 
         if (_map == null)
         {
-            _map = _serviceProvider.GetRequiredService<DatabaseFile>().Get();
+            _map = _serviceProvider.GetRequiredService<DatabaseFile>().Value;
             return;
         }
 

@@ -73,8 +73,9 @@ public static class IceCraftDependencyExtensions
             .AddScoped<ILocalDatabaseReadHandle>(provider =>
             {
                 var file = provider.GetRequiredService<DatabaseFile>();
-                return new DatabaseReadHandleImpl(file.Get());
-            });
+                return new DatabaseReadHandleImpl(file.Value);
+            })
+            .AddTransient<ILocalDatabaseMutator, LocalDatabaseMutatorImpl>();
     }
 
     public static IServiceCollection AddChecksumValidators(this IServiceCollection services)
