@@ -41,7 +41,7 @@ public class ExecutableManager : IExecutableManager
     public async Task RegisterAsync(PackageMeta meta, string linkName, string linkTo, EnvironmentVariableDictionary? variables = null)
     {
         await _executables;
-        await _installManager.GetInstalledPackageDirectoryAsync(meta);
+        _installManager.GetInstalledPackageDirectory(meta);
 
         if (_fileSystem.Path.GetInvalidFileNameChars().Any(linkName.Contains)
             || linkName.Contains("..")
@@ -71,7 +71,7 @@ public class ExecutableManager : IExecutableManager
 
     public async Task SwitchAlternativeAsync(PackageMeta meta, string linkName)
     {
-        var packageRoot = await _installManager.GetInstalledPackageDirectoryAsync(meta);
+        var packageRoot = _installManager.GetInstalledPackageDirectory(meta);
 
         var info = await GetInfo(linkName);
 

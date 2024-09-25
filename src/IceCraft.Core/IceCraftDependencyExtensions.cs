@@ -70,8 +70,11 @@ public static class IceCraftDependencyExtensions
             .AddKeyedSingleton<IPackageConfigurator, VirtualConfigurator>("virtual")
             .AddSingleton<IArtefactManager, ArtefactManager>()
             .AddSingleton<IEnvironmentProvider, EnvironmentWrapper>()
-            .AddScoped<DatabaseFile>()
-            .AddScoped<ILocalDatabaseReadAccess, DatabaseReadAccessImpl>();
+            .AddScoped<ILocalDatabaseReadHandle>(provider =>
+            {
+                var file = provider.GetRequiredService<DatabaseFile>();
+                return new DatabaseReadHandleImpl(file.Get());
+            });
     }
 
     public static IServiceCollection AddChecksumValidators(this IServiceCollection services)

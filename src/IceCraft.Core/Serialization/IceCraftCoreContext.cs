@@ -20,10 +20,10 @@ using IceCraft.Core.Installation.Storage;
 [JsonSerializable(typeof(Dictionary<string, CachedPackageSeriesInfo>), TypeInfoPropertyName = "BasePackageIndex_v0_1")]
 [JsonSerializable(typeof(ArtefactMirrorInfo))]
 [JsonSerializable(typeof(IEnumerable<ArtefactMirrorInfo>))]
-[JsonSerializable(typeof(PackageInstallDatabaseFactory.ValueMap), TypeInfoPropertyName = "PackageInstallValueMap")]
 [JsonSerializable(typeof(Dictionary<string, ExecutableInfo>), TypeInfoPropertyName = "ExecutableDataFile_v2")]
 [JsonSerializable(typeof(DependencyMap))]
 [JsonSerializable(typeof(Dictionary<string, string>))]
+[JsonSerializable(typeof(DatabaseObject))]
 internal partial class IceCraftCoreContext : JsonSerializerContext
 {
 }

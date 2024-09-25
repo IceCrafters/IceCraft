@@ -10,25 +10,25 @@ using Moq;
 
 public class ExecutableManagerTests
 {
-    #region Helpers
-    private static IPackageInstallManager GetInstallMock()
-    {
-        var mock = new Mock<IPackageInstallManager>();
-
-        mock.Setup(x => x.GetInstalledPackageDirectoryAsync(MockMeta))
-            .Returns(Task.FromResult("/icMock/packages/test/"));
-
-        return mock.Object;
-    }
-
-    private static readonly PackageMeta MockMeta = new()
-    {
-        Id = "test",
-        PluginInfo = new("test", "test"),
-        ReleaseDate = DateTime.MinValue,
-        Version = "0.0.0"
-    };
-    #endregion
+    // #region Helpers
+    // private static IPackageInstallManager GetInstallMock()
+    // {
+    //     var mock = new Mock<IPackageInstallManager>();
+    //
+    //     mock.Setup(x => x.GetInstalledPackageDirectory(MockMeta))
+    //         .Returns(Task.FromResult("/icMock/packages/test/"));
+    //
+    //     return mock.Object;
+    // }
+    //
+    // private static readonly PackageMeta MockMeta = new()
+    // {
+    //     Id = "test",
+    //     PluginInfo = new("test", "test"),
+    //     ReleaseDate = DateTime.MinValue,
+    //     Version = "0.0.0"
+    // };
+    // #endregion
 
     // [Fact]
     // public async Task LinkExecutableAsync_Creation()

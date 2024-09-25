@@ -13,6 +13,7 @@ using IceCraft.Api.Caching;
 using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
 using IceCraft.Core;
+using IceCraft.Core.Installation.Storage;
 using IceCraft.Developer;
 using IceCraft.Extensions.CentralRepo;
 using IceCraft.Extensions.DotNet;
@@ -25,12 +26,16 @@ using Serilog;
 using Spectre.Console;
 
 IceCraftApp.Initialize();
+var app = new IceCraftApp();
 var config = Config.Build();
+
+var dbFile = new DatabaseFile(await app.ReadDatabaseObject(), Output.Shared);
 
 var appServices = new ServiceCollection();
 appServices
     // Application
     .AddSingleton(config)
+    .AddSingleton(dbFile)
     .AddSingleton<IManagerConfiguration, DotNetConfigServiceImpl>()
     .AddSingleton<IFrontendApp, IceCraftApp>()
     .AddSingleton<ICacheManager, FileSystemCacheManager>()

@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using IceCraft.Api.Client;
 using IceCraft.Api.Network;
+using IceCraft.Core.Installation.Storage;
 using IceCraft.Frontend;
 using Serilog;
 using Spectre.Console;
@@ -79,6 +80,14 @@ internal class IceCraftApp : IFrontendApp
         Console.WriteLine();
         Log.Warning("Cancelled");
         TokenSource.Cancel();
+    }
+
+    internal async Task<DatabaseObject> ReadDatabaseObject()
+    {
+        var dbPath = Path.Combine(DataBasePath, "packages", "db.json");
+        var file = await DatabaseFile.LoadDatabaseAsync(dbPath);
+
+        return file;
     }
 
     public HttpClient GetClient() => HttpClient;

@@ -53,7 +53,7 @@ public class CliRemoveCommandFactory : ICommandFactory
     
     private async Task<int> ExecuteInternalAsync(string packageName, string? version, bool force)
     {
-        if (!await _installManager.IsInstalledAsync(packageName))
+        if (!_installManager.IsInstalled(packageName))
         {
             Log.Fatal("Package {PackageName} is not installed", packageName);
             return -1;
@@ -63,11 +63,11 @@ public class CliRemoveCommandFactory : ICommandFactory
         if (version != null)
         {
             var semver = SemVersion.Parse(version, SemVersionStyles.Any);
-            selectedVersion = await _installManager.TryGetMetaAsync(packageName, semver);
+            selectedVersion = _installManager.GetMetaOrDefault(packageName, semver);
         }
         else
         {
-            selectedVersion = await _installManager.GetLatestMetaOrDefaultAsync(packageName);
+            selectedVersion = _installManager.GetLatestMetaOrDefault(packageName);
         }
 
         if (selectedVersion == null)

@@ -36,7 +36,7 @@ public class ReconfigureCommandFactory : ICommandFactory
 
     private async Task ExecuteAsync(string package)
     {
-        var meta = await _installManager.GetLatestMetaOrDefaultAsync(package);
+        var meta = _installManager.GetLatestMetaOrDefault(package);
         if (meta == null)
         {
             throw new KnownException($"No such package '{package}'");
@@ -48,7 +48,7 @@ public class ReconfigureCommandFactory : ICommandFactory
             throw new KnownException($"Package '{meta.Id}' ({meta.Version}) does not define a valid configurator.");
         }
 
-        var installDir = await _installManager.GetInstalledPackageDirectoryAsync(meta);
+        var installDir = _installManager.GetInstalledPackageDirectory(meta);
         
         await configurator.UnconfigurePackageAsync(installDir, meta);
         await configurator.ConfigurePackageAsync(installDir, meta);

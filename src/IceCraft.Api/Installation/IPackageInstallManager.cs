@@ -15,7 +15,7 @@ public interface IPackageInstallManager
 
     Task BulkInstallAsync(IAsyncEnumerable<DueInstallTask> packages, int expectedCount);
 
-    Task<string> GetInstalledPackageDirectoryAsync(PackageMeta meta);
+    string GetInstalledPackageDirectory(PackageMeta meta);
 
     /// <summary>
     /// Uninstalls the latest version of the specified package.
@@ -23,14 +23,14 @@ public interface IPackageInstallManager
     /// <param name="meta">The package to uninstall.</param>
     Task UninstallAsync(PackageMeta meta);
 
-    Task<bool> IsInstalledAsync(PackageMeta meta);
+    bool IsInstalled(PackageMeta meta);
     
     /// <summary>
     /// Determines whether at least one version of the specified package is installed.
     /// </summary>
     /// <param name="packageName">The name of the package.</param>
     /// <returns><see langword="true"/> if installed; otherwise, <see langword="false"/>.</returns>
-    Task<bool> IsInstalledAsync(string packageName);
+    bool IsInstalled(string packageName);
     
     /// <summary>
     /// Determines whether at least one version of the specified package is installed.
@@ -38,9 +38,9 @@ public interface IPackageInstallManager
     /// <param name="packageName">The name of the package.</param>
     /// <param name="version">The version of the package.</param>
     /// <returns><see langword="true"/> if installed; otherwise, <see langword="false"/>.</returns>
-    Task<bool> IsInstalledAsync(string packageName, string version);
+    bool IsInstalled(string packageName, string version);
 
-    Task<bool> IsInstalledAsync(DependencyReference dependency);
+    bool IsInstalled(DependencyReference dependency);
 
     /// <summary>
     /// Queries the package database for any conflict between any installed package and the
@@ -56,7 +56,7 @@ public interface IPackageInstallManager
     /// </summary>
     /// <param name="packageName">The name of the package to get metadata from.</param>
     /// <returns>The created metadata.</returns>
-    Task<PackageMeta?> GetLatestMetaOrDefaultAsync(string packageName);
+    PackageMeta? GetLatestMetaOrDefault(string packageName);
 
     /// <summary>
     /// Gets the <see cref="PackageMeta"/> instance that describes the metadata of the specified
@@ -66,10 +66,10 @@ public interface IPackageInstallManager
     /// <param name="version">The version of the package to get metadata for.</param>
     /// <returns>The created metadata.</returns>
     /// <exception cref="ArgumentException">No such package or version.</exception>
-    Task<PackageMeta> GetMetaAsync(string packageName, SemVersion version);
-    Task<PackageMeta?> TryGetMetaAsync(string packageName, SemVersion version);
+    PackageMeta GetMeta(string packageName, SemVersion version);
+    PackageMeta? GetMetaOrDefault(string packageName, SemVersion version);
     
-    Task<PackageInstallationIndex?> GetIndexOrDefaultAsync(string metaId);
+    PackageInstallationIndex? GetIndexOrDefault(string metaId);
 
     Task RegisterVirtualPackageAsync(PackageMeta virtualMeta, PackageReference origin);
 

@@ -10,34 +10,28 @@ using IceCraft.Core.Serialization;
 
 public sealed class DatabaseFile
 {
-    private readonly IFrontendApp _frontend;
-    private PackageInstallDatabaseFactory.ValueMap? _database; 
+    private readonly DatabaseObject _database;
+    private readonly IOutputAdapter _output;
 
-    public DatabaseFile(IFrontendApp frontend)
+    public DatabaseFile(DatabaseObject database,
+        IOutputAdapter output)
     {
-        _frontend = frontend;
+        _database = database;
+        _output = output;
     }
 
-    internal async Task<PackageInstallDatabaseFactory.ValueMap> GetAsync()
+    public DatabaseObject Get()
     {
-        if (_database != null)
-        {
-            return _database;
-        }
-        
-        var packagesPath = Path.Combine(_frontend.DataBasePath, PackageInstallManager.PackagePath);
-        var retVal = await LoadDatabaseAsync(Path.Combine(packagesPath, "db.json"));
-        _database = retVal;
-        return retVal;
+        return _database;
     }
     
-    private static async Task<PackageInstallDatabaseFactory.ValueMap> CreateDatabaseFileAsync(string filePath)
+    private static async Task<DatabaseObject> CreateDatabaseFileAsync(string filePath)
     {
-        var retVal = new PackageInstallDatabaseFactory.ValueMap();
+        var retVal = new DatabaseObject();
         try
         {
             await using var fileStream = File.Create(filePath);
-            await JsonSerializer.SerializeAsync(fileStream, retVal, IceCraftCoreContext.Default.PackageInstallValueMap);
+            await JsonSerializer.SerializeAsync(fileStream, retVal, IceCraftCoreContext.Default.DatabaseObject);
         }
         catch (Exception ex)
         {
@@ -47,7 +41,8 @@ public sealed class DatabaseFile
         return retVal;
     }
     
-    internal async Task<PackageInstallDatabaseFactory.ValueMap> LoadDatabaseAsync(string filePath)
+    public static async Task<DatabaseObject> LoadDatabaseAsync(string filePath,
+        IOutputAdapter? outputAdapter = null)
     {
         if (!File.Exists(filePath))
         {
@@ -55,16 +50,16 @@ public sealed class DatabaseFile
         }
 
         // If database file exists, load existing file
-        PackageInstallDatabaseFactory.ValueMap? retVal;
+        DatabaseObject? retVal;
         try
         {
             await using var fileStream = File.OpenRead(filePath);
             retVal = await JsonSerializer.DeserializeAsync(fileStream,
-                IceCraftCoreContext.Default.PackageInstallValueMap);
+                IceCraftCoreContext.Default.DatabaseObject);
         }
         catch (JsonException ex)
         {
-            _frontend.Output.Warning(ex, "Json format failure");
+            outputAdapter?.Warning(ex, "Json format failure");
             return await CreateDatabaseFileAsync(filePath);
         }
         catch (Exception ex)
@@ -78,7 +73,7 @@ public sealed class DatabaseFile
             return await CreateDatabaseFileAsync(filePath);
         }
 
-        _frontend.Output.Verbose("{0} packages currently installed", retVal.Count);
+        outputAdapter?.Verbose("{0} packages currently installed", retVal.Count);
 
         return retVal;
     }

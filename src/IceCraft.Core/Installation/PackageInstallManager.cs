@@ -51,7 +51,7 @@ public class PackageInstallManager : IPackageInstallManager
         // Value : Expanded directory
         var dictionary = new Dictionary<PackageMeta, string>(expectedCount);
 
-        var database = await _databaseFactory.GetAsync();
+        var database = _databaseFactory.Get();
 
         // Configure and expand package.
         await foreach (var installTask in packages)
@@ -130,7 +130,7 @@ public class PackageInstallManager : IPackageInstallManager
     
     public async Task InstallAsync(PackageMeta meta, string artefactPath)
     {
-        var database = await _databaseFactory.GetAsync();
+        var database = _databaseFactory.Get();
         await InternalInstallAsync(database, meta, artefactPath);
         await _databaseFactory.SaveAsync();
     }
@@ -272,9 +272,9 @@ public class PackageInstallManager : IPackageInstallManager
         await PutPackageAsync(entry);
     }
 
-    public async Task<string> GetInstalledPackageDirectoryAsync(PackageMeta meta)
+    public string GetInstalledPackageDirectory(PackageMeta meta)
     {
-        if (!await IsInstalledAsync(meta))
+        if (!IsInstalled(meta))
         {
             throw new ArgumentException("The specified package was not installed.", nameof(meta));
         }
@@ -300,7 +300,7 @@ public class PackageInstallManager : IPackageInstallManager
 
     public async Task UninstallAsync(PackageMeta meta)
     {
-        if (!await IsInstalledAsync(meta))
+        if (!IsInstalled(meta))
         {
             throw new ArgumentException("No such package meta installed.", nameof(meta));
         }
@@ -331,51 +331,51 @@ public class PackageInstallManager : IPackageInstallManager
         await UnregisterPackageAsync(meta);
     }
 
-    public async Task<bool> IsInstalledAsync(PackageMeta meta)
+    public bool IsInstalled(PackageMeta meta)
     {
-        var database = await _databaseFactory.GetAsync();
+        var database = _databaseFactory.Get();
 
         return database.ContainsMeta(meta);
     }
 
-    public async Task<bool> IsInstalledAsync(string packageName)
+    public bool IsInstalled(string packageName)
     {
-        var database = await _databaseFactory.GetAsync();
+        var database = _databaseFactory.Get();
         return database.ContainsKey(packageName);
     }
 
-    public async Task<bool> IsInstalledAsync(string packageName, string version)
+    public bool IsInstalled(string packageName, string version)
     {
-        var database = await _databaseFactory.GetAsync();
+        var database = _databaseFactory.Get();
 
         return database.TryGetValue(packageName, out var index)
                && index.ContainsKey(version);
     }
 
-    public async Task<bool> IsInstalledAsync(DependencyReference dependency)
+    public bool IsInstalled(DependencyReference dependency)
     {
-        var database = await _databaseFactory.GetAsync();
+        var database = _databaseFactory.Get();
 
         return database.TryGetValue(dependency.PackageId, out var index)
                && index.Values.Any(x => dependency.VersionRange.Contains(x.Metadata.Version));
     }
 
-    public async Task<PackageMeta?> GetLatestMetaOrDefaultAsync(string packageName)
+    public PackageMeta? GetLatestMetaOrDefault(string packageName)
     {
         // TODO determine latest by semver
-        var database = await _databaseFactory.GetAsync();
+        var database = _databaseFactory.Get();
         return database[packageName].FirstOrDefault().Value?.Metadata;
     }
 
-    public async Task<PackageMeta> GetMetaAsync(string packageName, SemVersion version)
+    public PackageMeta GetMeta(string packageName, SemVersion version)
     {
-        var database = await _databaseFactory.GetAsync();
+        var database = _databaseFactory.Get();
         return database[packageName][version.ToString()].Metadata;
     }
 
-    public async Task<PackageMeta?> TryGetMetaAsync(string packageName, SemVersion version)
+    public PackageMeta? GetMetaOrDefault(string packageName, SemVersion version)
     {
-        var database = await _databaseFactory.GetAsync();
+        var database = _databaseFactory.Get();
         if (!database.TryGetValue(packageName, out var index))
         {
             return null;
@@ -386,16 +386,16 @@ public class PackageInstallManager : IPackageInstallManager
             : result.Metadata;
     }
 
-    public async Task<PackageInstallationIndex?> GetIndexOrDefaultAsync(string metaId)
+    public  PackageInstallationIndex? GetIndexOrDefault(string metaId)
     {
-        var database = await _databaseFactory.GetAsync();
+        var database = _databaseFactory.Get();
 
         return database.GetValueOrDefault(metaId);
     }
 
     public async Task RegisterVirtualPackageAsync(PackageMeta virtualMeta, PackageReference origin)
     {
-        var database = await _databaseFactory.GetAsync();
+        var database = _databaseFactory.Get();
 
         database.Put(new InstalledPackageInfo
         {
@@ -409,7 +409,7 @@ public class PackageInstallManager : IPackageInstallManager
 
     public async Task PutPackageAsync(InstalledPackageInfo info)
     {
-        var database = await _databaseFactory.GetAsync();
+        var database = _databaseFactory.Get();
         database.Put(info);
         
         await _databaseFactory.SaveAsync();
@@ -417,7 +417,7 @@ public class PackageInstallManager : IPackageInstallManager
 
     public async Task UnregisterPackageAsync(PackageMeta meta)
     {
-        var database = await _databaseFactory.GetAsync();
+        var database = _databaseFactory.Get();
         
         database[meta.Id].Remove(meta.Version.ToString());
         await _databaseFactory.MaintainAndSaveAsync();
@@ -430,7 +430,7 @@ public class PackageInstallManager : IPackageInstallManager
             return true;
         }
 
-        var database = await _databaseFactory.GetAsync();
+        var database = _databaseFactory.Get();
         var isConflictFree = true;
 
         await Task.Run(() =>

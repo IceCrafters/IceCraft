@@ -36,8 +36,7 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
     public async Task<DependencyMap> MapDependencies()
     {
         await using var scope = _serviceProvider.CreateAsyncScope();
-        var readHandle = await scope.ServiceProvider.GetRequiredService<ILocalDatabaseReadAccess>()
-            .GetReadHandle();
+        var readHandle = scope.ServiceProvider.GetRequiredService<ILocalDatabaseReadHandle>();
         
         var map = new DependencyMap(readHandle.Count);
 
@@ -103,8 +102,7 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
     public async IAsyncEnumerable<DependencyReference> MapUnmetDependencies()
     {
         await using var scope = _serviceProvider.CreateAsyncScope();
-        var readHandle = await scope.ServiceProvider.GetRequiredService<ILocalDatabaseReadAccess>()
-            .GetReadHandle();
+        var readHandle = scope.ServiceProvider.GetRequiredService<ILocalDatabaseReadHandle>();
         
         var map = new DependencyMap(readHandle.Count);
 
@@ -133,8 +131,7 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
     public async IAsyncEnumerable<PackageMeta> EnumerateUnsatisifiedPackages()
     {
         await using var scope = _serviceProvider.CreateAsyncScope();
-        var readHandle = await scope.ServiceProvider.GetRequiredService<ILocalDatabaseReadAccess>()
-            .GetReadHandle();
+        var readHandle = scope.ServiceProvider.GetRequiredService<ILocalDatabaseReadHandle>();
         var map = new DependencyMap(readHandle.Count);
 
         foreach (var package in readHandle.EnumeratePackages())

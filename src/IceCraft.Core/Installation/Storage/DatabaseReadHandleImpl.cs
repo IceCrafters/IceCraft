@@ -11,9 +11,9 @@ using IceCraft.Api.Package;
 
 internal class DatabaseReadHandleImpl : ILocalDatabaseReadHandle
 {
-    private readonly PackageInstallDatabaseFactory.ValueMap _database;
+    private readonly DatabaseObject _database;
 
-    internal DatabaseReadHandleImpl(PackageInstallDatabaseFactory.ValueMap database)
+    internal DatabaseReadHandleImpl(DatabaseObject database)
     {
         _database = database;
     }

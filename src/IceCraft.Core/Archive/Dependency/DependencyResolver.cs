@@ -157,7 +157,7 @@ public class DependencyResolver : IDependencyResolver
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (await _installManager.IsInstalledAsync(dependency))
+            if (_installManager.IsInstalled(dependency))
             {
                 // No need to install package that is already exists.
                 continue;

@@ -124,7 +124,7 @@ public class InstallCommandFactory : ICommandFactory
 
                     // Check if the package is already installed, and if the selected version matches.
                     // If all conditions above are true, do not need to do anything.
-                    if (await _installManager.IsInstalledAsync(meta!.Id)
+                    if (_installManager.IsInstalled(meta!.Id)
                         && !await ComparePackageAsync(meta))
                     {
                         throw new OperationCanceledException();
@@ -162,7 +162,7 @@ public class InstallCommandFactory : ICommandFactory
     private async Task<bool> ComparePackageAsync(PackageMeta meta)
     {
         // ReSharper disable once InvertIf
-        if (await _installManager.IsInstalledAsync(meta.Id, meta.Version.ToString()))
+        if (_installManager.IsInstalled(meta.Id, meta.Version.ToString()))
         {
             Output.Shared.Log("Package {0} ({1}) is already installed.", meta.Id, meta.Version);
             return false;

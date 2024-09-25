@@ -6,7 +6,7 @@ namespace IceCraft.Api.Installation;
 
 public interface IPackageInstallDatabaseFactory
 {
-    Task<IPackageInstallDatabase> GetAsync();
+    IPackageInstallDatabase Get();
     
     Task SaveAsync(string filePath);
     Task SaveAsync();
