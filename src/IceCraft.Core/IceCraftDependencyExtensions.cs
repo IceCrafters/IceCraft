@@ -30,6 +30,16 @@ using Microsoft.Extensions.DependencyInjection;
 
 public static class IceCraftDependencyExtensions
 {
+    public static ILocalDatabaseMutator GetMutator(this IServiceProvider serviceProvider)
+    {
+        return serviceProvider.GetRequiredService<ILocalDatabaseMutator>();
+    }
+    
+    public static ILocalDatabaseReadHandle GetReadHandle(this IServiceProvider serviceProvider)
+    {
+        return serviceProvider.GetRequiredService<ILocalDatabaseReadHandle>();
+    }
+    
     public static IServiceCollection AddIceCraftDefaults(this IServiceCollection services)
     {
         return services.AddChecksumValidators()
@@ -61,7 +71,6 @@ public static class IceCraftDependencyExtensions
             .AddSingleton<IRepositorySourceManager, RepositoryManager>()
             .AddSingleton<IChecksumRunner, DependencyChecksumRunner>()
             .AddSingleton<IPackageIndexer, CachedIndexer>()
-            .AddSingleton<IPackageInstallDatabaseFactory, PackageInstallDatabaseFactory>()
             .AddSingleton<IPackageInstallManager, PackageInstallManager>()
             .AddSingleton<IExecutableManager, ExecutableManager>()
             .AddSingleton<IDependencyResolver, DependencyResolver>()
@@ -70,10 +79,10 @@ public static class IceCraftDependencyExtensions
             .AddKeyedSingleton<IPackageConfigurator, VirtualConfigurator>("virtual")
             .AddSingleton<IArtefactManager, ArtefactManager>()
             .AddSingleton<IEnvironmentProvider, EnvironmentWrapper>()
-            .AddScoped<ILocalDatabaseReadHandle>(provider =>
+            .AddTransient<ILocalDatabaseReadHandle>(provider =>
             {
                 var file = provider.GetRequiredService<DatabaseFile>();
-                return new DatabaseReadHandleImpl(file.Value);
+                return new DatabaseReadHandleImpl(file);
             })
             .AddTransient<ILocalDatabaseMutator, LocalDatabaseMutatorImpl>();
     }

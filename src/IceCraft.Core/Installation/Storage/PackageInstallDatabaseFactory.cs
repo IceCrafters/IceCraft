@@ -12,6 +12,7 @@ using IceCraft.Api.Package;
 using IceCraft.Core.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 
+[Obsolete("Use mutators and read handles instead.")]
 public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
 {
     private readonly IFrontendApp _frontend;

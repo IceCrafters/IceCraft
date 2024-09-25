@@ -12,6 +12,13 @@ public interface ILocalDatabaseMutator : ILocalDatabaseReadHandle
     
     void Add(InstalledPackageInfo info);
     
+    /// <summary>
+    /// Adds a new entry or updates an existing entry matching the specified package
+    /// metadata.
+    /// </summary>
+    /// <param name="info">The entry to put.</param>
+    void Put(InstalledPackageInfo info);
+    
     Task MaintainAsync();
     
     Task StoreAsync();

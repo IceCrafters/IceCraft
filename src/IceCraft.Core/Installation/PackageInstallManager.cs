@@ -9,6 +9,7 @@ using System.IO.Abstractions;
 using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
 using IceCraft.Api.Installation;
+using IceCraft.Api.Installation.Database;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,19 +21,16 @@ public class PackageInstallManager : IPackageInstallManager
     
     private readonly IFrontendApp _frontend;
     private readonly IServiceProvider _serviceProvider;
-    private readonly IPackageInstallDatabaseFactory _databaseFactory;
     private readonly IFileSystem _fileSystem;
 
     private readonly string _packagesPath;
 
     public PackageInstallManager(IFrontendApp frontend,
         IServiceProvider serviceProvider,
-        IPackageInstallDatabaseFactory databaseFactory,
         IFileSystem fileSystem)
     {
         _frontend = frontend;
         _serviceProvider = serviceProvider;
-        _databaseFactory = databaseFactory;
         _fileSystem = fileSystem;
 
         _packagesPath = Path.Combine(frontend.DataBasePath, "packages");
@@ -51,7 +49,7 @@ public class PackageInstallManager : IPackageInstallManager
         // Value : Expanded directory
         var dictionary = new Dictionary<PackageMeta, string>(expectedCount);
 
-        var database = _databaseFactory.Get();
+        var mutator = _serviceProvider.GetRequiredService<ILocalDatabaseMutator>();
 
         // Configure and expand package.
         await foreach (var installTask in packages)
@@ -75,11 +73,11 @@ public class PackageInstallManager : IPackageInstallManager
 
             // If package is unitary, remove previous version.
             if (meta.Unitary
-                && database.TryGetValue(meta.Id, out var index))
+                && mutator.ContainsPackage(meta.Id))
             {
-                foreach (var (_, package) in index)
+                foreach (var package in mutator.EnumeratePackages())
                 {
-                    await UninstallAsync(package.Metadata);
+                    await UninstallAsync(package);
                 }
             }
 
@@ -119,7 +117,7 @@ public class PackageInstallManager : IPackageInstallManager
             {
                 // Save the fact that the package is expanded but couldn't be set up.
                 entry.State = InstallationState.Expanded;
-                database.Put(entry);
+                mutator.Put(entry);
 
                 throw new KnownException("Failed to set up package", ex);
             }
@@ -130,9 +128,9 @@ public class PackageInstallManager : IPackageInstallManager
     
     public async Task InstallAsync(PackageMeta meta, string artefactPath)
     {
-        var database = _databaseFactory.Get();
-        await InternalInstallAsync(database, meta, artefactPath);
-        await _databaseFactory.SaveAsync();
+        var mutator = _serviceProvider.GetMutator();
+        await InternalInstallAsync(mutator, meta, artefactPath);
+        await mutator.StoreAsync();
     }
 
     /// <summary>
@@ -207,7 +205,7 @@ public class PackageInstallManager : IPackageInstallManager
         }
     }
 
-    private async Task InternalInstallAsync(IPackageInstallDatabase database, PackageMeta meta, string artefactPath)
+    private async Task InternalInstallAsync(ILocalDatabaseMutator mutator, PackageMeta meta, string artefactPath)
     {
         var pkgDir = GetPackageDirectory(meta);
 
@@ -238,11 +236,11 @@ public class PackageInstallManager : IPackageInstallManager
 
         // If package is unitary, remove previous version.
         if (meta.Unitary
-            && database.TryGetValue(meta.Id, out var index))
+            && mutator.ContainsPackage(meta.Id))
         {
-            foreach (var (_, package) in index)
+            foreach (var package in mutator.EnumeratePackages(meta.Id))
             {
-                await UninstallAsync(package.Metadata);
+                await UninstallAsync(package);
             }
         }
 
@@ -333,69 +331,67 @@ public class PackageInstallManager : IPackageInstallManager
 
     public bool IsInstalled(PackageMeta meta)
     {
-        var database = _databaseFactory.Get();
+        var database = _serviceProvider.GetReadHandle();
 
-        return database.ContainsMeta(meta);
+        return database.ContainsPackage(meta);
     }
 
     public bool IsInstalled(string packageName)
     {
-        var database = _databaseFactory.Get();
-        return database.ContainsKey(packageName);
+        var database = _serviceProvider.GetReadHandle();
+        
+        return database.ContainsPackage(packageName);
     }
 
     public bool IsInstalled(string packageName, string version)
     {
-        var database = _databaseFactory.Get();
+        var database = _serviceProvider.GetReadHandle();
 
-        return database.TryGetValue(packageName, out var index)
-               && index.ContainsKey(version);
+        return database.ContainsPackage(packageName, version);
     }
 
     public bool IsInstalled(DependencyReference dependency)
     {
-        var database = _databaseFactory.Get();
+        var database = _serviceProvider.GetReadHandle();
 
-        return database.TryGetValue(dependency.PackageId, out var index)
-               && index.Values.Any(x => dependency.VersionRange.Contains(x.Metadata.Version));
+        return database.ContainsPackage(dependency.PackageId)
+               && database.EnumeratePackages().Any(x => dependency.VersionRange.Contains(x.Version));
     }
 
     public PackageMeta? GetLatestMetaOrDefault(string packageName)
     {
-        // TODO determine latest by semver
-        var database = _databaseFactory.Get();
-        return database[packageName].FirstOrDefault().Value?.Metadata;
+        var database = _serviceProvider.GetReadHandle();
+
+        return database.GetLatestVersionOrDefault(packageName);
+    }
+
+    public async Task<PackageMeta?> GetLatestMetaOrDefaultAsync(string packageName,
+        CancellationToken cancellationToken = default)
+    {
+        var database = _serviceProvider.GetReadHandle();
+
+        return await database.GetLatestVersionOrDefaultAsync(packageName,
+            cancellationToken);
     }
 
     public PackageMeta GetMeta(string packageName, SemVersion version)
     {
-        var database = _databaseFactory.Get();
-        return database[packageName][version.ToString()].Metadata;
+        var reader = _serviceProvider.GetReadHandle();
+        return reader[packageName, version.ToString()].Metadata;
     }
 
     public PackageMeta? GetMetaOrDefault(string packageName, SemVersion version)
     {
-        var database = _databaseFactory.Get();
-        if (!database.TryGetValue(packageName, out var index))
-        {
-            return null;
-        }
+        var reader = _serviceProvider.GetReadHandle();
 
-        return !index.TryGetValue(version.ToString(), out var result)
+        return !reader.TryGetValue(packageName, version, out var result)
             ? null
             : result.Metadata;
     }
 
-    public  PackageInstallationIndex? GetIndexOrDefault(string metaId)
-    {
-        var database = _databaseFactory.Get();
-
-        return database.GetValueOrDefault(metaId);
-    }
-
     public async Task RegisterVirtualPackageAsync(PackageMeta virtualMeta, PackageReference origin)
     {
-        var database = _databaseFactory.Get();
+        var database = _serviceProvider.GetMutator();
 
         database.Put(new InstalledPackageInfo
         {
@@ -404,23 +400,25 @@ public class PackageInstallManager : IPackageInstallManager
             ProvidedBy = origin
         });
 
-        await _databaseFactory.MaintainAndSaveAsync();
+        await database.MaintainAsync();
+        await database.StoreAsync();
     }
 
     public async Task PutPackageAsync(InstalledPackageInfo info)
     {
-        var database = _databaseFactory.Get();
+        var database = _serviceProvider.GetMutator();
         database.Put(info);
         
-        await _databaseFactory.SaveAsync();
+        await database.StoreAsync();
     }
 
     public async Task UnregisterPackageAsync(PackageMeta meta)
     {
-        var database = _databaseFactory.Get();
+        var database = _serviceProvider.GetMutator();
         
-        database[meta.Id].Remove(meta.Version.ToString());
-        await _databaseFactory.MaintainAndSaveAsync();
+        database.Remove(meta.Id, meta.Version);
+        await database.MaintainAsync();
+        await database.StoreAsync();
     }
 
     public async Task<bool> CheckForConflictAsync(PackageMeta package)
@@ -430,21 +428,23 @@ public class PackageInstallManager : IPackageInstallManager
             return true;
         }
 
-        var database = _databaseFactory.Get();
+        var database = _serviceProvider.GetReadHandle();
         var isConflictFree = true;
 
         await Task.Run(() =>
         {
             foreach (var reference in package.ConflictsWith)
             {
-                if (!database.TryGetValue(reference.PackageId, out var index))
+                if (!database.ContainsPackage(reference.PackageId))
                 {
                     continue;
                 }
 
-                if (index.Any(x => reference.VersionRange.Contains(x.Value.Metadata.Version)
-                    && !(x.Value is { State: InstallationState.Virtual, ProvidedBy: not null }
-                         && x.Value.ProvidedBy.Value.DoesPointTo(package))))
+                // ReSharper disable once InvertIf
+                if (database.EnumerateEntries(reference.PackageId)
+                    .Any(x => reference.VersionRange.Contains(x.Metadata.Version)
+                              && !(x is { State: InstallationState.Virtual, ProvidedBy: not null }
+                                   && x.ProvidedBy.Value.DoesPointTo(package))))
                 {
                     _frontend.Output.Warning("Package {0} ({1}) conflicts with {2} {3}",
                         package.Id,

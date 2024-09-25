@@ -57,6 +57,15 @@ public interface IPackageInstallManager
     /// <param name="packageName">The name of the package to get metadata from.</param>
     /// <returns>The created metadata.</returns>
     PackageMeta? GetLatestMetaOrDefault(string packageName);
+    
+    /// <summary>
+    /// Gets the <see cref="PackageMeta"/> instance that describes the metadata of the latest
+    /// installed version of a given package.
+    /// </summary>
+    /// <param name="packageName">The name of the package to get metadata from.</param>
+    /// <param name="cancellationToken">The token to cancel the operation.</param>
+    /// <returns>The created metadata.</returns>
+    Task<PackageMeta?> GetLatestMetaOrDefaultAsync(string packageName, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the <see cref="PackageMeta"/> instance that describes the metadata of the specified
@@ -68,8 +77,6 @@ public interface IPackageInstallManager
     /// <exception cref="ArgumentException">No such package or version.</exception>
     PackageMeta GetMeta(string packageName, SemVersion version);
     PackageMeta? GetMetaOrDefault(string packageName, SemVersion version);
-    
-    PackageInstallationIndex? GetIndexOrDefault(string metaId);
 
     Task RegisterVirtualPackageAsync(PackageMeta virtualMeta, PackageReference origin);
 
