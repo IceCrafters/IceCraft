@@ -6,6 +6,9 @@ namespace IceCraft.Api.Installation.Database;
 
 using Semver;
 
+/// <summary>
+/// Provides mutation of state of the local package database.
+/// </summary>
 public interface ILocalDatabaseMutator : ILocalDatabaseReadHandle
 {
     void Remove(string key, SemVersion version);

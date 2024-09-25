@@ -9,8 +9,7 @@ using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
 using Semver;
 
-public sealed class DatabaseObject : Dictionary<string, PackageInstallationIndex>, 
-    IPackageInstallDatabase
+public sealed class DatabaseObject : Dictionary<string, PackageInstallationIndex>
 {
     public InstalledPackageInfo this[string key, string version]
     {
@@ -76,11 +75,6 @@ public sealed class DatabaseObject : Dictionary<string, PackageInstallationIndex
         }
 
         index[info.Metadata.Version.ToString()] = info;
-    }
-
-    void IPackageInstallDatabase.Remove(string key)
-    {
-        this.Remove(key);
     }
 
     public void Add(string key, SemVersion version, InstalledPackageInfo info)

@@ -10,7 +10,7 @@ using IceCraft.Api.Package;
 using Semver;
 
 /// <summary>
-/// Provides read-only access to <see cref="IPackageInstallDatabase"/>.
+/// Provides read-only access to the local package database.
 /// </summary>
 public interface ILocalDatabaseReadHandle
 {
