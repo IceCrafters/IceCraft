@@ -7,41 +7,45 @@ namespace IceCraft.Core.Installation.Analysis;
 using System.Collections.Generic;
 using IceCraft.Api.Caching;
 using IceCraft.Api.Client;
-using IceCraft.Api.Installation;
+using IceCraft.Api.Installation.Database;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
 using IceCraft.Core.Archive.Dependency;
 using IceCraft.Core.Caching;
 using IceCraft.Core.Serialization;
+using Microsoft.Extensions.DependencyInjection;
 
 public class DependencyMapper : IDependencyMapper, ICacheClearable
 {
     private static readonly Guid CacheGuid = new("478DA958-DADF-4789-B05A-B63A095D97D6");
     private const string CacheObjectName = "dependencyMap";
 
-    private readonly IPackageInstallDatabaseFactory _databaseFactory;
+    private readonly IServiceProvider _serviceProvider;
     private readonly IOutputAdapter _output;
     private readonly ICacheStorage _cacheStorage;
 
-    public DependencyMapper(IPackageInstallDatabaseFactory databaseFactory,
+    public DependencyMapper(IServiceProvider serviceProvider,
         IFrontendApp frontendApp,
         ICacheManager cacheManager)
     {
-        _databaseFactory = databaseFactory;
+        _serviceProvider = serviceProvider;
         _output = frontendApp.Output;
         _cacheStorage = cacheManager.GetStorage(CacheGuid);
     }
 
     public async Task<DependencyMap> MapDependencies()
     {
-        var database = await _databaseFactory.GetAsync();
-        var map = new DependencyMap(database.Count);
+        await using var scope = _serviceProvider.CreateAsyncScope();
+        var readHandle = await scope.ServiceProvider.GetRequiredService<ILocalDatabaseReadAccess>()
+            .GetReadHandle();
+        
+        var map = new DependencyMap(readHandle.Count);
 
         await Task.Run(async () =>
         {
-            foreach (var (_, index) in database)
+            foreach (var package in readHandle.EnumeratePackages())
             {
-                await ProcessIndex(database, index, map);
+                await ProcessPackage(package, map, readHandle);
             }
         });
 
@@ -55,45 +59,42 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
             IceCraftCoreContext.Default.DependencyMap);
     }
 
-    private async ValueTask ProcessIndex(IPackageInstallDatabase database,
-        PackageInstallationIndex index,
-        DependencyMap map)
+    private async ValueTask ProcessPackage(PackageMeta package,
+        DependencyMap map,
+        ILocalDatabaseReadHandle readHandle)
     {
-        foreach (var (version, info) in index)
-        {
-            var entry = map.GetEntry(info.Metadata);
+        var entry = map.GetEntry(package);
 
-            if (info.Metadata.Dependencies == null)
+        if (package.Dependencies == null)
+        {
+            return;
+        }
+
+        foreach (var dependency in package.Dependencies)
+        {
+            var best = await DependencyResolver.SelectBestPackageDependencyOrDefault(readHandle.EnumeratePackages(),
+                dependency);
+
+            if (best == null)
             {
+                entry.HasUnsatisifiedDependencies = true;
                 continue;
             }
 
-            foreach (var dependency in info.Metadata.Dependencies)
-            {
-                var best = await DependencyResolver.SelectBestPackageDependencyOrDefault(database.EnumeratePackages(),
-                    dependency);
+            var bestEntry = map.GetEntry(best);
 
-                if (best == null)
-                {
-                    entry.HasUnsatisifiedDependencies = true;
-                    continue;
-                }
+            entry.Dependencies.Add(new PackageReference(best.Id,
+                best.Version));
+            bestEntry.Dependents.Add(new PackageReference(package.Id,
+                package.Version));
+        }
 
-                var bestEntry = map.GetEntry(best);
-
-                entry.Dependencies.Add(new PackageReference(best.Id,
-                    best.Version));
-                bestEntry.Dependents.Add(new PackageReference(info.Metadata.Id,
-                    info.Metadata.Version));
-            }
-
-            if (entry.HasUnsatisifiedDependencies)
-            {
-                _output.Warning("Package '{0}' ({1}) has UNSATISFIED dependencies", info.Metadata.Id, version);
-            }
+        if (entry.HasUnsatisifiedDependencies)
+        {
+            _output.Warning("Package '{0}' ({1}) has UNSATISFIED dependencies", package.Id, package.Version);
         }
     }
-
+    
     public void ClearCache()
     {
         _cacheStorage.DeleteObject(CacheObjectName);
@@ -101,29 +102,29 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
 
     public async IAsyncEnumerable<DependencyReference> MapUnmetDependencies()
     {
-        var database = await _databaseFactory.GetAsync();
-        var map = new DependencyMap(database.Count);
+        await using var scope = _serviceProvider.CreateAsyncScope();
+        var readHandle = await scope.ServiceProvider.GetRequiredService<ILocalDatabaseReadAccess>()
+            .GetReadHandle();
+        
+        var map = new DependencyMap(readHandle.Count);
 
-        foreach (var (_, index) in database)
+        foreach (var package in readHandle.EnumeratePackages())
         {
-            foreach (var (_, info) in index)
+            map.GetEntry(package);
+
+            if (package.Dependencies == null)
             {
-                map.GetEntry(info.Metadata);
+                continue;
+            }
 
-                if (info.Metadata.Dependencies == null)
+            foreach (var dependency in package.Dependencies)
+            {
+                var best = await DependencyResolver.SelectBestPackageDependencyOrDefault(readHandle.EnumeratePackages(),
+                    dependency);
+
+                if (best == null)
                 {
-                    continue;
-                }
-
-                foreach (var dependency in info.Metadata.Dependencies)
-                {
-                    var best = await DependencyResolver.SelectBestPackageDependencyOrDefault(database.EnumeratePackages(),
-                        dependency);
-
-                    if (best == null)
-                    {
-                        yield return dependency;
-                    }
+                    yield return dependency;
                 }
             }
         }
@@ -131,37 +132,36 @@ public class DependencyMapper : IDependencyMapper, ICacheClearable
 
     public async IAsyncEnumerable<PackageMeta> EnumerateUnsatisifiedPackages()
     {
-        var database = await _databaseFactory.GetAsync();
-        var map = new DependencyMap(database.Count);
+        await using var scope = _serviceProvider.CreateAsyncScope();
+        var readHandle = await scope.ServiceProvider.GetRequiredService<ILocalDatabaseReadAccess>()
+            .GetReadHandle();
+        var map = new DependencyMap(readHandle.Count);
 
-        foreach (var (_, index) in database)
+        foreach (var package in readHandle.EnumeratePackages())
         {
-            foreach (var (_, info) in index)
+            map.GetEntry(package);
+
+            if (package.Dependencies == null)
             {
-                map.GetEntry(info.Metadata);
+                continue;
+            }
 
-                if (info.Metadata.Dependencies == null)
+            var noBest = false;
+            foreach (var dependency in package.Dependencies)
+            {
+                var best = await DependencyResolver.SelectBestPackageDependencyOrDefault(readHandle.EnumeratePackages(),
+                    dependency);
+
+                if (best == null)
                 {
-                    continue;
+                    noBest = true;
+                    yield return package;
+                    break;
                 }
+            }
 
-                var noBest = false;
-                foreach (var dependency in info.Metadata.Dependencies)
-                {
-                    var best = await DependencyResolver.SelectBestPackageDependencyOrDefault(database.EnumeratePackages(),
-                        dependency);
-
-                    if (best == null)
-                    {
-                        noBest = true;
-                        yield return info.Metadata;
-                        break;
-                    }
-                }
-
-                if (noBest)
-                {
-                }
+            if (noBest)
+            {
             }
         }
     }

@@ -11,94 +11,43 @@ using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
 using IceCraft.Core.Serialization;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using Semver;
 using InstalledPackageMap = Dictionary<string, Api.Installation.PackageInstallationIndex>;
 
 public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
 {
-    private readonly ILogger<PackageInstallDatabaseFactory> _logger;
     private readonly IFrontendApp _frontend;
+    private readonly ServiceProvider _serviceProvider;
     private readonly string _databasePath;
 
     private ValueMap? _map;
 
-    public PackageInstallDatabaseFactory(ILogger<PackageInstallDatabaseFactory> logger,
-        IFrontendApp frontend)
+    public PackageInstallDatabaseFactory(IFrontendApp frontend,
+        ServiceProvider serviceProvider)
     {
-        _logger = logger;
         _frontend = frontend;
 
         var packagesPath = Path.Combine(_frontend.DataBasePath, PackageInstallManager.PackagePath);
         _databasePath = Path.Combine(packagesPath, "db.json");
 
         Directory.CreateDirectory(packagesPath);
+
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<IPackageInstallDatabase> GetAsync()
     {
-        if (_map == null)
-        {
-            _frontend.Output.Log("Loading package database...");
+        if (_map != null) return _map;
+        
+        _frontend.Output.Log("Loading package database...");
 
-            var packagesPath = Path.Combine(_frontend.DataBasePath, PackageInstallManager.PackagePath);
-            var retVal = await LoadDatabaseAsync(Path.Combine(packagesPath, "db.json"));
-            _map = retVal;
-            return retVal;
-        }
+        var packagesPath = Path.Combine(_frontend.DataBasePath, PackageInstallManager.PackagePath);
 
-        return _map;
-    }
-
-    private async Task<ValueMap> LoadDatabaseAsync(string filePath)
-    {
-        if (!File.Exists(filePath))
-        {
-            return await CreateDatabaseFileAsync(filePath);
-        }
-
-        // If database file exists, load existing file
-        ValueMap? retVal;
-        try
-        {
-            using var fileStream = File.OpenRead(filePath);
-            retVal = await JsonSerializer.DeserializeAsync(fileStream,
-                IceCraftCoreContext.Default.PackageInstallValueMap);
-        }
-        catch (JsonException ex)
-        {
-            _frontend.Output.Warning(ex, "Json format failure");
-            return await CreateDatabaseFileAsync(filePath);
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException("Failed to load installation database.", ex);
-        }
-
-        if (retVal == null)
-        {
-            File.Delete(filePath);
-            return await CreateDatabaseFileAsync(filePath);
-        }
-
-        _frontend.Output.Verbose("{0} packages currently installed", retVal.Count);
-
-        return retVal;
-    }
-
-    private static async Task<ValueMap> CreateDatabaseFileAsync(string filePath)
-    {
-        var retVal = new ValueMap();
-        try
-        {
-            using var fileStream = File.Create(filePath);
-            await JsonSerializer.SerializeAsync(fileStream, retVal, IceCraftCoreContext.Default.PackageInstallValueMap);
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException("Failed to create installation database.", ex);
-        }
-
+        await using var scope = _serviceProvider.CreateAsyncScope();
+        var loader = scope.ServiceProvider.GetRequiredService<DatabaseFile>();
+        var retVal = await loader.LoadDatabaseAsync(Path.Combine(packagesPath, "db.json"));
+        _map = retVal;
         return retVal;
     }
 
@@ -112,7 +61,7 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
         _ = await GetAsync();
         var showHint = false;
         var orphanedVirtual = new List<PackageMeta>();
-        foreach (var (key, packageInfo) in 
+        foreach (var (_, packageInfo) in 
                  _map!.SelectMany(x => x.Value))
         {
             // ReSharper disable once InvertIf
@@ -160,7 +109,10 @@ public class PackageInstallDatabaseFactory : IPackageInstallDatabaseFactory
 
         if (_map == null)
         {
-            await LoadDatabaseAsync(filePath);
+            await using var scope = _serviceProvider.CreateAsyncScope();
+            var loader = scope.ServiceProvider.GetRequiredService<DatabaseFile>();
+            
+            await loader.LoadDatabaseAsync(filePath);
             return;
         }
 

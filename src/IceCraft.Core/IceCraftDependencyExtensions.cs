@@ -8,6 +8,7 @@ using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Archive.Indexing;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Installation;
+using IceCraft.Api.Installation.Database;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Network;
 using IceCraft.Api.Platform;
@@ -68,7 +69,9 @@ public static class IceCraftDependencyExtensions
             .AddKeyedSingleton<IPackageInstaller, VirtualInstaller>("virtual")
             .AddKeyedSingleton<IPackageConfigurator, VirtualConfigurator>("virtual")
             .AddSingleton<IArtefactManager, ArtefactManager>()
-            .AddSingleton<IEnvironmentProvider, EnvironmentWrapper>();
+            .AddSingleton<IEnvironmentProvider, EnvironmentWrapper>()
+            .AddScoped<DatabaseFile>()
+            .AddScoped<ILocalDatabaseReadAccess, DatabaseReadAccessImpl>();
     }
 
     public static IServiceCollection AddChecksumValidators(this IServiceCollection services)
