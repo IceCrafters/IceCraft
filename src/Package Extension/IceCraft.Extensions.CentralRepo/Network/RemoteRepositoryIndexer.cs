@@ -6,8 +6,10 @@ namespace IceCraft.Extensions.CentralRepo.Network;
 
 using System.IO.Abstractions;
 using IceCraft.Api.Client;
+using IceCraft.Api.Package.Data;
 using IceCraft.Extensions.CentralRepo.Impl;
 using IceCraft.Extensions.CentralRepo.Runtime;
+using IceCraft.Extensions.CentralRepo.Util;
 using Jint.Runtime;
 
 public class RemoteRepositoryIndexer
@@ -16,6 +18,8 @@ public class RemoteRepositoryIndexer
     private readonly IOutputAdapter _output;
     private readonly MashiroRuntime _runtime;
     private readonly IFileSystem _fileSystem;
+    
+    internal const string RemoteRepoData = "remote_repo_data";
 
     public RemoteRepositoryIndexer(RemoteRepositoryManager remoteManager, 
         IFrontendApp frontend, 
@@ -94,15 +98,16 @@ public class RemoteRepositoryIndexer
                 continue;
             }
 
+            var customData = new PackageCustomDataDictionary();
+            customData.AddSerialize(RemoteRepoData, new RemotePackageData(state.FileName),
+                CsrJsonContext.Default.RemotePackageData);
+            
             yield return new RemotePackageInfo
             {
                 Artefact = state.RemoteArtefact.Value,
                 Metadata = meta with
                 {
-                    AdditionalMetadata = new Dictionary<string, string?>
-                    {
-                        { "FileName", state.FileName }
-                    }
+                    CustomData = customData
                 },
                 Mirrors = state.GetMirrors()
             };

@@ -7,6 +7,7 @@ namespace IceCraft.Extensions.CentralRepo.Runtime;
 using System.IO.Abstractions;
 using IceCraft.Api.Package;
 using IceCraft.Extensions.CentralRepo.Network;
+using IceCraft.Extensions.CentralRepo.Util;
 
 public class MashiroStatePool
 {
@@ -35,14 +36,8 @@ public class MashiroStatePool
 
     private async Task<MashiroState> LoadLocalStateAsync(PackageMeta packageMeta)
     {
-        var fileName = $"{packageMeta.Id}-{packageMeta.Version}.js";
-        if (packageMeta.AdditionalMetadata != null
-            && packageMeta.AdditionalMetadata.TryGetValue("FileName", out var realFileName)
-            && realFileName != null)
-        {
-            fileName = $"{realFileName}.js";
-        }
-        
+        var fileName = GetScriptFileName(packageMeta);
+
         var path = _fileSystem.Path.Combine(_remoteManager.LocalCachedRepoPath, "packages", fileName);
         Console.WriteLine(path);
 
@@ -53,5 +48,22 @@ public class MashiroStatePool
         
         return _runtime.CreateState(await _fileSystem.File.ReadAllTextAsync(path), 
             Path.GetFileNameWithoutExtension(path));
+    }
+
+    internal static string GetScriptFileName(PackageMeta packageMeta)
+    {
+        var fileName = $"{packageMeta.Id}-{packageMeta.Version}.js";
+        if (packageMeta.CustomData != null
+            && packageMeta.CustomData.TryGetValueDeserialize(RemoteRepositoryIndexer.RemoteRepoData, 
+                CsrJsonContext.Default.RemotePackageData, 
+                out var packageData)
+            && packageData is { FileName: not null })
+        {
+            fileName = packageData.FileName.EndsWith(".js") ? 
+                packageData.FileName :
+                $"{packageData.FileName}.js";
+        }
+
+        return fileName;
     }
 }
