@@ -28,7 +28,8 @@ public class DotNetSdkConfigurator : IPackageConfigurator
     
     public async Task ConfigurePackageAsync(string installDir, PackageMeta meta)
     {
-        if (meta.AdditionalMetadata?.TryGetValue(DotNetSdkPackage.MetadataRuntimeVersion,
+        if (meta.CustomData?.TryGetValueDeserialize(DotNetSdkPackage.MetadataRuntimeVersion,
+                DotNetJsonContext.Default.String,
                 out var runtimeVersion) == true)
         {
             var virtualMeta = new PackageMeta

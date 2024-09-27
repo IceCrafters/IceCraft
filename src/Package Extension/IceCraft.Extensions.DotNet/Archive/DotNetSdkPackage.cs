@@ -8,6 +8,7 @@ using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
+using IceCraft.Api.Package.Data;
 using Microsoft.Deployment.DotNet.Releases;
 using Semver;
 
@@ -59,16 +60,18 @@ public class DotNetSdkPackage : IPackage
         var version = _sdkRelease.Version;
         var rtVersion = _sdkRelease.RuntimeVersion;
 
-        return new PackageMeta()
+        var data = new PackageCustomDataDictionary();
+        data.AddSerialize(MetadataRuntimeVersion, 
+            new SemVersion(rtVersion.Major, rtVersion.Minor, rtVersion.Patch).ToString(),
+            DotNetJsonContext.Default.String!);
+
+        return new PackageMeta
         {
             Id = _series.Name,
             Version = GetSemanticVersion(version),
             PluginInfo = new PackagePluginInfo("dotnet-sdk", "dotnet-sdk"),
             ReleaseDate = _sdkRelease.Release.ReleaseDate,
-            AdditionalMetadata = new Dictionary<string, string?>
-            {
-                { MetadataRuntimeVersion, new SemVersion(rtVersion.Major, rtVersion.Minor, rtVersion.Patch).ToString() }
-            },
+            CustomData = data,
             ConflictsWith =
             [
                 new DependencyReference($"dotnet-{_sdkRelease.Release.Product.ProductVersion}-runtime", SemVersionRange.All)
