@@ -7,6 +7,7 @@ namespace IceCraft.Api.Serialization;
 using System.Text.Json.Serialization;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
+using IceCraft.Api.Package.Data;
 
 [JsonSerializable(typeof(DependencyCollection))]
 [JsonSerializable(typeof(PackageMeta))]
@@ -14,6 +15,7 @@ using IceCraft.Api.Package;
 [JsonSerializable(typeof(PackageAuthorInfo))]
 [JsonSerializable(typeof(PackageTranscript))]
 [JsonSerializable(typeof(PackagePluginInfo))]
+[JsonSerializable(typeof(PackageCustomDataDictionary))]
 public sealed partial class IceCraftApiContext : JsonSerializerContext 
 {
 }

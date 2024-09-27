@@ -7,6 +7,7 @@ namespace IceCraft.Api.Package;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using IceCraft.Api.Installation.Dependency;
+using IceCraft.Api.Package.Data;
 using IceCraft.Api.Serialization;
 using Semver;
 
@@ -47,7 +48,13 @@ public sealed record PackageMeta
 
     public DependencyCollection? ConflictsWith { get; init; }
 
+    [Obsolete("Use CustomData instead.")]
     public IDictionary<string, string?>? AdditionalMetadata { get; init; }
+    
+    /// <summary>
+    /// Gets the dictionary containing custom data for the current package.
+    /// </summary>
+    public PackageCustomDataDictionary? CustomData { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether this package should install to a fixed location and the previous version must be
