@@ -20,4 +20,9 @@ public class DummyPackageConfigurator : IPackageConfigurator
         File.Delete(Path.Combine(installDir, "configured"));
         return Task.CompletedTask;
     }
+
+    public void ExportEnvironment(string installDir, PackageMeta meta)
+    {
+        // No exports
+    }
 }

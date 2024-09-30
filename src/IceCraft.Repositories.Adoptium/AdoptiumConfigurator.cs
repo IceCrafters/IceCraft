@@ -29,4 +29,9 @@ public class AdoptiumConfigurator : IPackageConfigurator
         await _executableManager.UnregisterAsync(meta, "java");
         await _executableManager.UnregisterAsync(meta, "javaw");
     }
+
+    public void ExportEnvironment(string installDir, PackageMeta meta)
+    {
+        // Nothing to export
+    }
 }

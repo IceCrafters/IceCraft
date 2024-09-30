@@ -28,6 +28,7 @@ public class MashiroState : IDisposable
     internal MashiroRuntime.ExpandPackageDelegate? ExpandPackageDelegate { get; private set; }
     internal MashiroRuntime.RemovePackageDelegate? RemovePackageDelegate { get; private set; }
     internal MashiroRuntime.ConfigureDelegate? ConfigurePackageDelegate { get; private set; }
+    internal MashiroRuntime.ConfigureDelegate? ExportEnvironmentDelegate { get; private set; }
     internal MashiroRuntime.UnConfigureDelegate? UnConfigurePackageDelegate { get; private set; }
     internal MashiroRuntime.OnPreprocessDelegate? PreprocessPackageDelegate { get; private set; }
 
@@ -110,6 +111,11 @@ public class MashiroState : IDisposable
     {
         UnConfigurePackageDelegate = action;
     }
+    
+    private void MashiroOnExportEnvironment(MashiroRuntime.ConfigureDelegate action)
+    {
+        ExportEnvironmentDelegate = action;
+    }
 
     #endregion
 
@@ -165,6 +171,7 @@ public class MashiroState : IDisposable
         _engine.SetValue("onRemove", MashiroOnRemove);
         _engine.SetValue("onConfigure", MashiroOnConfigure);
         _engine.SetValue("onUnConfigure", MashiroOnUnConfigure);
+        _engine.SetValue("onExportEnv", MashiroOnExportEnvironment);
         _engine.SetValue("onPreprocess", MashiroOnPreprocess);
 
         _engine.SetValue("Fs", new MashiroFs(_apiRoot));
@@ -196,6 +203,7 @@ public class MashiroState : IDisposable
         VerifyDelegate(RemovePackageDelegate, "onRemove");
         VerifyDelegate(ConfigurePackageDelegate, "onConfigure");
         VerifyDelegate(UnConfigurePackageDelegate, "onUnConfigure");
+        VerifyDelegate(ExportEnvironmentDelegate, "onExportEnv");
     }
 
     public void DoContext(ExecutionContextType contextType, Action action)

@@ -43,4 +43,17 @@ public class MashiroConfigurator : IPackageConfigurator
         state.DoContext(ExecutionContextType.Configuration,
             () => state.UnConfigurePackageDelegate(installDir));
     }
+
+    public void ExportEnvironment(string installDir, PackageMeta meta)
+    {
+        var state = _statePool.GetAsync(meta).Result;
+        state.EnsureMetadata();
+        if (state.ExportEnvironmentDelegate == null)
+        {
+            throw new InvalidOperationException($"No preprocessor registered for package {meta.Id} ({meta.Version})");
+        }
+        
+        state.DoContext(ExecutionContextType.Configuration,
+            () => state.ExportEnvironmentDelegate(installDir));
+    }
 }

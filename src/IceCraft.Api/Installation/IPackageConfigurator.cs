@@ -10,4 +10,6 @@ public interface IPackageConfigurator
 {
     Task ConfigurePackageAsync(string installDir, PackageMeta meta);
     Task UnconfigurePackageAsync(string installDir, PackageMeta meta);
+
+    void ExportEnvironment(string installDir, PackageMeta meta);
 }

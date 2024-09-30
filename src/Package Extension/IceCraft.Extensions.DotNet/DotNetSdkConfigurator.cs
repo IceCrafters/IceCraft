@@ -60,4 +60,10 @@ public class DotNetSdkConfigurator : IPackageConfigurator
         _environmentManager.RemovePath(installDir, EnvironmentTarget.Global);
         _environmentManager.RemoveVariable("DOTNET_ROOT", EnvironmentTarget.Global);
     }
+
+    public void ExportEnvironment(string installDir, PackageMeta meta)
+    {
+        _environmentManager.AddPath(installDir, EnvironmentTarget.CurrentProcess);
+        _environmentManager.SetVariable("DOTNET_ROOT", installDir, EnvironmentTarget.CurrentProcess);
+    }
 }

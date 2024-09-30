@@ -18,4 +18,9 @@ public class VirtualConfigurator : IPackageConfigurator
     {
         return Task.CompletedTask;
     }
+
+    public void ExportEnvironment(string installDir, PackageMeta meta)
+    {
+        // No exports for you!
+    }
 }
