@@ -6,11 +6,9 @@ namespace IceCraft.Api.Platform;
 
 public interface IEnvironmentManager
 {
-    void AddUserGlobalPath(string path);
-    void AddUserGlobalPathFromHome(string relativeToHome);
-
-    void RemoveUserGlobalPath(string path);
-
-    void AddUserVariable(string key, string value);
-    void RemoveUserVariable(string key);
+    void AddPath(string path, EnvironmentTarget target);
+    void RemovePath(string path, EnvironmentTarget target);
+    
+    void SetVariable(string variableName, string value, EnvironmentTarget target);
+    void RemoveVariable(string variableName, EnvironmentTarget target);
 }

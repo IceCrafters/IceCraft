@@ -26,7 +26,8 @@ public class InitializeCommandFactory : ICommandFactory
         var command = new Command("init", "Initializes IceCraft for the current user");
         command.SetHandler(_ =>
         {
-            _environmentManager.AddUserGlobalPath(Path.Combine(_frontendApp.DataBasePath, "run"));
+            _environmentManager.AddPath(Path.Combine(_frontendApp.DataBasePath, "run"),
+                EnvironmentTarget.Global);
 
             Output.Hint("It is recommended that you REOPEN your terminal (or logout/login in tty).");
         });

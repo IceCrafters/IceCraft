@@ -116,7 +116,34 @@ public class LinuxEnvironmentManager : IEnvironmentManager
         JsonSerializer.SerializeAsync(stream, _envRegistry, IceCraftCoreContext.Default.DictionaryStringString);
     }
 
-    public void AddUserGlobalPath(string path)
+    #region AddPath
+    
+    public void AddPath(string path, EnvironmentTarget target)
+    {
+        switch (target)
+        {
+            case EnvironmentTarget.Global:
+                AddUserPath(path);
+                break;
+            
+            case EnvironmentTarget.CurrentProcess:
+                AddProcessPath(path);
+                break;
+            
+            default:
+                throw new ArgumentException("Invalid environment target.", nameof(target));
+        }
+    }
+
+    private static void AddProcessPath(string path)
+    {
+        var processPath = Environment.GetEnvironmentVariable("PATH");
+        var toPath = $"{processPath}:{path}";
+        
+        Environment.SetEnvironmentVariable(toPath, processPath);
+    }
+    
+    private void AddUserPath(string path)
     {
         if (DryEnvRuns)
         {
@@ -126,6 +153,113 @@ public class LinuxEnvironmentManager : IEnvironmentManager
         _fileSystem.File.AppendAllLines(_pathFile, [path]);
         ApplyProfile();
     }
+    
+    #endregion
+
+    #region RemovePath
+    public void RemovePath(string path, EnvironmentTarget target)
+    {
+        switch (target)
+        {
+            case EnvironmentTarget.CurrentProcess:
+                RemoveProcessPath(path);
+                break;
+
+            case EnvironmentTarget.Global:
+                RemoveUserPath(path);
+                break;
+
+            default:
+                throw new ArgumentException("Invalid environment target.", nameof(target));
+        }
+    }
+
+    private static void RemoveProcessPath(string path)
+    {
+        var current = Environment.GetEnvironmentVariable("PATH");
+        var result = current?.Replace(path, string.Empty);
+        
+        Environment.SetEnvironmentVariable("PATH", result);
+    }
+    
+    private void RemoveUserPath(string path)
+    {
+        if (DryEnvRuns)
+        {
+            return;
+        }
+
+        var lines = new List<string>(File.ReadAllLines(_pathFile));
+        lines.Remove(path);
+        _fileSystem.File.WriteAllLines(_pathFile, lines);
+        
+        ApplyProfile();
+    }
+    #endregion
+
+    #region SetVariable
+    
+    public void SetVariable(string variableName, string value, EnvironmentTarget target)
+    {
+        switch (target)
+        {
+            case EnvironmentTarget.CurrentProcess:
+                Environment.SetEnvironmentVariable(variableName, value);
+                break;
+            
+            case EnvironmentTarget.Global:
+                SetUserVariable(variableName, value);
+                break;
+            
+            default:
+                throw new ArgumentException("Invalid environment target.", nameof(target));
+        }
+    }
+    
+    private void SetUserVariable(string key, string value)
+    {
+        if (DryEnvRuns)
+        {
+            return;
+        }
+
+        _envRegistry[key] = value;
+        SaveRegistryFile();
+        ApplyProfile();
+    }
+    
+    #endregion
+
+    #region RemoveVariable
+    public void RemoveVariable(string variableName, EnvironmentTarget target)
+    {
+        switch (target)
+        {
+            case EnvironmentTarget.CurrentProcess:
+                Environment.SetEnvironmentVariable(variableName, null);
+                break;
+
+            case EnvironmentTarget.Global:
+                RemoveUserVariable(variableName);
+                break;
+
+            default:
+                throw new ArgumentException("Invalid environment target.", nameof(target));
+        }
+    }
+    
+    private void RemoveUserVariable(string key)
+    {
+        if (DryEnvRuns)
+        {
+            return;
+        }
+
+        _envRegistry.Remove(key);
+        SaveRegistryFile();
+        ApplyProfile();
+    }
+    #endregion
 
     private void EnsurePathFile()
     {
@@ -226,44 +360,6 @@ public class LinuxEnvironmentManager : IEnvironmentManager
             return;
         }
 
-        AddUserGlobalPath($"$HOME/{relativeToHome}");
-    }
-
-    public void RemoveUserGlobalPath(string path)
-    {
-        if (DryEnvRuns)
-        {
-            return;
-        }
-
-        var lines = new List<string>(File.ReadAllLines(_pathFile));
-        lines.Remove(path);
-        _fileSystem.File.WriteAllLines(_pathFile, lines);
-        
-        ApplyProfile();
-    }
-
-    public void AddUserVariable(string key, string value)
-    {
-        if (DryEnvRuns)
-        {
-            return;
-        }
-
-        _envRegistry[key] = value;
-        SaveRegistryFile();
-        ApplyProfile();
-    }
-
-    public void RemoveUserVariable(string key)
-    {
-        if (DryEnvRuns)
-        {
-            return;
-        }
-
-        _envRegistry.Remove(key);
-        SaveRegistryFile();
-        ApplyProfile();
+        AddUserPath($"$HOME/{relativeToHome}");
     }
 }

@@ -48,8 +48,8 @@ public class DotNetSdkConfigurator : IPackageConfigurator
         // Instead, we register PATH directly.
         // await _executableManager.RegisterAsync(meta, "dotnet", "dotnet")
         
-        _environmentManager.AddUserGlobalPath(installDir);
-        _environmentManager.AddUserVariable("DOTNET_ROOT", installDir);
+        _environmentManager.AddPath(installDir, EnvironmentTarget.Global);
+        _environmentManager.SetVariable("DOTNET_ROOT", installDir, EnvironmentTarget.Global);
     }
 
     public async Task UnconfigurePackageAsync(string installDir, PackageMeta meta)
@@ -57,7 +57,7 @@ public class DotNetSdkConfigurator : IPackageConfigurator
         // Clean any leftover executables from the old logic.
         await _executableManager.UnregisterAsync(meta, "dotnet");
         
-        _environmentManager.RemoveUserGlobalPath(installDir);
-        _environmentManager.RemoveUserVariable("DOTNET_ROOT");
+        _environmentManager.RemovePath(installDir, EnvironmentTarget.Global);
+        _environmentManager.RemoveVariable("DOTNET_ROOT", EnvironmentTarget.Global);
     }
 }

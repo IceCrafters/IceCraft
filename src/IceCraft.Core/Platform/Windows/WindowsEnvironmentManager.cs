@@ -13,26 +13,33 @@ using IceCraft.Api.Platform;
 [SupportedOSPlatform("windows")]
 public class WindowsEnvironmentManager : IEnvironmentManager
 {
-    public void AddUserGlobalPath(string path)
+    private static EnvironmentVariableTarget GetVariableTarget(EnvironmentTarget target)
     {
-        var currentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
+        return target switch
+        {
+            EnvironmentTarget.CurrentProcess => EnvironmentVariableTarget.Process,
+            EnvironmentTarget.Global => EnvironmentVariableTarget.User,
+            _ => throw new ArgumentException("Invalid environment target.", nameof(target))
+        };
+    }
+    
+    #region Path Manager
+    
+    private static void AddPathToEnv(string path, EnvironmentVariableTarget target)
+    {
+        var currentPath = Environment.GetEnvironmentVariable("PATH", target);
         if (currentPath != null && currentPath.EndsWith(';'))
         {
             currentPath = currentPath[..^1];
         }
 
         var newPath = $"{currentPath};{path}";
-        Environment.SetEnvironmentVariable("PATH", newPath, EnvironmentVariableTarget.User);
+        Environment.SetEnvironmentVariable("PATH", newPath, target);
     }
-
-    public void AddUserGlobalPathFromHome(string relativeToHome)
+    
+    private static void RemovePathFromEnv(string path, EnvironmentVariableTarget target)
     {
-        AddUserGlobalPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), relativeToHome));
-    }
-
-    public void RemoveUserGlobalPath(string path)
-    {
-        var currentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
+        var currentPath = Environment.GetEnvironmentVariable("PATH", target);
         if (currentPath != null && currentPath.EndsWith(';'))
         {
             currentPath = currentPath[..^1];
@@ -40,16 +47,40 @@ public class WindowsEnvironmentManager : IEnvironmentManager
 
         var newPath = currentPath?.Replace($"{path};", "")
             .Replace(path, "");
-        Environment.SetEnvironmentVariable("PATH", newPath, EnvironmentVariableTarget.User);
+        Environment.SetEnvironmentVariable("PATH", newPath, target);
+    }
+    
+    #endregion
+
+    public void AddPath(string path, EnvironmentTarget target)
+    {
+        var varTarget = GetVariableTarget(target);
+        AddPathToEnv(path, varTarget);
     }
 
-    public void AddUserVariable(string key, string value)
+    public void RemovePath(string path, EnvironmentTarget target)
     {
-        Environment.SetEnvironmentVariable(key, value, EnvironmentVariableTarget.User);
+        var varTarget = GetVariableTarget(target);
+        RemovePathFromEnv(path, varTarget);
     }
 
-    public void RemoveUserVariable(string key)
+    public void SetVariable(string variableName, string value, EnvironmentTarget target)
     {
-        Environment.SetEnvironmentVariable(key, null, EnvironmentVariableTarget.User);
+        var env = GetVariableTarget(target);
+        
+        Environment.SetEnvironmentVariable(variableName, value, env);
+    }
+
+    public void RemoveVariable(string variableName, EnvironmentTarget target)
+    {
+        var env = GetVariableTarget(target);
+        
+        Environment.SetEnvironmentVariable(variableName, null, env);
+    }
+
+    public void AddUserGlobalPathFromHome(string relativeToHome)
+    {
+        AddPathToEnv(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), relativeToHome),
+            EnvironmentVariableTarget.User);
     }
 }

@@ -40,7 +40,7 @@ public class LinuxEnvironmentTests
             envProvider.Object);
 
         // Act
-        envManager.AddUserVariable("A", "B");
+        envManager.SetVariable("A", "B", EnvironmentTarget.Global);
 
         // Assert
         var envs = fileSystem.GetFile("/home/.ice_craft_envs");
