@@ -180,6 +180,8 @@ public class MashiroState : IDisposable
         _engine.SetValue("Binary", new MashiroBinary(_apiRoot,
             _serviceProvider.GetRequiredService<IExecutableManager>(),
             this));
+        _engine.SetValue("Packages", new MashiroPackages(_apiRoot,
+            _serviceProvider));
     }
 
     public void Dispose()

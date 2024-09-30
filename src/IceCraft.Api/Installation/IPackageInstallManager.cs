@@ -82,4 +82,6 @@ public interface IPackageInstallManager
 
     Task PutPackageAsync(InstalledPackageInfo info);
     Task UnregisterPackageAsync(PackageMeta meta);
+
+    void ImportEnvironment(PackageMeta meta);
 }

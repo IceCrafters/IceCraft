@@ -421,6 +421,24 @@ public class PackageInstallManager : IPackageInstallManager
         await database.StoreAsync();
     }
 
+    public void ImportEnvironment(PackageMeta meta)
+    {
+        if (!IsInstalled(meta))
+        {
+            throw new ArgumentException("The package is not installed.", nameof(meta));
+        }
+
+        var installDir = GetInstalledPackageDirectory(meta);
+        
+        var configurator = _serviceProvider.GetKeyedService<IPackageConfigurator>(meta.PluginInfo.ConfiguratorRef);
+        if (configurator == null)
+        {
+            throw new KnownException($"Package '{meta.Id}' ({meta.Version}) does not define a valid configurator.");
+        }
+        
+        configurator.ExportEnvironment(installDir, meta);
+    }
+
     public async Task<bool> CheckForConflictAsync(PackageMeta package)
     {
         if (package.ConflictsWith == null)

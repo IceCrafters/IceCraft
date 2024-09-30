@@ -36,7 +36,7 @@ public class ReconfigureCommandFactory : ICommandFactory
 
     private async Task ExecuteAsync(string package)
     {
-        var meta = _installManager.GetLatestMetaOrDefault(package);
+        var meta = await _installManager.GetLatestMetaOrDefaultAsync(package);
         if (meta == null)
         {
             throw new KnownException($"No such package '{package}'");
