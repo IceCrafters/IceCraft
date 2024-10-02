@@ -14,6 +14,25 @@ public static class MashiroGlobals
         return SemVersion.Parse(version, SemVersionStyles.Strict);
     }
 
+    public static SemVersionRange SemRange(string range)
+    {
+        return SemVersionRange.Parse(range, SemVersionRangeOptions.Strict);
+    }
+
+    public static SemVersionRange SemRangeExact(string version)
+    {
+        var semversion = SemVer(version);
+
+        return SemVersionRange.Equals(semversion);
+    }
+
+    public static SemVersionRange SemRangeAtLeast(string version)
+    {
+        var semversion = SemVer(version);
+
+        return SemVersionRange.AtLeast(semversion);
+    }
+
     public static PackageAuthorInfo Author(string name, string email)
     {
         return new PackageAuthorInfo(name, email);

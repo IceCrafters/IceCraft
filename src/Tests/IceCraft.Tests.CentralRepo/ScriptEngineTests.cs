@@ -6,9 +6,12 @@ namespace IceCraft.Tests.CentralRepo;
 
 using System.IO.Abstractions.TestingHelpers;
 using IceCraft.Api.Exceptions;
+using IceCraft.Api.Package;
 using IceCraft.Api.Platform;
 using IceCraft.Extensions.CentralRepo.Runtime;
+using Jint;
 using Moq;
+using Semver;
 
 public class ScriptEngineTests
 {
@@ -17,11 +20,11 @@ public class ScriptEngineTests
         """
         setMeta(MetaBuilder
                 .id("example")
-                .version(SemVer("0.1.0-alpha"))
-                .authors(Author("foo", "foo@gmail.com"),
-                         Author("bar", "bar@gmail.com"))
-                .maintainer(Author("maintainer", "maintainer@example.com"))
-                .pluginMaintainer(Author("plugin", "plugin@example.com"))
+                .version(semVer("0.1.0-alpha"))
+                .authors(author("foo", "foo@gmail.com"),
+                         author("bar", "bar@gmail.com"))
+                .maintainer(author("maintainer", "maintainer@example.com"))
+                .pluginMaintainer(author("plugin", "plugin@example.com"))
                 .license("MIT")
                 .date(new Date())
                 .build()
@@ -44,11 +47,11 @@ public class ScriptEngineTests
         """
         setMeta(MetaBuilder
                 .id("example")
-                .version(SemVer("0.1.0-alpha"))
-                .authors(Author("foo", "foo@gmail.com"),
-                         Author("bar", "bar@gmail.com"))
-                .maintainer(Author("maintainer", "maintainer@example.com"))
-                .pluginMaintainer(Author("plugin", "plugin@example.com"))
+                .version(semVer("0.1.0-alpha"))
+                .authors(author("foo", "foo@gmail.com"),
+                         author("bar", "bar@gmail.com"))
+                .maintainer(author("maintainer", "maintainer@example.com"))
+                .pluginMaintainer(author("plugin", "plugin@example.com"))
                 .license("MIT")
                 .date(new Date())
                 .build()
@@ -74,11 +77,11 @@ public class ScriptEngineTests
         """
         setMeta(MetaBuilder
                 .id("example")
-                .version(SemVer("0.1.0-alpha"))
-                .authors(Author("foo", "foo@gmail.com"),
-                         Author("bar", "bar@gmail.com"))
-                .maintainer(Author("maintainer", "maintainer@example.com"))
-                .pluginMaintainer(Author("plugin", "plugin@example.com"))
+                .version(semVer("0.1.0-alpha"))
+                .authors(author("foo", "foo@gmail.com"),
+                         author("bar", "bar@gmail.com"))
+                .maintainer(author("maintainer", "maintainer@example.com"))
+                .pluginMaintainer(author("plugin", "plugin@example.com"))
                 .license("MIT")
                 .date(new Date())
                 .build()
@@ -104,11 +107,11 @@ public class ScriptEngineTests
         """
         setMeta(MetaBuilder
                 .id("example-no-preproc")
-                .version(SemVer("0.1.0-alpha"))
-                .authors(Author("foo", "foo@gmail.com"),
-                         Author("bar", "bar@gmail.com"))
-                .maintainer(Author("maintainer", "maintainer@example.com"))
-                .pluginMaintainer(Author("plugin", "plugin@example.com"))
+                .version(semVer("0.1.0-alpha"))
+                .authors(author("foo", "foo@gmail.com"),
+                         author("bar", "bar@gmail.com"))
+                .maintainer(author("maintainer", "maintainer@example.com"))
+                .pluginMaintainer(author("plugin", "plugin@example.com"))
                 .license("MIT")
                 .date(new Date())
                 .build()
@@ -133,11 +136,11 @@ public class ScriptEngineTests
         """
         setMeta(MetaBuilder
                 .id("example-no-preproc")
-                .version(SemVer("0.1.0-alpha"))
-                .authors(Author("foo", "foo@gmail.com"),
-                         Author("bar", "bar@gmail.com"))
-                .maintainer(Author("maintainer", "maintainer@example.com"))
-                .pluginMaintainer(Author("plugin", "plugin@example.com"))
+                .version(semVer("0.1.0-alpha"))
+                .authors(author("foo", "foo@gmail.com"),
+                         author("bar", "bar@gmail.com"))
+                .maintainer(author("maintainer", "maintainer@example.com"))
+                .pluginMaintainer(author("plugin", "plugin@example.com"))
                 .license("MIT")
                 .date(new Date())
                 .build()
@@ -168,11 +171,11 @@ public class ScriptEngineTests
         """
         setMeta(MetaBuilder
                 .id("example-no-preproc")
-                .version(SemVer("0.1.0-alpha"))
-                .authors(Author("foo", "foo@gmail.com"),
-                         Author("bar", "bar@gmail.com"))
-                .maintainer(Author("maintainer", "maintainer@example.com"))
-                .pluginMaintainer(Author("plugin", "plugin@example.com"))
+                .version(semVer("0.1.0-alpha"))
+                .authors(author("foo", "foo@gmail.com"),
+                         author("bar", "bar@gmail.com"))
+                .maintainer(author("maintainer", "maintainer@example.com"))
+                .pluginMaintainer(author("plugin", "plugin@example.com"))
                 .license("MIT")
                 .date(new Date())
                 .build()
@@ -185,11 +188,11 @@ public class ScriptEngineTests
         """
         setMeta(MetaBuilder
                 .id("example-no-preproc")
-                .version(SemVer("0.1.0-alpha"))
-                .authors(Author("foo", "foo@gmail.com"),
-                         Author("bar", "bar@gmail.com"))
-                .maintainer(Author("maintainer", "maintainer@example.com"))
-                .pluginMaintainer(Author("plugin", "plugin@example.com"))
+                .version(semVer("0.1.0-alpha"))
+                .authors(author("foo", "foo@gmail.com"),
+                         author("bar", "bar@gmail.com"))
+                .maintainer(author("maintainer", "maintainer@example.com"))
+                .pluginMaintainer(author("plugin", "plugin@example.com"))
                 .license("MIT")
                 .date(new Date())
                 .build()
@@ -339,5 +342,37 @@ public class ScriptEngineTests
         
         // Assert
         Assert.Null(exception);
+    }
+
+    [Fact]
+    public void MashiroRuntime_SemVerAvailable()
+    {
+        // Arrange
+        var engine = MashiroRuntime.CreateJintEngine();
+        var expected = new SemVersion(1, 0, 0);
+        
+        // Act
+        var result = engine.Evaluate("return semVer(\"1.0.0\")");
+        var obj = result.AsObject().ToObject();
+        
+        // Assert
+        var version = Assert.IsType<SemVersion>(obj);
+        Assert.Equal(expected, version);
+    }
+
+    [Fact]
+    public void MashiroRuntime_AuthorAvailable()
+    {
+        // Arrange
+        var engine = MashiroRuntime.CreateJintEngine();
+        var expected = new PackageAuthorInfo("test", "test@example.com");
+        
+        // Act
+        var result = engine.Evaluate("return author(\"test\", \"test@example.com\")");
+        var obj = result.AsObject().ToObject();
+        
+        // Assert
+        var version = Assert.IsType<PackageAuthorInfo>(obj);
+        Assert.Equal(expected, version);
     }
 }

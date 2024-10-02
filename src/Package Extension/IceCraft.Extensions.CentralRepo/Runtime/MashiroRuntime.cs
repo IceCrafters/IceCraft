@@ -78,12 +78,15 @@ public class MashiroRuntime
             _fileSystem.Path.GetFileNameWithoutExtension(scriptFile));
     }
     
-    private static Engine CreateJintEngine()
+    internal static Engine CreateJintEngine()
     {
         var engine = new Engine(JintOptions);
         engine.SetValue(MashiroMetaBuilder.JsName, TypeReference.CreateTypeReference<MashiroMetaBuilder>(engine));
-        engine.SetValue("SemVer", MashiroGlobals.SemVer);
-        engine.SetValue("Author", MashiroGlobals.Author);
+        engine.SetValue("semVer", MashiroGlobals.SemVer);
+        engine.SetValue("author", MashiroGlobals.Author);
+        engine.SetValue("semRange", MashiroGlobals.SemRange);
+        engine.SetValue("semRangeExact", MashiroGlobals.SemRangeExact);
+        engine.SetValue("semRangeAtLeast", MashiroGlobals.SemRangeAtLeast);
 
         return engine;
     }
