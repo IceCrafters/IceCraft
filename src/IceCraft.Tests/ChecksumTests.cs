@@ -7,7 +7,6 @@ namespace IceCraft.Tests;
 using System.Security.Cryptography;
 using System.Text;
 using IceCraft.Api.Archive.Artefacts;
-using IceCraft.Api.Client;
 using IceCraft.Core.Archive.Checksums;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -40,6 +39,32 @@ public class ChecksumTests
             });
     }
     #endregion
+
+    [Fact]
+    public void Void_AlwaysTrue()
+    {
+        // Arrange
+        var validator = new VoidChecksumValidator();
+
+        // Act
+        var result = validator.CompareChecksum("123", "456");
+
+        // Assert
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void Void_AlwaysReturnVoid()
+    {
+        // Arrange
+        var validator = new VoidChecksumValidator();
+
+        // Act
+        var result = validator.GetChecksumString([0x39, 0x11]);
+
+        // Assert
+        Assert.Equal("void", result);
+    }
 
     [Fact]
     public async Task Sha256_Run()

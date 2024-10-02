@@ -61,6 +61,11 @@ public class MashiroState : IDisposable
         RemoteArtefact = new RemoteArtefact("sha512", sha);
     }
 
+    private void MashiroVoidSum()
+    {
+        RemoteArtefact = new RemoteArtefact("void", "void");
+    }
+
     private void MashiroSetOrigin(string origin)
     {
         if (Origin != null)
@@ -164,6 +169,7 @@ public class MashiroState : IDisposable
     {
         _engine.SetValue("setMeta", MashiroSetMeta);
         _engine.SetValue("sha512sum", MashiroSha512Sum);
+        _engine.SetValue("voidsum", MashiroVoidSum);
         _engine.SetValue("setOrigin", MashiroSetOrigin);
         _engine.SetValue("addMirror", MashiroAddMirror);
         
