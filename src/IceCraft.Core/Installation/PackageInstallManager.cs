@@ -115,10 +115,6 @@ public class PackageInstallManager : IPackageInstallManager
             }
             catch (Exception ex)
             {
-                // Save the fact that the package is expanded but couldn't be set up.
-                entry.State = InstallationState.Expanded;
-                mutator.Put(entry);
-
                 throw new KnownException("Failed to set up package", ex);
             }
 
@@ -477,5 +473,10 @@ public class PackageInstallManager : IPackageInstallManager
         });
 
         return isConflictFree;
+    }
+
+    public string GetUnsafePackageDirectory(PackageMeta meta)
+    {
+        return GetPackageDirectory(meta);
     }
 }

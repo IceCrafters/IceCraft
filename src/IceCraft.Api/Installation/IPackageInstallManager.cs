@@ -15,6 +15,8 @@ public interface IPackageInstallManager
 
     Task BulkInstallAsync(IAsyncEnumerable<DueInstallTask> packages, int expectedCount);
 
+    string GetUnsafePackageDirectory(PackageMeta meta);
+
     string GetInstalledPackageDirectory(PackageMeta meta);
 
     /// <summary>
