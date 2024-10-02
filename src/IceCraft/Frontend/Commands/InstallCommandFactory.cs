@@ -55,6 +55,8 @@ public class InstallCommandFactory : ICommandFactory
         var argVersion = new Argument<string?>("version", () => null, "The version to install. If not specified, selects the latest version");
 
         var optNoCleanArtefact = new Option<bool>("--no-clean-artefact", "Do not clean previous artefact before proceeding");
+        var optForceRedownload = new Option<bool>("--force-redownload", "Forces artefacts to be redownloaded.");
+        var optOverwrite = new Option<bool>("--overwrite", "Overwrites existing installation even if it is equivalent to the version being installed.");
         var optPrerelease = new Option<bool>(["-P", "--include-prerelease"], "Include prerelease versions when selecting latest version");
 
         var command = new Command("install", "Install a package")
@@ -62,7 +64,9 @@ public class InstallCommandFactory : ICommandFactory
             argPackage,
             argVersion,
             optNoCleanArtefact,
-            optPrerelease
+            optPrerelease,
+            optForceRedownload,
+            optOverwrite
         };
 
         command.SetHandler(async context =>
@@ -70,7 +74,9 @@ public class InstallCommandFactory : ICommandFactory
             context.ExitCode = await ExecuteInternalAsync(context.GetOpt(optNoCleanArtefact),
                 context.GetArgNotNull(argPackage),
                 context.GetArg(argVersion),
-                context.GetOpt(optPrerelease));
+                context.GetOpt(optPrerelease),
+                context.GetOpt(optForceRedownload),
+                context.GetOpt(optOverwrite));
         });
 
         return command;
@@ -79,7 +85,9 @@ public class InstallCommandFactory : ICommandFactory
     private async Task<int> ExecuteInternalAsync(bool noCleanArtefact,
         string packageName,
         string? version,
-        bool includePrerelease)
+        bool includePrerelease,
+        bool forceRedownload,
+        bool doOverwrite)
     {
         // Step 0: Clean artefacts
         if (!noCleanArtefact)
@@ -120,7 +128,8 @@ public class InstallCommandFactory : ICommandFactory
 
         // Check if the package is already installed, and if the selected version matches.
         // If all conditions above are true, do not need to do anything.
-        if (_installManager.IsInstalled(meta!.Id)
+        if (!doOverwrite
+            && _installManager.IsInstalled(meta!.Id)
             && !ComparePackage(meta))
         {
             throw new OperationCanceledException();
@@ -150,7 +159,7 @@ public class InstallCommandFactory : ICommandFactory
 
         // Step 3: download artefacts
         AnsiConsole.MarkupLine("[bold white]:gear:[/] [deepskyblue1]Installing packages[/]");
-        return await _interactiveInstaller.InstallAsync(allPackagesSet, index!);
+        return await _interactiveInstaller.InstallAsync(allPackagesSet, index!, forceRedownload);
     }
 
     private bool ComparePackage(PackageMeta meta)

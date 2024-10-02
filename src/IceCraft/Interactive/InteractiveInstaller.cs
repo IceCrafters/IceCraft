@@ -54,7 +54,7 @@ public class InteractiveInstaller
         return AnsiConsole.Confirm("Install packages?", defaultValue: false);
     }
 
-    public async Task<int> InstallAsync(ISet<DependencyLeaf> packages, PackageIndex index)
+    public async Task<int> InstallAsync(ISet<DependencyLeaf> packages, PackageIndex index, bool forceRedownload)
     {
         QueuedDownloadTask[] artefactTasks = [];
         await AnsiConsole.Progress()
@@ -68,23 +68,26 @@ public class InteractiveInstaller
                 {
                     var packageInfo = index.GetPackageInfo(package.Package);
 
-                    var artefactFile = await _artefactManager.GetSafeArtefactPathAsync(packageInfo.Artefact,
-                        packageInfo.Metadata);
-
-                    // Detect existing artefacts.
-                    if (artefactFile != null)
+                    if (!forceRedownload)
                     {
-                        artefactList.Add(new QueuedDownloadTask()
-                        {
-                            Task = Task.FromResult(DownloadResult.Succeeded),
-                            ArtefactInfo = packageInfo.Artefact,
-                            Metadata = packageInfo.Metadata,
-                            Objective = artefactFile,
-                            IsExplicit = package.IsExplicit
-                        }
-                        );
+                        var artefactFile = await _artefactManager.GetSafeArtefactPathAsync(packageInfo.Artefact,
+                            packageInfo.Metadata);
 
-                        continue;
+                        // Detect existing artefacts.
+                        if (artefactFile != null)
+                        {
+                            artefactList.Add(new QueuedDownloadTask()
+                            {
+                                Task = Task.FromResult(DownloadResult.Succeeded),
+                                ArtefactInfo = packageInfo.Artefact,
+                                Metadata = packageInfo.Metadata,
+                                Objective = artefactFile,
+                                IsExplicit = package.IsExplicit
+                            }
+                            );
+
+                            continue;
+                        }
                     }
 
                     // Download new artefact.
