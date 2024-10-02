@@ -84,7 +84,10 @@ internal class IceCraftApp : IFrontendApp
 
     internal async Task<DatabaseFile> ReadDatabase()
     {
-        var dbPath = Path.Combine(DataBasePath, "packages", "db.json");
+        var packagesDir = Path.Combine(DataBasePath, "packages");
+        Directory.CreateDirectory(packagesDir);
+
+        var dbPath = Path.Combine(packagesDir, "db.json");
         var file = await DatabaseFile.LoadDatabaseAsync(dbPath);
 
         return new DatabaseFile(file, Output, dbPath);
