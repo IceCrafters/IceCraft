@@ -34,6 +34,9 @@ public class ScriptEngineTests
         onConfigure(function (meta, path) {
             Binary.register("example", "example")
         })
+
+        onExportEnv(function (path) {
+        })
         
         """;
     
@@ -62,6 +65,9 @@ public class ScriptEngineTests
             Binary.register("example", "example")
         })
 
+        onExportEnv(function (path) {
+        })
+
         """;
     
     private const string TestScriptWithOnlyOrigin =
@@ -86,6 +92,9 @@ public class ScriptEngineTests
 
         onConfigure(function (meta, path) {
             Binary.register("example", "example")
+        })
+
+        onExportEnv(function (path) {
         })
 
         """;
@@ -113,6 +122,9 @@ public class ScriptEngineTests
 
         onConfigure(function (meta, path) {
             Binary.register("example", "example")
+        })
+
+        onExportEnv(function (path) {
         })
 
         """;
@@ -145,6 +157,9 @@ public class ScriptEngineTests
 
         onConfigure(function (meta, path) {
             Binary.register("example", "example")
+        })
+
+        onExportEnv(function (path) {
         })
 
         """;
@@ -196,6 +211,9 @@ public class ScriptEngineTests
         
         onRemove(function (path) {
             Fs.Rmdir(path, true)
+        })
+
+        onExportEnv(function (path) {
         })
 
         """;
