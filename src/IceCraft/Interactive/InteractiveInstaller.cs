@@ -115,28 +115,22 @@ public class InteractiveInstaller
 
         // Step 4: install artefacts and map dependencies
 
-        await AnsiConsole.Status()
-            .StartAsync("Installing packages",
-                async ctx =>
-                {
-                    await _installManager.BulkInstallAsync(ValidateAndInsertInternalAsync(ctx, artefactTasks),
-                        artefactTasks.Length);
+        await _installManager.BulkInstallAsync(ValidateAndInsertInternalAsync(artefactTasks),
+            artefactTasks.Length);
 
-                    ctx.Status("Evaluating dependency information");
+        AnsiConsole.MarkupLine("[bold white]:gear:[/] [deepskyblue1]Resolve dependencies[/]");
 
-                    if (_dependencyMapper is ICacheClearable clearable)
-                    {
-                        clearable.ClearCache();
-                    }
+        if (_dependencyMapper is ICacheClearable clearable)
+        {
+            clearable.ClearCache();
+        }
 
-                    await _dependencyMapper.MapDependenciesCached();
-                });
+        await _dependencyMapper.MapDependenciesCached();
 
         return 0;
     }
 
     private async IAsyncEnumerable<DueInstallTask> ValidateAndInsertInternalAsync(
-        StatusContext status,
         IEnumerable<QueuedDownloadTask> tasks)
     {
         foreach (var task in tasks)
@@ -147,7 +141,7 @@ public class InteractiveInstaller
                 throw new KnownException($"Download for {task.Metadata.Id} ({task.Metadata.Version}) have FAILED.");
             }
 
-            status.Status($"Installing package {task.Metadata.Id}");
+            AnsiConsole.MarkupLineInterpolated($"[bold white]:gear:[/] [deepskyblue1] -- {task.Metadata.Id} -- [/]");
 
             if (task.Stream != null)
             {

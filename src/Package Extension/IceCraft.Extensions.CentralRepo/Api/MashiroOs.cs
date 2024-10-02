@@ -13,7 +13,7 @@ public class MashiroOs : ContextApi
     {
     }
 
-    public void System(string command)
+    public int System(string command)
     {
         EnsureContext();
         
@@ -24,7 +24,7 @@ public class MashiroOs : ContextApi
         
         Console.WriteLine(command);
 #pragma warning disable CA1416
-        CommandShell.Execute(command);
+        return CommandShell.Execute(command);
 #pragma warning restore CA1416
     }
 }

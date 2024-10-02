@@ -4,3 +4,5 @@
 	enabled
 [source "csr"]
 	enabled
+[source "dotnet"]
+	enabled

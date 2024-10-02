@@ -64,7 +64,7 @@ public class InstallCommandFactory : ICommandFactory
             optNoCleanArtefact,
             optPrerelease
         };
-        
+
         command.SetHandler(async context =>
         {
             context.ExitCode = await ExecuteInternalAsync(context.GetOpt(optNoCleanArtefact),
@@ -75,7 +75,7 @@ public class InstallCommandFactory : ICommandFactory
 
         return command;
     }
-    
+
     private async Task<int> ExecuteInternalAsync(bool noCleanArtefact,
         string packageName,
         string? version,
@@ -94,57 +94,51 @@ public class InstallCommandFactory : ICommandFactory
         PackageIndex? index = null;
         HashSet<DependencyLeaf> allPackagesSet = [];
 
-        await AnsiConsole.Status()
-            .StartAsync("Indexing remote packages",
-                async ctx =>
-                {
-                    // STEP: Index remote packages
-                    index = await _indexer.IndexAsync(_sourceManager);
-                    if (!index.TryGetValue(packageName, out var seriesInfo))
-                    {
-                        throw new KnownException($"No such package series {packageName}");
-                    }
+        // STEP: Index remote packages
+        index = await _indexer.IndexAsync(_sourceManager);
+        if (!index.TryGetValue(packageName, out var seriesInfo))
+        {
+            throw new KnownException($"No such package series {packageName}");
+        }
 
-                    // STEP: Select version
-                    ctx.Status("Acquiring version information");
-                    if (!string.IsNullOrWhiteSpace(version))
-                    {
-                        // Parse user input, and store in specifiedVersion.
-                        // Does not need to be that strict on user input since we all make mistakes.
-                        selectedVersion = SemVersion.Parse(version, SemVersionStyles.Any);
-                    }
-                    else
-                    {
-                        selectedVersion = await Task.Run(() =>
-                            seriesInfo.Versions.GetLatestSemVersion(includePrerelease));
-                    }
+        // STEP: Select version
+        AnsiConsole.MarkupLine("[bold white]:gear:[/] [deepskyblue1]Acquiring information[/]");
+        if (!string.IsNullOrWhiteSpace(version))
+        {
+            // Parse user input, and store in specifiedVersion.
+            // Does not need to be that strict on user input since we all make mistakes.
+            selectedVersion = SemVersion.Parse(version, SemVersionStyles.Any);
+        }
+        else
+        {
+            selectedVersion = await Task.Run(() =>
+                seriesInfo.Versions.GetLatestSemVersion(includePrerelease));
+        }
 
-                    var versionInfo = seriesInfo.Versions[selectedVersion.ToString()];
-                    meta = versionInfo.Metadata;
+        var versionInfo = seriesInfo.Versions[selectedVersion.ToString()];
+        meta = versionInfo.Metadata;
 
-                    // Check if the package is already installed, and if the selected version matches.
-                    // If all conditions above are true, do not need to do anything.
-                    if (_installManager.IsInstalled(meta!.Id)
-                        && !await ComparePackageAsync(meta))
-                    {
-                        throw new OperationCanceledException();
-                    }
+        // Check if the package is already installed, and if the selected version matches.
+        // If all conditions above are true, do not need to do anything.
+        if (_installManager.IsInstalled(meta!.Id)
+            && !ComparePackage(meta))
+        {
+            throw new OperationCanceledException();
+        }
 
-                    // STEP: Resolve all dependencies.
-                    ctx.Status("Resolving dependencies");
-                    allPackagesSet.Add(new DependencyLeaf(meta, true));
-                    await _dependencyResolver.ResolveTree(meta, index!, allPackagesSet,
-                        _frontend.GetCancellationToken());
+        // STEP: Resolve all dependencies.
+        AnsiConsole.MarkupLine("[bold white]:gear:[/] [deepskyblue1]Resolving dependencies[/]");
+        allPackagesSet.Add(new DependencyLeaf(meta, true));
+        await _dependencyResolver.ResolveTree(meta, index!, allPackagesSet,
+            _frontend.GetCancellationToken());
 
-                    ctx.Status("Checking for conflicts");
-                    foreach (var package in allPackagesSet)
-                    {
-                        if (!await _installManager.CheckForConflictAsync(package.Package))
-                        {
-                            throw new KnownException("Package conflict detected.");
-                        }
-                    }
-                });
+        foreach (var package in allPackagesSet)
+        {
+            if (!await _installManager.CheckForConflictAsync(package.Package))
+            {
+                throw new KnownException("Package conflict detected.");
+            }
+        }
 
         // Step 2: Confirmation
         if (!InteractiveInstaller.AskConfirmation(allPackagesSet))
@@ -155,11 +149,11 @@ public class InstallCommandFactory : ICommandFactory
         _frontend.Output.Verbose("Initializing download for {0} packages", allPackagesSet.Count);
 
         // Step 3: download artefacts
-
+        AnsiConsole.MarkupLine("[bold white]:gear:[/] [deepskyblue1]Installing packages[/]");
         return await _interactiveInstaller.InstallAsync(allPackagesSet, index!);
     }
-    
-    private async Task<bool> ComparePackageAsync(PackageMeta meta)
+
+    private bool ComparePackage(PackageMeta meta)
     {
         // ReSharper disable once InvertIf
         if (_installManager.IsInstalled(meta.Id, meta.Version.ToString()))
