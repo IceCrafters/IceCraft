@@ -22,6 +22,7 @@ public class MashiroOs : ContextApi
             throw new PlatformNotSupportedException("Os.system is not supported on this platform.");
         }
         
+        Console.WriteLine(command);
 #pragma warning disable CA1416
         CommandShell.Execute(command);
 #pragma warning restore CA1416

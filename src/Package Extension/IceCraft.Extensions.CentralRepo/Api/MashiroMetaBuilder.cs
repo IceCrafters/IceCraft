@@ -4,6 +4,7 @@
 
 namespace IceCraft.Extensions.CentralRepo.Api;
 
+using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
 using Semver;
 
@@ -19,6 +20,8 @@ public class MashiroMetaBuilder
     private string? _license;
     private string? _description;
     private DateTime? _releaseDate;
+
+    private readonly DependencyCollection _dependencies = [];
 
     private MashiroMetaBuilder(string id)
     {
@@ -72,6 +75,12 @@ public class MashiroMetaBuilder
         return this;
     }
 
+    public MashiroMetaBuilder Dependency(string packageId, SemVersionRange versionRange)
+    {
+        _dependencies.Add(new DependencyReference(packageId, versionRange));
+        return this;
+    }
+
     public PackageMeta Build()
     {
         if (_version == null)
@@ -97,7 +106,8 @@ public class MashiroMetaBuilder
                 License = _license,
                 Maintainer = _maintainer ?? default,
                 PluginMaintainer = _pluginMaintainer ?? default,
-            }
+            },
+            Dependencies = _dependencies
         };
 
         return result;
