@@ -15,7 +15,7 @@ public class RemoteRepositoryManager
     private readonly IOutputAdapter _output;
     private readonly ICustomConfig _customConfig;
 
-    private static readonly RemoteRepositoryInfo OfficialRepository = new RemoteRepositoryInfo(
+    private static readonly RemoteRepositoryInfo OfficialRepository = new(
         new Uri("https://gitlab.com/icecrafters/repository/-/archive/main/repository-main.tar.gz"),
         "repository-main"
     );
@@ -38,6 +38,23 @@ public class RemoteRepositoryManager
         {
             Directory.Delete(LocalCachedRepoPath, true);
         }
+    }
+
+    internal FileStream GetAssetFileStream(string assetName)
+    {
+        var invalids = Path.GetInvalidFileNameChars();
+        if (assetName.Any(x => invalids.Contains(x)))
+        {
+            throw new ArgumentException("Invalid asset filename.", nameof(assetName));
+        }
+
+        var assetPath = Path.Combine(LocalCachedRepoPath, "assets", assetName);
+        if (!File.Exists(assetPath))
+        {
+            throw new FileNotFoundException("Failed to locate asset.", assetName);
+        }
+
+        return File.OpenRead(assetPath);
     }
 
     internal async Task InitializeCacheAsync()

@@ -10,6 +10,7 @@ using IceCraft.Api.Exceptions;
 using IceCraft.Api.Package;
 using IceCraft.Api.Platform;
 using IceCraft.Extensions.CentralRepo.Api;
+using IceCraft.Extensions.CentralRepo.Network;
 using IceCraft.Extensions.CentralRepo.Runtime.Security;
 using Jint;
 using Microsoft.Extensions.DependencyInjection;
@@ -188,6 +189,8 @@ public class MashiroState : IDisposable
             this));
         _engine.SetValue("Packages", new MashiroPackages(_apiRoot,
             _serviceProvider));
+        _engine.SetValue("Assets", new MashiroAssets(_apiRoot,
+            _serviceProvider.GetRequiredService<RemoteRepositoryManager>()));
     }
 
     public void Dispose()

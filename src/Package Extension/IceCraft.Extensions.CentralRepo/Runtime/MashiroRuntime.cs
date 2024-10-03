@@ -82,6 +82,8 @@ public class MashiroRuntime
     {
         var engine = new Engine(JintOptions);
         engine.SetValue(MashiroMetaBuilder.JsName, TypeReference.CreateTypeReference<MashiroMetaBuilder>(engine));
+        engine.SetValue("AssetHandle", TypeReference.CreateTypeReference<MashiroAssetHandle>(engine));
+
         engine.SetValue("semVer", MashiroGlobals.SemVer);
         engine.SetValue("author", MashiroGlobals.Author);
         engine.SetValue("semRange", MashiroGlobals.SemRange);
