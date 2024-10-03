@@ -80,6 +80,6 @@ public class FixBrokenCommandFactory : ICommandFactory
             return ExitCodes.Ok;
         }
 
-        return await _installer.InstallAsync(packages, index);
+        return await _installer.InstallAsync(packages, index, false);
     }
 }
