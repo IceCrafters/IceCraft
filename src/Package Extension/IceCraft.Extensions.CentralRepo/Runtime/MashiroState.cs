@@ -190,7 +190,7 @@ public class MashiroState : IDisposable
         _engine.SetValue("Packages", new MashiroPackages(_apiRoot,
             _serviceProvider));
         _engine.SetValue("Assets", new MashiroAssets(_apiRoot,
-            _serviceProvider.GetRequiredService<RemoteRepositoryManager>()));
+            _serviceProvider.GetRequiredService<IRemoteRepositoryManager>()));
     }
 
     public void Dispose()

@@ -13,7 +13,7 @@ public class RemoteRepositorySourceFactory : IRepositorySourceFactory
     public IRepositorySource CreateRepositorySource(IServiceProvider provider, out string name)
     {
         name = "csr";
-        return new RemoteRepositorySource(provider.GetRequiredService<RemoteRepositoryManager>(),
+        return new RemoteRepositorySource(provider.GetRequiredService<IRemoteRepositoryManager>(),
                 provider.GetRequiredService<RemoteRepositoryIndexer>());
     }
 }

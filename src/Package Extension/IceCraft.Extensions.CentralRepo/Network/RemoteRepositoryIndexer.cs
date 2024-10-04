@@ -14,14 +14,14 @@ using Jint.Runtime;
 
 public class RemoteRepositoryIndexer
 {
-    private readonly RemoteRepositoryManager _remoteManager;
+    private readonly IRemoteRepositoryManager _remoteManager;
     private readonly IOutputAdapter _output;
     private readonly MashiroRuntime _runtime;
     private readonly IFileSystem _fileSystem;
     
     internal const string RemoteRepoData = "remote_repo_data";
 
-    public RemoteRepositoryIndexer(RemoteRepositoryManager remoteManager, 
+    public RemoteRepositoryIndexer(IRemoteRepositoryManager remoteManager, 
         IFrontendApp frontend, 
         MashiroRuntime runtime, 
         IFileSystem fileSystem)

@@ -8,6 +8,7 @@ using System.IO.Abstractions.TestingHelpers;
 using IceCraft.Api.Exceptions;
 using IceCraft.Api.Package;
 using IceCraft.Api.Platform;
+using IceCraft.Extensions.CentralRepo.Network;
 using IceCraft.Extensions.CentralRepo.Runtime;
 using Jint;
 using Moq;
@@ -230,6 +231,8 @@ public class ScriptEngineTests
 
         result.Setup(x => x.GetService(typeof(IExecutableManager)))
             .Returns(new Mock<IExecutableManager>().Object);
+        result.Setup(x => x.GetService(typeof(IRemoteRepositoryManager)))
+            .Returns(Mock.Of<IRemoteRepositoryManager>());
 
         return result.Object;
     }

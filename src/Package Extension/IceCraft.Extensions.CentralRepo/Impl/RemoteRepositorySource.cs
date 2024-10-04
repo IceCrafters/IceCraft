@@ -9,10 +9,10 @@ using IceCraft.Extensions.CentralRepo.Network;
 
 public class RemoteRepositorySource : IRepositorySource
 {
-    private readonly RemoteRepositoryManager _remoteManager;
+    private readonly IRemoteRepositoryManager _remoteManager;
     private readonly RemoteRepositoryIndexer _repositoryIndexer;
 
-    public RemoteRepositorySource(RemoteRepositoryManager remoteManager, 
+    public RemoteRepositorySource(IRemoteRepositoryManager remoteManager, 
         RemoteRepositoryIndexer repositoryIndexer)
     {
         _remoteManager = remoteManager;
@@ -29,7 +29,7 @@ public class RemoteRepositorySource : IRepositorySource
 
     public Task RefreshAsync()
     {
-        _remoteManager.CleanPrevious();
+        _remoteManager.CleanCached();
         return Task.CompletedTask;
     }
 }

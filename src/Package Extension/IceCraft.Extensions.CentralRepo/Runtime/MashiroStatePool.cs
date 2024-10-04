@@ -11,12 +11,12 @@ using IceCraft.Extensions.CentralRepo.Util;
 
 public class MashiroStatePool
 {
-    private readonly RemoteRepositoryManager _remoteManager;
+    private readonly IRemoteRepositoryManager _remoteManager;
     private readonly Dictionary<PackageMeta, MashiroState> _mashiroStates = new();
     private readonly MashiroRuntime _runtime;
     private readonly IFileSystem _fileSystem;
 
-    public MashiroStatePool(RemoteRepositoryManager remoteManager, 
+    public MashiroStatePool(IRemoteRepositoryManager remoteManager, 
         MashiroRuntime runtime,
         IFileSystem fileSystem)
     {

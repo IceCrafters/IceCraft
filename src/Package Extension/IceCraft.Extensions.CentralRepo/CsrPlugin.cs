@@ -22,7 +22,7 @@ public class CsrPlugin : IPlugin
     public void Initialize(IServiceRegistry serviceRegistry)
     {
         serviceRegistry.RegisterRepositorySource<RemoteRepositorySourceFactory>()
-            .RegisterSingleton<RemoteRepositoryManager>()
+            .RegisterSingleton<IRemoteRepositoryManager, RemoteRepositoryManager>()
             .RegisterSingleton<RemoteRepositoryIndexer>()
             .RegisterSingleton<MashiroStatePool>()
             .RegisterSingleton<MashiroRuntime>()

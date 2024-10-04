@@ -9,7 +9,7 @@ using IceCraft.Api.Exceptions;
 using SharpCompress.Common;
 using SharpCompress.Readers;
 
-public class RemoteRepositoryManager
+public class RemoteRepositoryManager : IRemoteRepositoryManager
 {
     private readonly IFrontendApp _frontendApp;
     private readonly IOutputAdapter _output;
@@ -30,9 +30,9 @@ public class RemoteRepositoryManager
         LocalCachedRepoPath = Path.Combine(csrDataPath, "repository");
     }
 
-    internal string LocalCachedRepoPath { get; }
+    public string LocalCachedRepoPath { get; }
 
-    internal void CleanPrevious()
+    public void CleanCached()
     {
         if (Directory.Exists(LocalCachedRepoPath))
         {
@@ -40,7 +40,7 @@ public class RemoteRepositoryManager
         }
     }
 
-    internal FileStream GetAssetFileStream(string assetName)
+    public FileStream GetAssetFileStream(string assetName)
     {
         var invalids = Path.GetInvalidFileNameChars();
         if (assetName.Any(x => invalids.Contains(x)))
@@ -57,7 +57,7 @@ public class RemoteRepositoryManager
         return File.OpenRead(assetPath);
     }
 
-    internal async Task InitializeCacheAsync()
+    public async Task InitializeCacheAsync()
     {
         if (Directory.Exists(LocalCachedRepoPath))
         {

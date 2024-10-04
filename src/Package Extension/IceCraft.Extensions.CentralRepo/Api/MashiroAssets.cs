@@ -8,10 +8,10 @@ using IceCraft.Extensions.CentralRepo.Runtime.Security;
 
 public class MashiroAssets : ContextApi
 {
-    private readonly RemoteRepositoryManager _repoManager;
+    private readonly IRemoteRepositoryManager _repoManager;
 
     public MashiroAssets(ContextApiRoot parent,
-        RemoteRepositoryManager repoManager) : base(ExecutionContextType.Installation, parent)
+        IRemoteRepositoryManager repoManager) : base(ExecutionContextType.Installation, parent)
     {
         _repoManager = repoManager;
     }

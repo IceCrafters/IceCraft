@@ -73,6 +73,11 @@ public class PackageCustomDataDictionary : Dictionary<string, JsonElement>
         }
         
         result = element.Deserialize(typeInfo);
+        if (result == null)
+        {
+            return false;
+        }
+
         return true;
     }
 }
