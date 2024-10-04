@@ -4,13 +4,14 @@
 
 namespace IceCraft.Repositories.Adoptium;
 
+using System.Collections.Generic;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Caching;
 using IceCraft.Core.Caching;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-public class AdoptiumRepositorySource : IRepositorySource
+public class AdoptiumRepositorySource : AsyncRepositorySource
 {
     private static readonly Guid StorageGuid = new("ad2c3cc6-4ad4-4c7a-bb45-cd3c85cea041");
     private const string AvailableReleaseCacheId = "available_releases";
@@ -33,7 +34,7 @@ public class AdoptiumRepositorySource : IRepositorySource
     private async Task<IRepository?> CreateRepositoryInternal(bool regenerate)
     {
         var releases = await CacheStorage.RollJsonAsync(AvailableReleaseCacheId,
-            Client.GetAvailableReleasesAsync, 
+            Client.GetAvailableReleasesAsync,
             reset: regenerate);
 
         if (releases == null)
@@ -41,26 +42,25 @@ public class AdoptiumRepositorySource : IRepositorySource
             return null;
         }
         _logger.LogTrace("Adoptium: {Count} releases", releases.AvailableReleases.Count);
-        
+
         return new AdoptiumRepository(releases, this, _logger);
     }
 
-    public async Task<IRepository?> CreateRepositoryAsync()
-    {
-        return await CreateRepositoryInternal(false);
-    }
-
-    public async Task<IRepository?> RegenerateRepository()
-    {
-        return await CreateRepositoryInternal(true);
-    }
-
-    public Task RefreshAsync()
+    public override Task RefreshAsync()
     {
         // Clears all cache storage objects so all latest information, etc.
         // are regenerated.
         CacheStorage.Clear();
 
         return Task.CompletedTask;
+    }
+
+    public override async IAsyncEnumerable<RepositoryInfo> CreateRepositoriesAsync()
+    {
+        var repository = await CreateRepositoryInternal(false);
+        if (repository != null)
+        {
+            yield return new RepositoryInfo("adoptium", repository);
+        }
     }
 }

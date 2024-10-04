@@ -4,10 +4,11 @@
 
 namespace IceCraft.Extensions.CentralRepo.Impl;
 
+using System.Collections.Generic;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Extensions.CentralRepo.Network;
 
-public class RemoteRepositorySource : IRepositorySource
+public class RemoteRepositorySource : AsyncRepositorySource
 {
     private readonly IRemoteRepositoryManager _remoteManager;
     private readonly RemoteRepositoryIndexer _repositoryIndexer;
@@ -18,7 +19,15 @@ public class RemoteRepositorySource : IRepositorySource
         _remoteManager = remoteManager;
         _repositoryIndexer = repositoryIndexer;
     }
-    
+
+    public override async IAsyncEnumerable<RepositoryInfo> CreateRepositoriesAsync()
+    {
+        await _remoteManager.InitializeCacheAsync();
+        var (count, series) = await _repositoryIndexer.IndexSeries();
+
+        yield return new RepositoryInfo("csr", new RemoteRepository(series, count));
+    }
+
     public async Task<IRepository?> CreateRepositoryAsync()
     {
         await _remoteManager.InitializeCacheAsync();
@@ -27,7 +36,7 @@ public class RemoteRepositorySource : IRepositorySource
         return new RemoteRepository(series, count);
     }
 
-    public Task RefreshAsync()
+    public override Task RefreshAsync()
     {
         _remoteManager.CleanCached();
         return Task.CompletedTask;

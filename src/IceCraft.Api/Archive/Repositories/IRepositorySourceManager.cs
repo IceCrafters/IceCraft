@@ -23,7 +23,6 @@ public interface IRepositorySourceManager
     void RegisterSourceAsService(string key);
 
     bool ContainsSource(string id);
-    Task<IEnumerable<IRepository>> GetRepositoriesAsync();
     IAsyncEnumerable<KeyValuePair<string, IRepository>> EnumerateRepositoriesAsync();
     IEnumerable<IRepositorySource> EnumerateSources();
 }

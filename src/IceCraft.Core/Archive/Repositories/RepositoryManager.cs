@@ -75,32 +75,6 @@ public class RepositoryManager : IRepositorySourceManager
         return _sources.ContainsKey(id);
     }
 
-    public async Task<IEnumerable<IRepository>> GetRepositoriesAsync()
-    {
-        var list = new List<IRepository>(_sources.Count);
-        _output.Verbose("{0} sources to index", _sources.Count);
-
-        foreach (var provider in _sources)
-        {
-            if (!_config.IsSourceEnabled(provider.Key))
-            {
-                continue;
-            }
-
-            var repo = await provider.Value.CreateRepositoryAsync();
-            if (repo == null)
-            {
-                _output.Warning("Source {0} did not provide a valid repository", provider.Key);
-                continue;
-            }
-
-            _output.Verbose("RepositoryManager: provider gone through: '{0}'", provider.Key);
-            list.Add(repo);
-        }
-
-        return list.AsReadOnly();
-    }
-
     public IEnumerable<IRepositorySource> EnumerateSources()
     {
         return _sources.Values;
@@ -118,14 +92,21 @@ public class RepositoryManager : IRepositorySourceManager
             }
 
             _output.Tagged("ROLL", provider.Key);
-            var repo = await provider.Value.CreateRepositoryAsync();
-            if (repo == null)
-            {
-                _output.Warning("Source {0} did not provide a valid repository", provider.Key);
-                continue;
-            }
 
-            yield return new KeyValuePair<string, IRepository>(provider.Key, repo);
+            if (provider.Value is IAsyncRepositorySource asyncSource)
+            {
+                await foreach (var info in asyncSource.CreateRepositoriesAsync())
+                {
+                    yield return new KeyValuePair<string, IRepository>(info.Name, info.Repository);
+                }
+            }
+            else
+            {
+                foreach (var info in provider.Value.CreateRepositories())
+                {
+                    yield return new KeyValuePair<string, IRepository>(info.Name, info.Repository);
+                }
+            }
         }
     }
 }

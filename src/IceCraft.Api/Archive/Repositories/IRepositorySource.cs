@@ -16,21 +16,14 @@ namespace IceCraft.Api.Archive.Repositories;
 public interface IRepositorySource
 {
     /// <summary>
-    /// Creates a new instance of the repository provided by this provider, reusing the previous cache if available.
+    /// Creates the repositories.
     /// </summary>
     /// <remarks>
     /// Repositories should cache their data and only regenerate on <see cref="RefreshAsync"/>, and
     /// when first initialization.
     /// </remarks>
-    /// <returns>The created repository, or <see langword="null"/> if no repository can be provided.</returns>
-    Task<IRepository?> CreateRepositoryAsync();
-
-    [Obsolete("Use Refresh instead.")]
-    async Task<IRepository?> RegenerateRepository()
-    {
-        await RefreshAsync();
-        return await CreateRepositoryAsync();
-    }
+    /// <returns>The information regarding the created repositories.</returns>
+    IEnumerable<RepositoryInfo> CreateRepositories();
 
     /// <summary>
     /// Deletes all cached data, and regenerate everything at the next <see cref="CreateRepositoryAsync"/> call.

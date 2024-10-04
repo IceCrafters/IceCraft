@@ -4,15 +4,16 @@
 
 namespace IceCraft.Extensions.DotNet;
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Core.Archive.Repositories;
 using IceCraft.Extensions.DotNet.Archive;
 using Microsoft.Deployment.DotNet.Releases;
 
-public class DotNetRepositorySource : IRepositorySource
+public class DotNetRepositorySource : AsyncRepositorySource
 {
-    public async Task<IRepository?> CreateRepositoryAsync()
+    public override async IAsyncEnumerable<RepositoryInfo> CreateRepositoriesAsync()
     {
         var selfRid = await DotNetPlatformUtil.GetDotNetRidAsync();
         var products = await ProductCollection.GetAsync();
@@ -31,10 +32,10 @@ public class DotNetRepositorySource : IRepositorySource
             repository.Add(sdkSeries.Name, sdkSeries);
         }
 
-        return repository;
+        yield return new RepositoryInfo("dotnet", repository);
     }
 
-    public Task RefreshAsync()
+    public override Task RefreshAsync()
     {
         // Nothing to refresh
         return Task.CompletedTask;

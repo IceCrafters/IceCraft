@@ -5,6 +5,7 @@
 namespace IceCraft.Developer;
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Installation;
@@ -12,11 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 public class DummyRepositorySource : IRepositorySource
 {
-    public Task<IRepository?> CreateRepositoryAsync()
-    {
-        return Task.FromResult<IRepository?>(new DummyRepository());
-    }
-
     public Task RefreshAsync()
     {
         return Task.CompletedTask;
@@ -36,5 +32,10 @@ public class DummyRepositorySource : IRepositorySource
         return collection.AddKeyedSingleton<IRepositorySourceFactory, Factory>(null)
             .AddKeyedSingleton<IPackageConfigurator, DummyPackageConfigurator>("dummy-test")
             .AddKeyedSingleton<IPackageInstaller, DummyPackageInstaller>("dummy-test");
+    }
+
+    public IEnumerable<RepositoryInfo> CreateRepositories()
+    {
+        yield return new RepositoryInfo("dummy-test", new DummyRepository());
     }
 }
