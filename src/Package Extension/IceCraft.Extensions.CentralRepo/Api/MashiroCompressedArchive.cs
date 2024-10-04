@@ -26,4 +26,25 @@ public class MashiroCompressedArchive : ContextApi
             Overwrite = overwrite
         });
     }
+
+    public void Expand(MashiroAssetHandle assetHandle, string destination, bool overwrite = false, bool leaveOpen = false)
+    {
+        EnsureContext();
+        var stream = assetHandle.GetStream();
+        using var reader = ReaderFactory.Open(stream, new ReaderOptions()
+        {
+            LeaveStreamOpen = true
+        });
+
+        reader.WriteAllToDirectory(destination, new ExtractionOptions
+        {
+            ExtractFullPath = true,
+            Overwrite = overwrite
+        });
+
+        if (!leaveOpen)
+        {
+            assetHandle.Dispose();
+        }
+    }
 }
