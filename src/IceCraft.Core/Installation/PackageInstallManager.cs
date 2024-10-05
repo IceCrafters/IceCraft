@@ -445,6 +445,13 @@ public class PackageInstallManager : IPackageInstallManager
         var database = _serviceProvider.GetReadHandle();
         var isConflictFree = true;
 
+        // Check for virtual packages with the same name
+        if (database.EnumerateEntries(package.Id).Any(x => x.State == InstallationState.Virtual))
+        {
+            isConflictFree = false;
+            _frontend.Output.Warning("A virtual package with the same name of '{0}' was found", package.Id);
+        }
+
         await Task.Run(() =>
         {
             foreach (var reference in package.ConflictsWith)
