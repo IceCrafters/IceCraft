@@ -6,6 +6,7 @@ namespace IceCraft.Extensions.CentralRepo.Network;
 
 using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
+using IceCraft.Extensions.CentralRepo.Util;
 using SharpCompress.Common;
 using SharpCompress.Readers;
 
@@ -13,17 +14,12 @@ public class RemoteRepositoryManager : IRemoteRepositoryManager
 {
     private readonly IFrontendApp _frontendApp;
     private readonly IOutputAdapter _output;
-    private readonly ICustomConfig _customConfig;
+    private readonly RepoConfigFactory _configFactory;
 
-    private static readonly RemoteRepositoryInfo OfficialRepository = new(
-        new Uri("https://gitlab.com/icecrafters/repository/-/archive/main/repository-main.tar.gz"),
-        "repository-main"
-    );
-
-    public RemoteRepositoryManager(IFrontendApp frontendApp, ICustomConfig customConfig)
+    public RemoteRepositoryManager(IFrontendApp frontendApp, RepoConfigFactory configFactory)
     {
         _frontendApp = frontendApp;
-        _customConfig = customConfig;
+        _configFactory = configFactory;
         _output = frontendApp.Output;
 
         var csrDataPath = Path.Combine(frontendApp.DataBasePath, "csr");
@@ -125,12 +121,6 @@ public class RemoteRepositoryManager : IRemoteRepositoryManager
         return tempPath;
     }
 
-    private RemoteRepositoryInfo GetEffectiveRepository()
-    {
-        return GetUserSpecifiedRepository()
-                   ?? OfficialRepository;
-    }
-
     private async Task<Stream> GetArchiveStreamAsync()
     {
 #if DEBUG
@@ -149,19 +139,9 @@ public class RemoteRepositoryManager : IRemoteRepositoryManager
         return await response.Content.ReadAsStreamAsync();
     }
 
-    private RemoteRepositoryInfo? GetUserSpecifiedRepository()
+    private RemoteRepositoryInfo GetEffectiveRepository()
     {
-        var scope = _customConfig.GetScope("csr");
-
-        var sourceUriStr = scope.Get("repo_uri");
-        var sourceSubfolder = scope.Get("repo_subfolder");
-
-        if (string.IsNullOrWhiteSpace(sourceUriStr)
-        || !Uri.TryCreate(sourceUriStr, UriKind.Absolute, out var sourceUri))
-        {
-            return null;
-        }
-
-        return new RemoteRepositoryInfo(sourceUri, sourceSubfolder);
+        var value = _configFactory.GetData();
+        return value.Repository;
     }
 }

@@ -51,6 +51,7 @@ appServices
 
 var pluginManager = new PluginManager();
 pluginManager.Add(new CsrPlugin());
+pluginManager.Add(new ClientPlugin());
 
 pluginManager.InitializeAll(new ServiceRegistry(appServices));
 

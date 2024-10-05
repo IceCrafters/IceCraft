@@ -7,6 +7,7 @@ namespace IceCraft.Frontend;
 using DotNetConfig;
 using IceCraft.Api.Client;
 
+[Obsolete("Use ClientConfigManager instead.")]
 public class CustomConfigImpl : ICustomConfig
 {
     private readonly Config _config;

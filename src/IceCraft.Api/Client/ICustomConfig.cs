@@ -4,7 +4,9 @@
 
 namespace IceCraft.Api.Client;
 
+[Obsolete("Use IConfigManager instead.")]
 public interface ICustomConfig
 {
+    [Obsolete("Use IConfigManager instead.")]
     IConfigScope GetScope(string name);
 }
