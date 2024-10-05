@@ -46,13 +46,13 @@ public class FixBrokenCommandFactory : ICommandFactory
         {
             optDryRun
         };
-        
-        command.SetHandler(async context => context.ExitCode = 
+
+        command.SetHandler(async context => context.ExitCode =
             await ExecuteAsync(context.GetOpt(optDryRun)));
 
         return command;
     }
-    
+
     private async Task<int> ExecuteAsync(bool dryRun)
     {
         var packages = new HashSet<DependencyLeaf>();
@@ -60,7 +60,16 @@ public class FixBrokenCommandFactory : ICommandFactory
 
         await foreach (var package in _dependencyMapper.EnumerateUnsatisifiedPackages())
         {
-            await _resolver.ResolveTree(package, index, packages);
+            try
+            {
+                await _resolver.ResolveTree(package, index, packages);
+            }
+            catch (DependencyException ex)
+            {
+                AnsiConsole.MarkupLine("[bold white]!!![/] [red]Unsatisified requirements[/]");
+                AnsiConsole.WriteLine("IceCraft: {0}", ex.Message);
+                return ExitCodes.GenericError;
+            }
         }
 
         if (packages.Count == 0)

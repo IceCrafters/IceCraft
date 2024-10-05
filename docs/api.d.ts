@@ -25,6 +25,8 @@ declare interface AssetHandle {
 
 //#endregion
 
+//#region Compressed Archive
+
 declare namespace CompressedArchive {
     /**
      * Expands the specified archive file.
@@ -43,3 +45,33 @@ declare namespace CompressedArchive {
      */
     function expand(asset: AssetHandle, destination: string, overwrite?: boolean, leaveOpen?: boolean): void;
 }
+//#endregion
+
+//#region Binary
+
+/**
+ * Provides executable registration services. This API is available only under
+ * the Configuration context.
+ */
+declare namespace Binary {
+    function register(fileName: string, path: string): Promise<void>;
+    function register(fileName: string, path: string, envs: EnvironmentVariableDictionary): Promise<void>;
+    function unregister(fileName: string): Promise<void>;
+}
+
+declare class EnvironmentVariableDictionary implements Map<string, string> {
+    clear(): void;
+    delete(key: string): boolean;
+    forEach(callbackfn: (value: string, key: string, map: Map<string, string>) => void, thisArg?: any): void;
+    get(key: string): string | undefined;
+    has(key: string): boolean;
+    set(key: string, value: string): this;
+    size: number;
+    entries(): IterableIterator<[string, string]>;
+    keys(): IterableIterator<string>;
+    values(): IterableIterator<string>;
+    [Symbol.iterator](): IterableIterator<[string, string]>;
+    [Symbol.toStringTag]: string;
+}
+
+//#endregion

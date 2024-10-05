@@ -138,8 +138,18 @@ public class InstallCommandFactory : ICommandFactory
         // STEP: Resolve all dependencies.
         AnsiConsole.MarkupLine("[bold white]:gear:[/] [deepskyblue1]Resolving dependencies[/]");
         allPackagesSet.Add(new DependencyLeaf(meta, true));
-        await _dependencyResolver.ResolveTree(meta, index!, allPackagesSet,
-            _frontend.GetCancellationToken());
+
+        try
+        {
+            await _dependencyResolver.ResolveTree(meta, index!, allPackagesSet,
+                _frontend.GetCancellationToken());
+        }
+        catch (DependencyException ex)
+        {
+            AnsiConsole.MarkupLine("[bold white]!!![/] [red]Unsatisified requirements[/]");
+            AnsiConsole.WriteLine("IceCraft: {0}", ex.Message);
+            return ExitCodes.GenericError;
+        }
 
         foreach (var package in allPackagesSet)
         {
