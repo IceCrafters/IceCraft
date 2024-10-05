@@ -188,7 +188,7 @@ public class MashiroState : IDisposable
             _serviceProvider.GetRequiredService<IExecutableManager>(),
             this));
         _engine.SetValue("Packages", new MashiroPackages(_apiRoot,
-            _serviceProvider));
+            _serviceProvider, this));
         _engine.SetValue("Assets", new MashiroAssets(_apiRoot,
             _serviceProvider.GetRequiredService<IRemoteRepositoryManager>()));
     }

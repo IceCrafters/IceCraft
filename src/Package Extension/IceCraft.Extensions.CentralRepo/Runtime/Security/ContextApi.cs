@@ -29,4 +29,14 @@ public abstract class ContextApi
             throw new SecurityException($"The current API is not allowed in context {_parent.CurrentContext}");
         }
     }
+
+    protected void EnsureContext(ExecutionContextType contextType)
+    {
+        if (_parent.CurrentContext == ExecutionContextType.None 
+            ||(_parent.CurrentContext != contextType &&
+               !contextType.HasFlag(_parent.CurrentContext)))
+        {
+            throw new SecurityException($"The current API is not allowed in context {_parent.CurrentContext}");
+        }
+    }
 }

@@ -75,3 +75,28 @@ declare class EnvironmentVariableDictionary implements Map<string, string> {
 }
 
 //#endregion
+
+//#region Packages
+
+/**
+ * Represents a package.
+ */
+declare interface PackageMeta {}
+
+declare namespace Packages {
+    function getLatestInstalledPackage(id: string): PackageMeta | null;
+
+    /**
+     * Imports environment from the specified package.
+     * @param package The package to import.
+     */
+    function importEnvironment(package: PackageMeta): void;
+
+    /**
+     * Registers a virtual package. This API is only available under Configuration context.
+     * @param package The metadata of the virtual package to register.
+     */
+    function registerVirtual(package: PackageMeta): Promise<void>;
+}
+
+//#endregion

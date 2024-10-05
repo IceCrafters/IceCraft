@@ -6,6 +6,7 @@ namespace IceCraft.Extensions.CentralRepo.Api;
 
 using IceCraft.Api.Installation;
 using IceCraft.Api.Package;
+using IceCraft.Extensions.CentralRepo.Runtime;
 using IceCraft.Extensions.CentralRepo.Runtime.Security;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,13 +14,14 @@ using Microsoft.Extensions.DependencyInjection;
 public class MashiroPackages : ContextApi
 {
     private readonly IServiceProvider _serviceProvider;
-
+    private readonly MashiroState _state;
     private const ExecutionContextType ContextTypes = ExecutionContextType.Configuration
                                                       | ExecutionContextType.Installation;
     
-    public MashiroPackages(ContextApiRoot parent, IServiceProvider serviceProvider) : base(ContextTypes, parent)
+    public MashiroPackages(ContextApiRoot parent, IServiceProvider serviceProvider, MashiroState state) : base(ContextTypes, parent)
     {
         _serviceProvider = serviceProvider;
+        _state = state;
     }
 
     [PublicAPI]
@@ -34,9 +36,19 @@ public class MashiroPackages : ContextApi
     [PublicAPI]
     public void ImportEnvironment(PackageMeta package)
     {
-        EnsureContext();
+        EnsureContext(ExecutionContextType.Configuration);
         var installManager = _serviceProvider.GetRequiredService<IPackageInstallManager>();
 
         installManager.ImportEnvironment(package);
+    }
+
+    [PublicAPI]
+    public Task RegisterVirtual(PackageMeta package)
+    {
+        EnsureContext(ExecutionContextType.Configuration);
+        var installManager = _serviceProvider.GetRequiredService<IPackageInstallManager>();
+
+        _state.EnsureMetadata();
+        return installManager.RegisterVirtualPackageAsync(package, _state.GetPackageMeta()!.CreateReference());
     }
 }

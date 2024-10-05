@@ -19,6 +19,11 @@ public class ContextApiTests
         {
             EnsureContext();
         }
+
+        internal void EnsureContextWrapper(ExecutionContextType contextType)
+        {
+            EnsureContext(contextType);
+        }
     }
     
     [Fact]
@@ -116,6 +121,43 @@ public class ContextApiTests
         
         // Act
         var exception = Record.Exception(() => api.EnsureContextWrapper());
+        
+        // Assert
+        Assert.IsType<SecurityException>(exception);
+    }
+
+    [Fact]
+    public void ContextApi_NoneContext_Specified()
+    {
+        // Arrange
+        var parent = new ContextApiRoot
+        {
+            CurrentContext = ExecutionContextType.None
+        };
+
+        var api = new MockContextApi(ExecutionContextType.Installation, parent);
+        
+        // Act
+        var exception = Record.Exception(() => api.EnsureContextWrapper(ExecutionContextType.None));
+        
+        // Assert
+        Assert.IsType<SecurityException>(exception);
+    }
+    
+
+    [Fact]
+    public void ContextApi_InvalidContext_Specified()
+    {
+        // Arrange
+        var parent = new ContextApiRoot
+        {
+            CurrentContext = ExecutionContextType.Metadata
+        };
+
+        var api = new MockContextApi(ExecutionContextType.Installation, parent);
+        
+        // Act
+        var exception = Record.Exception(() => api.EnsureContextWrapper(ExecutionContextType.Configuration));
         
         // Assert
         Assert.IsType<SecurityException>(exception);

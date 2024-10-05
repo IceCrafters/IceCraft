@@ -66,4 +66,9 @@ public sealed record PackageMeta
     /// Gets the human-readable information associated with this package.
     /// </summary>
     public PackageTranscript? Transcript { get; init; }
+
+    public PackageReference CreateReference()
+    {
+        return new PackageReference(Id, Version);
+    }
 }
