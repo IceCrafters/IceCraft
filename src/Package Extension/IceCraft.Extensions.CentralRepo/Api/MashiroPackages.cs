@@ -43,6 +43,21 @@ public class MashiroPackages : ContextApi
     }
 
     [PublicAPI]
+    public Task RegisterVirtual(string id)
+    {
+        EnsureContext(ExecutionContextType.Configuration);
+        var installManager = _serviceProvider.GetRequiredService<IPackageInstallManager>();
+
+        _state.EnsureMetadata();
+        var metadata = _state.GetPackageMeta()!;
+
+        return installManager.RegisterVirtualPackageAsync(metadata with
+        {
+            Id = id
+        }, metadata.CreateReference());
+    }
+
+    [PublicAPI]
     public Task RegisterVirtual(PackageMeta package)
     {
         EnsureContext(ExecutionContextType.Configuration);

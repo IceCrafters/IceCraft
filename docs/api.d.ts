@@ -97,6 +97,14 @@ declare namespace Packages {
      * @param package The metadata of the virtual package to register.
      */
     function registerVirtual(package: PackageMeta): Promise<void>;
+
+    /**
+     * Registers a virtual package with the specified ID and all other metadata equivalent to the
+     * current package.
+     * This API is only available under Configuration context.
+     * @param id The ID of the virtual package to register.
+     */
+    function registerVirtual(id: string): Promise<void>;
 }
 
 //#endregion
