@@ -78,7 +78,7 @@ internal class IceCraftApp : IFrontendApp
         Console.WriteLine();
         Console.WriteLine("-----------------------");
         Console.WriteLine();
-        Log.Warning("Cancelled");
+        Frontend.Output.Shared.Warning("Cancelled");
         TokenSource.Cancel();
     }
 

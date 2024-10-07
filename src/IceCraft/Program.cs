@@ -58,7 +58,7 @@ pluginManager.InitializeAll(new ServiceRegistry(appServices));
 #if DEBUG
 if (!Debugger.IsAttached && args.Contains("--debug"))
 {
-    AnsiConsole.WriteLine($"{FrontendUtil.BaseName}: Attach a debugger, and then PRESS ANY KEY...");
+    AnsiConsole.WriteLine($"{Path.GetFileNameWithoutExtension(FrontendUtil.BaseName)}: Attach a debugger, and then PRESS ANY KEY...");
     Console.ReadKey(true);
 }
 
