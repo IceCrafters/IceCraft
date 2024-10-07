@@ -90,6 +90,8 @@ public class InteractiveInstaller
                             Stream = vStream,
                             IsExplicit = package.IsExplicit
                         });
+
+                        continue;
                     }
 
                     if (!forceRedownload)
