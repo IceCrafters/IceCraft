@@ -63,7 +63,12 @@ public class DatabaseReadHandleImpl : ILocalDatabaseReadHandle
     
     public IEnumerable<InstalledPackageInfo> EnumerateEntries(string id)
     {
-        return _database.Value[id].Values;
+        if (!_database.Value.TryGetValue(id, out var index))
+        {
+            return [];
+        }
+
+        return index.Values;
     }
 
     public InstalledPackageInfo? GetValueOrDefault(PackageMeta meta)

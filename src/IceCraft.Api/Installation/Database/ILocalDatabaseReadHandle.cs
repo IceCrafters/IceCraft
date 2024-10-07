@@ -27,6 +27,11 @@ public interface ILocalDatabaseReadHandle
     IEnumerable<PackageMeta> EnumeratePackages();
     IEnumerable<PackageMeta>? EnumeratePackagesOrDefault(string id);
     
+    /// <summary>
+    /// Enumerates installed package information entries with the specified ID.
+    /// </summary>
+    /// <param name="id">The ID.</param>
+    /// <returns>An enumerable with zero or more installed package information entries under the specified ID.</returns>
     IEnumerable<InstalledPackageInfo> EnumerateEntries(string id);
     
     InstalledPackageInfo? GetValueOrDefault(PackageMeta meta);
