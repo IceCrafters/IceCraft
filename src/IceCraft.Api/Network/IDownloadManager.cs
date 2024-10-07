@@ -39,7 +39,21 @@ public interface IDownloadManager
     /// <param name="downloadTask">The progress reporting task to report to.</param>
     /// <returns>The path where the downloaded file is located.</returns>
     /// <exception cref="IceCraft.Core.Util.KnownException">Failed to validate artefact.</exception>
+    [Obsolete("Use DownloadTemporaryArtefactSecureAsync(IArtefactDefinition, ...) instead.")]
     Task<string> DownloadTemporaryArtefactSecureAsync(RemoteArtefact artefact,
+        ArtefactMirrorInfo mirror,
+        IProgressedTask? downloadTask = null, string? fileName = null);
+
+    /// <summary>
+    /// Downloads an artefact from the best mirror to a temporary location, and validates its hash. Throws <see cref="IceCraft.Core.Util.KnownException"/>
+    /// if hash mismatches.
+    /// </summary>
+    /// <param name="artefact">The artefact information describing the package to be downloaded.</param>
+    /// <param name="mirror">The package to download.</param>
+    /// <param name="downloadTask">The progress reporting task to report to.</param>
+    /// <returns>The path where the downloaded file is located.</returns>
+    /// <exception cref="IceCraft.Core.Util.KnownException">Failed to validate artefact.</exception>
+    Task<string> DownloadTemporaryArtefactSecureAsync(IArtefactDefinition artefact,
         ArtefactMirrorInfo mirror,
         IProgressedTask? downloadTask = null, string? fileName = null);
 }

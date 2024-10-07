@@ -11,7 +11,7 @@ public interface IPackage
 {
     public IPackageSeries Series { get; }
 
-    public RemoteArtefact GetArtefact();
+    public IArtefactDefinition GetArtefact();
 
     PackageMeta GetMeta();
 

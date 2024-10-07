@@ -9,6 +9,7 @@ using IceCraft.Api.Plugin;
 using IceCraft.Extensions.CentralRepo.Impl;
 using IceCraft.Extensions.CentralRepo.Network;
 using IceCraft.Extensions.CentralRepo.Runtime;
+using IceCraft.Extensions.CentralRepo.Util;
 
 public class CsrPlugin : IPlugin
 {
@@ -28,6 +29,7 @@ public class CsrPlugin : IPlugin
             .RegisterSingleton<MashiroRuntime>()
             .RegisterKeyedSingleton<IPackageInstaller, MashiroInstaller>("mashiro")
             .RegisterKeyedSingleton<IArtefactPreprocessor, MashiroPreprocessor>("mashiro")
-            .RegisterKeyedSingleton<IPackageConfigurator, MashiroConfigurator>("mashiro");
+            .RegisterKeyedSingleton<IPackageConfigurator, MashiroConfigurator>("mashiro")
+            .RegisterSingleton<RepoConfigFactory>();
     }
 }

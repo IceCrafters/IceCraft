@@ -29,23 +29,6 @@ public class AdoptiumPackage : IPackage
 
     public IPackageSeries Series => _series;
 
-    public RemoteArtefact GetArtefact()
-    {
-        var binary = (_asset.Binaries?.FirstOrDefault(x => x.Package is { Checksum: not null }))
-            ?? throw new NotSupportedException("Asset does not contain binary asset");
-
-        if (binary.Package is not {Checksum: not null})
-        {
-            throw new NotSupportedException("Asset does not contain verifiable checksum");
-        }
-        
-        return new RemoteArtefact
-        {
-            Checksum = binary.Package!.Checksum,
-            ChecksumType = "sha256"
-        };
-    }
-
     public PackageMeta GetMeta()
     {
         var asset = _asset;
@@ -75,5 +58,22 @@ public class AdoptiumPackage : IPackage
         }
 
         return AdoptiumMirrors.GetMirrors(_asset, _series.Type);
+    }
+
+    public IArtefactDefinition GetArtefact()
+    {
+        var binary = (_asset.Binaries?.FirstOrDefault(x => x.Package is { Checksum: not null }))
+            ?? throw new NotSupportedException("Asset does not contain binary asset");
+
+        if (binary.Package is not {Checksum: not null})
+        {
+            throw new NotSupportedException("Asset does not contain verifiable checksum");
+        }
+        
+        return new HashedArtefact
+        {
+            Checksum = binary.Package!.Checksum,
+            ChecksumType = "sha256"
+        };
     }
 }

@@ -22,10 +22,4 @@ public sealed record ArtefactMirrorInfo
     /// <c>--official-only</c> switch.
     /// </summary>
     public bool IsOrigin { get; init; }
-
-    [Obsolete("Use RemoteArtefact.ChecksumType instead.")]
-    public string? Checksum { get; init; }
-
-    [Obsolete("Use RemoteArtefact.ChecksumType instead.")]
-    public string? ChecksumType { get; init; }
 }

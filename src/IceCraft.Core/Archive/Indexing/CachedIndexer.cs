@@ -22,16 +22,12 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
     
     private readonly ICacheStorage _cacheStorage;
 
-    private readonly ILogger<CachedIndexer> _logger;
-
     private readonly IOutputAdapter _output;
 
     public CachedIndexer(ICacheManager cacheManager,
-        ILogger<CachedIndexer> logger,
         IFrontendApp frontendApp)
     {
         _cacheStorage = cacheManager.GetStorage(CacheStorageId);
-        _logger = logger;
         _output = frontendApp.Output;
     }
 
@@ -111,13 +107,13 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
             var pkgMeta = package.GetMeta();
             _output.Verbose("Indexing version {0}", pkgMeta.Version);
 
-            RemoteArtefact remoteArtefact;
+            IArtefactDefinition artefactDef;
             IEnumerable<ArtefactMirrorInfo>? mirrors;
 
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
-                remoteArtefact = package.GetArtefact();
+                artefactDef = package.GetArtefact();
                 mirrors = package.GetMirrors();
             }
             catch (Exception ex)
@@ -129,7 +125,7 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
             versions.Add(pkgMeta.Version.ToString(), new CachedPackageInfo
             {
                 Metadata = pkgMeta,
-                Artefact = remoteArtefact,
+                Artefact = artefactDef,
                 Mirrors = mirrors
             });
         }
@@ -146,13 +142,13 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
             var pkgMeta = package.GetMeta();
             _output.Verbose("Indexing version {0}", pkgMeta.Version);
 
-            RemoteArtefact remoteArtefact;
+            IArtefactDefinition artefactDef;
             IEnumerable<ArtefactMirrorInfo>? mirrors;
 
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
-                remoteArtefact = package.GetArtefact();
+                artefactDef = package.GetArtefact();
                 mirrors = package.GetMirrors();
             }
             catch (Exception ex)
@@ -164,7 +160,7 @@ public class CachedIndexer : IPackageIndexer, ICacheClearable
             versions.Add(pkgMeta.Version.ToString(), new CachedPackageInfo
             {
                 Metadata = pkgMeta,
-                Artefact = remoteArtefact,
+                Artefact = artefactDef,
                 Mirrors = mirrors
             });
         }

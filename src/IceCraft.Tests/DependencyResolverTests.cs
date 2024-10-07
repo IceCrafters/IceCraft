@@ -20,7 +20,7 @@ public class DependencyResolverTests
 
     private const int Timeout = 10000;
 
-    private static readonly RemoteArtefact MockArtefact = new()
+    private static readonly HashedArtefact MockArtefact = new()
     {
         Checksum = "",
         ChecksumType = ""

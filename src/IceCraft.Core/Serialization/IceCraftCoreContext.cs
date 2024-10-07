@@ -13,7 +13,6 @@ using IceCraft.Core.Installation.Execution;
 using IceCraft.Core.Installation.Storage;
 
 [JsonSerializable(typeof(PackageMeta))]
-[JsonSerializable(typeof(RemoteArtefact))]
 [JsonSerializable(typeof(CachedPackageInfo))]
 [JsonSerializable(typeof(CachedPackageSeriesInfo))]
 [JsonSerializable(typeof(string))]
@@ -24,6 +23,9 @@ using IceCraft.Core.Installation.Storage;
 [JsonSerializable(typeof(DependencyMap))]
 [JsonSerializable(typeof(Dictionary<string, string>))]
 [JsonSerializable(typeof(DatabaseObject))]
+[JsonSerializable(typeof(IArtefactDefinition))]
+[JsonSerializable(typeof(VolatileArtefact))]
+[JsonSerializable(typeof(HashedArtefact))]
 internal partial class IceCraftCoreContext : JsonSerializerContext
 {
 }

@@ -91,7 +91,7 @@ public class RemoteRepositoryIndexer
             }
 
             var meta = state.GetPackageMeta();
-            if (!state.RemoteArtefact.HasValue
+            if (state.ArtefactDefinition == null
                 || state.Origin == null
                 || meta == null)
             {
@@ -104,7 +104,7 @@ public class RemoteRepositoryIndexer
             
             yield return new RemotePackageInfo
             {
-                Artefact = state.RemoteArtefact.Value,
+                Artefact = state.ArtefactDefinition,
                 Metadata = meta with
                 {
                     CustomData = customData

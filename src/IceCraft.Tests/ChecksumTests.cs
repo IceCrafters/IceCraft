@@ -20,7 +20,7 @@ public class ChecksumTests
     private static readonly string TestHashSha256 = Convert.ToHexString(SHA256.HashData(TestData));
     private static readonly string TestHashSha512 = Convert.ToHexString(SHA512.HashData(TestData));
 
-    private static readonly RemoteArtefact TestArtefactSha256 = new RemoteArtefact
+    private static readonly HashedArtefact TestArtefactSha256 = new HashedArtefact
     {
         ChecksumType = "sha256",
         Checksum = TestHashSha256
@@ -117,7 +117,7 @@ public class ChecksumTests
         var memStream = new MemoryStream(TestData);
         
         // Act
-        var result = await runner.ValidateLocal(TestArtefactSha256, memStream);
+        var result = await runner.ValidateAsync(TestArtefactSha256, memStream);
         
         // Assert
         Assert.True(result);

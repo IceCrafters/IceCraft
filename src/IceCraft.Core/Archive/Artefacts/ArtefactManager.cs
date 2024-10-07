@@ -28,11 +28,13 @@ public class ArtefactManager : IArtefactManager
         _fileSystem.Directory.CreateDirectory(_artefactDirectory);
     }
     
+    [Obsolete("Use IArtefactDefinition reloads instead.")]
     public async Task<bool> VerifyArtefactAsync(RemoteArtefact artefact, PackageMeta package)
     {
         return await GetSafeArtefactPathAsync(artefact, package) != null;
     }
 
+    [Obsolete("Use IArtefactDefinition reloads instead.")]
     public async Task<string?> GetSafeArtefactPathAsync(RemoteArtefact artefact, PackageMeta package)
     {
         var fileName = GetArtefactPath(artefact, package);
@@ -46,6 +48,7 @@ public class ArtefactManager : IArtefactManager
         return fileName;
     }
 
+    [Obsolete("Use IArtefactDefinition reloads instead.")]
     public string GetArtefactPath(RemoteArtefact artefact, PackageMeta package)
     {
         var idString = $"{package.Id}-{artefact.ChecksumType}-{artefact.Checksum}";
@@ -55,6 +58,7 @@ public class ArtefactManager : IArtefactManager
             strHash);
     }
 
+    [Obsolete("Use IArtefactDefinition reloads instead.")]
     public Stream CreateArtefact(RemoteArtefact artefact, PackageMeta package)
     {
         var fileName = GetArtefactPath(artefact, package);
@@ -73,5 +77,34 @@ public class ArtefactManager : IArtefactManager
                 _fileSystem.File.Delete(file);
             }
         }
+    }
+
+    public Task<bool> VerifyArtefactAsync(IArtefactDefinition artefact, PackageMeta package)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<string?> GetSafeArtefactPathAsync(IArtefactDefinition artefact, PackageMeta package)
+    {
+        throw new NotImplementedException();
+    }
+
+    public string? GetArtefactPath(IArtefactDefinition artefact, PackageMeta package)
+    {
+        if (artefact is not HashedArtefact hashed)
+        {
+            return null;
+        }
+
+        var idString = $"{package.Id}-{hashed.ChecksumType}-{hashed.Checksum}";
+        var strHash = Convert.ToHexString(SHA512.HashData(Encoding.UTF8.GetBytes(idString)));
+
+        return _fileSystem.Path.Combine(_artefactDirectory,
+            strHash);
+    }
+
+    public Stream CreateArtefactFile(IArtefactDefinition artefact, PackageMeta package)
+    {
+        throw new NotImplementedException();
     }
 }

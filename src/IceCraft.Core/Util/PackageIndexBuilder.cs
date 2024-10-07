@@ -12,7 +12,7 @@ public class PackageIndexBuilder
 {
     private readonly Dictionary<string, CachedPackageSeriesInfo> _dictionary = new();
 
-    public PackageIndexBuilder WithPackage(PackageMeta meta, RemoteArtefact artefact)
+    public PackageIndexBuilder WithPackage(PackageMeta meta, IArtefactDefinition artefact)
     {
         var pkgInfo = new CachedPackageInfo()
         {

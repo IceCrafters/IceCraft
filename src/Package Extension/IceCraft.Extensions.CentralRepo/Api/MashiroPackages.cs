@@ -36,7 +36,7 @@ public class MashiroPackages : ContextApi
     [PublicAPI]
     public void ImportEnvironment(PackageMeta package)
     {
-        EnsureContext(ExecutionContextType.Configuration);
+        EnsureContext();
         var installManager = _serviceProvider.GetRequiredService<IPackageInstallManager>();
 
         installManager.ImportEnvironment(package);

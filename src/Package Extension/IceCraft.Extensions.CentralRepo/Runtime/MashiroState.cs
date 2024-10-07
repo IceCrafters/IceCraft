@@ -44,7 +44,7 @@ public class MashiroState : IDisposable
 
     private PackageMeta? PackageMeta { get; set; }
 
-    public RemoteArtefact? RemoteArtefact { get; private set; }
+    public IArtefactDefinition? ArtefactDefinition { get; private set; }
 
     public ArtefactMirrorInfo? Origin { get; private set; }
     
@@ -59,12 +59,12 @@ public class MashiroState : IDisposable
 
     private void MashiroSha512Sum(string sha)
     {
-        RemoteArtefact = new RemoteArtefact("sha512", sha);
+        ArtefactDefinition = new HashedArtefact("sha512", sha);
     }
 
     private void MashiroVoidSum()
     {
-        RemoteArtefact = new RemoteArtefact("void", "void");
+        ArtefactDefinition = new VolatileArtefact();
     }
 
     private void MashiroSetOrigin(string origin)

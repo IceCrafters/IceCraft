@@ -29,9 +29,9 @@ public class DotNetSdkPackage : IPackage
 
     public IPackageSeries Series => _series;
 
-    public RemoteArtefact GetArtefact()
+    public IArtefactDefinition GetArtefact()
     {
-        return new RemoteArtefact
+        return new HashedArtefact
         {
             Checksum = _releaseFile.Hash,
             ChecksumType = "sha512"

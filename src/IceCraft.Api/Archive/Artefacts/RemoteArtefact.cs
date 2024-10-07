@@ -11,6 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 /// Represents an artefact available over HTTP(S).
 /// </summary>
 [DebuggerDisplay($"{{{nameof(GetDebuggerDisplay)}(),nq}}")]
+[Obsolete("Use HashedArtefact instead.")]
 public readonly struct RemoteArtefact : IEquatable<RemoteArtefact>
 {
     [SetsRequiredMembers]

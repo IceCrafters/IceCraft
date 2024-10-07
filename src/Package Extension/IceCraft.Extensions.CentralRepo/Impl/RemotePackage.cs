@@ -21,7 +21,7 @@ public class RemotePackage : IPackage
 
     public IPackageSeries Series { get; }
 
-    public RemoteArtefact GetArtefact()
+    public IArtefactDefinition GetArtefact()
     {
         return _remotePackageInfo.Artefact;
     }
