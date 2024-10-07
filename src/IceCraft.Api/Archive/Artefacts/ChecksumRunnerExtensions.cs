@@ -15,9 +15,9 @@ public static class ChecksumRunnerExtensions
     /// <param name="file">The file to verify with.</param>
     /// <returns><see langword="true"/> if the verification is successful; otherwise, <see langword="false"/>.</returns>
     /// <exception cref="NotSupportedException">The <see cref="IArtefactDefinition"/> implementation specified is not supported.</exception>
-    public static Task<bool> ValidateAsync(this IChecksumRunner runner, IArtefactDefinition artefact, string file)
+    public static async Task<bool> ValidateAsync(this IChecksumRunner runner, IArtefactDefinition artefact, string file)
     {
-        using var stream = File.OpenRead(file);
-        return runner.ValidateAsync(artefact, stream);
+        await using var stream = File.OpenRead(file);
+        return await runner.ValidateAsync(artefact, stream);
     }
 }
