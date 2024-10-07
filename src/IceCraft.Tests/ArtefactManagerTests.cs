@@ -15,6 +15,8 @@ using Xunit.Abstractions;
 
 public class ArtefactManagerTests
 {
+    private const string MockBase = "/ic/";
+
     private readonly FrontendAppHelper _frontendApp;
     private static readonly PackageMeta MockMeta = new()
     {
@@ -23,10 +25,17 @@ public class ArtefactManagerTests
         ReleaseDate = DateTime.MinValue,
         PluginInfo = new PackagePluginInfo("mashiro", "mashiro")
     };
+    private static readonly PackageMeta MockMetaB = new()
+    {
+        Id = "test2",
+        Version = new SemVersion(1, 0, 0),
+        ReleaseDate = DateTime.MinValue,
+        PluginInfo = new PackagePluginInfo("mashiro", "mashiro")
+    };
 
     public ArtefactManagerTests(ITestOutputHelper outputHelper)
     {
-        _frontendApp = new FrontendAppHelper(outputHelper);
+        _frontendApp = new FrontendAppHelper(outputHelper, MockBase);
     }
 
     [Fact]
@@ -43,5 +52,39 @@ public class ArtefactManagerTests
 
         // Assert
         Assert.Null(result);
+    }
+
+    [Fact]
+    public void GetArtefactPath_UniqueForEachPackage()
+    {
+        // Arrange
+        var fileSystem = new MockFileSystem();
+        var artefactManager = new ArtefactManager(_frontendApp,
+            Mock.Of<IChecksumRunner>(),
+            fileSystem);
+        var artefact = new HashedArtefact("test", "test");
+
+        // Act
+        var resultA = artefactManager.GetArtefactPath(artefact, MockMeta);
+        var resultB = artefactManager.GetArtefactPath(artefact, MockMetaB);
+
+        // Assert
+        Assert.NotEqual(resultA, resultB);
+    }
+
+    [Fact]
+    public async Task VerifyArtefact_AlwaysFalseWhenVolatile()
+    {
+        // Arrange
+        var fileSystem = new MockFileSystem();
+        var artefactManager = new ArtefactManager(_frontendApp,
+            Mock.Of<IChecksumRunner>(),
+            fileSystem);
+
+        // Act
+        var result = await artefactManager.VerifyArtefactAsync(new VolatileArtefact(), MockMeta);
+
+        // Assert
+        Assert.False(result);
     }
 }

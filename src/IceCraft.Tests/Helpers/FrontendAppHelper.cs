@@ -16,17 +16,23 @@ public class FrontendAppHelper : IFrontendApp
 {
     private readonly CancellationTokenSource _cancelSource;
 
-    public FrontendAppHelper(ITestOutputHelper outputHelper)
+    public FrontendAppHelper(ITestOutputHelper outputHelper,
+        string? dataBasePath = null)
     {
         Output = new OutputHelper(outputHelper);
         _cancelSource = new CancellationTokenSource();
+
+        if (dataBasePath != null)
+        {
+            DataBasePath = dataBasePath;
+        }
     }
 
     public string ProductName => "Test XUnit Instance";
 
     public string ProductVersion => "0.0.0";
 
-    public string DataBasePath => Path.Combine(Path.GetTempPath(), "__icecraft_test_temp");
+    public string DataBasePath { get; } = Path.Combine(Path.GetTempPath(), "__icecraft_test_temp");
 
     public IOutputAdapter Output { get; }
 
