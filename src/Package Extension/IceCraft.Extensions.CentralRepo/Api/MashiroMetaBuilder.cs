@@ -20,6 +20,7 @@ public class MashiroMetaBuilder
     private string? _license;
     private string? _description;
     private DateTime? _releaseDate;
+    private bool _unitary;
 
     private readonly DependencyCollection _dependencies = [];
 
@@ -81,6 +82,12 @@ public class MashiroMetaBuilder
         return this;
     }
 
+    public MashiroMetaBuilder Unitary()
+    {
+        _unitary = true;
+        return this;
+    }
+
     public PackageMeta Build()
     {
         if (_version == null)
@@ -107,7 +114,8 @@ public class MashiroMetaBuilder
                 Maintainer = _maintainer ?? default,
                 PluginMaintainer = _pluginMaintainer ?? default,
             },
-            Dependencies = _dependencies
+            Dependencies = _dependencies,
+            Unitary = _unitary
         };
 
         return result;
