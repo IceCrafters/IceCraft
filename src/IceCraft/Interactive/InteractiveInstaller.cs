@@ -39,7 +39,7 @@ public class InteractiveInstaller
     private readonly record struct QueuedDownloadTask
     {
         internal required Task<DownloadResult> Task { get; init; }
-        internal required RemoteArtefact ArtefactInfo { get; init; }
+        internal required IArtefactDefinition ArtefactInfo { get; init; }
         internal required PackageMeta Metadata { get; init; }
         internal required string Objective { get; init; }
         internal Stream? Stream { get; init; }
@@ -67,6 +67,30 @@ public class InteractiveInstaller
                 foreach (var package in packages)
                 {
                     var packageInfo = index.GetPackageInfo(package.Package);
+                    var artefact = packageInfo.Artefact;
+                
+                    // Handle volatile artefact
+                    if (artefact is VolatileArtefact)
+                    {
+                        // Download volatile artefact.
+                        var vTask = ctx.AddTask(package.Package.Id);
+                        var vTempFile = Path.Combine(Path.GetTempPath(),
+                            Path.GetRandomFileName());
+                        var vStream = File.Create(vTempFile);
+
+                        artefactList.Add(new QueuedDownloadTask()
+                        {
+                            Task = _downloadManager.DownloadAsync(packageInfo,
+                                    vStream,
+                                    new SpectreProgressedTask(vTask),
+                                    $"{packageInfo.Metadata.Id} {packageInfo.Metadata.Version}"),
+                            ArtefactInfo = artefact,
+                            Metadata = packageInfo.Metadata,
+                            Objective = vTempFile,
+                            Stream = vStream,
+                            IsExplicit = package.IsExplicit
+                        });
+                    }
 
                     if (!forceRedownload)
                     {
@@ -90,10 +114,10 @@ public class InteractiveInstaller
                         }
                     }
 
-                    // Download new artefact.
-                    var task = ctx.AddTask(package.Package.Id);
-                    var stream = _artefactManager.CreateArtefact(packageInfo.Artefact,
+                    var stream = _artefactManager.CreateArtefactFile(packageInfo.Artefact,
                         packageInfo.Metadata);
+                                            // Download new artefact.
+                    var task = ctx.AddTask(package.Package.Id);
 
                     artefactList.Add(new QueuedDownloadTask()
                     {
@@ -104,7 +128,7 @@ public class InteractiveInstaller
                         ArtefactInfo = packageInfo.Artefact,
                         Metadata = packageInfo.Metadata,
                         Objective = _artefactManager.GetArtefactPath(packageInfo.Artefact,
-                            packageInfo.Metadata),
+                            packageInfo.Metadata)!,
                         Stream = stream,
                         IsExplicit = package.IsExplicit
                     }
@@ -152,9 +176,8 @@ public class InteractiveInstaller
             }
 
             var path = task.Objective;
-            if (!await _checksumRunner.ValidateLocal(task.ArtefactInfo, path))
+            if (!await _checksumRunner.ValidateAsync(task.ArtefactInfo, path))
             {
-                Output.Shared.Verbose("Remote hash: {0}", task.ArtefactInfo.Checksum);
                 throw new KnownException("Artefact hash mismatches downloaded file.");
             }
 

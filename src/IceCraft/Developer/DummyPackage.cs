@@ -34,9 +34,9 @@ public class DummyPackage : IPackage
 
     public IPackageSeries Series => _series;
 
-    public RemoteArtefact GetArtefact()
+    public IArtefactDefinition GetArtefact()
     {
-        return new RemoteArtefact
+        return new HashedArtefact
         {
             ChecksumType = "sha256",
             Checksum = "5e9a7996fe94d7be10595d7133748760bf8348198b71b7a50fd8affaa980ac61"
