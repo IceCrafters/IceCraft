@@ -39,7 +39,6 @@ public class MashiroStatePool
         var fileName = GetScriptFileName(packageMeta);
 
         var path = _fileSystem.Path.Combine(_remoteManager.LocalCachedRepoPath, "packages", fileName);
-        Console.WriteLine(path);
 
         if (!_fileSystem.File.Exists(path))
         {
