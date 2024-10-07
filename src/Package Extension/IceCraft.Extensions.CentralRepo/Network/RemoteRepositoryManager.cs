@@ -73,36 +73,24 @@ public class RemoteRepositoryManager : IRemoteRepositoryManager
         await using var stream = File.OpenRead(downloadedPath);
         using var reader = ReaderFactory.Open(stream);
 
-        var extractEntry = false;
-
-        // If we have a subfolder specified then try to extract subfolder
-        if (effective.Subfolder != null 
-        #if DEBUG
-        // Disallow subfolder structure for debug targz file
-        && Environment.GetEnvironmentVariable("ICECRAFT_DBG_CSR_ARCHIVE_PATH") == null
-        #endif
-        )
-        {
-            while (reader.Entry.Key != effective.Subfolder)
-            {
-                if (!reader.MoveToNextEntry())
-                {
-                    throw new KnownInvalidOperationException($"Subfolder '{effective.Subfolder}' specified in config doesn't exist!");
-                }
-            }
-
-            extractEntry = true;
-        }
-
         var options = new ExtractionOptions
         {
             ExtractFullPath = true,
             Overwrite = true
         };
 
-        if (extractEntry)
+        if (effective.Subfolder != null
+        #if DEBUG
+        // Disallow subfolder structure for debug targz file
+        && Environment.GetEnvironmentVariable("ICECRAFT_DBG_CSR_ARCHIVE_PATH") == null
+        #endif
+        )
         {
-            reader.WriteEntryToDirectory(LocalCachedRepoPath, options);
+            var tmp = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(tmp);
+            reader.WriteAllToDirectory(tmp, options);
+
+            FsUtil.CopyDirectory(Path.Combine(tmp, effective.Subfolder), LocalCachedRepoPath, true);
         }
         else
         {
