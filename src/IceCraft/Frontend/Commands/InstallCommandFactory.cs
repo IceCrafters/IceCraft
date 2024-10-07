@@ -148,12 +148,12 @@ public class InstallCommandFactory : ICommandFactory
 
         // STEP: Resolve all dependencies.
         AnsiConsole.MarkupLine("[bold white]:gear:[/] [deepskyblue1]Resolving dependencies[/]");
-        allPackagesSet.Add(new DependencyLeaf(meta, true));
 
         try
         {
             await _dependencyResolver.ResolveTree(meta, index!, allPackagesSet,
                 _frontend.GetCancellationToken());
+            allPackagesSet.Add(new DependencyLeaf(meta, true));                
         }
         catch (DependencyException ex)
         {
