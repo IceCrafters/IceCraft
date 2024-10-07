@@ -53,8 +53,8 @@ public sealed class ListVersionCommandFactory : ICommandFactory
 
         if (!index.TryGetValue(packageName, out var seriesInfo))
         {
-            _frontend.Output.Error("Package {0} not found", packageName);
-            return -1;
+            _frontend.Output.Error("package not found: {0}", packageName);
+            return ExitCodes.PackageNotFound;
         }
 
         foreach (var version in seriesInfo.Versions
@@ -64,6 +64,6 @@ public sealed class ListVersionCommandFactory : ICommandFactory
             AnsiConsole.WriteLine(version.Key);
         }
 
-        return 0;
+        return ExitCodes.Ok;
     }
 }

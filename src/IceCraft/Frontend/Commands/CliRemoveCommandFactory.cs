@@ -55,8 +55,8 @@ public class CliRemoveCommandFactory : ICommandFactory
     {
         if (!_installManager.IsInstalled(packageName))
         {
-            Log.Fatal("Package {PackageName} is not installed", packageName);
-            return -1;
+            Output.Shared.Error("package not installed: {0}", packageName);
+            return ExitCodes.PackageNotFound;
         }
 
         PackageMeta? selectedVersion;

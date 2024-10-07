@@ -52,7 +52,8 @@ internal class FileSystemCacheStorage : ICacheStorage
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Failed to read cache index for storage: '{}'", Id);
+                Output.Shared.Warning("Failed to read cache index for storage: '{}'", Id);
+                Output.Shared.Warning(ex, "Details");
             }
         }
 
@@ -77,7 +78,7 @@ internal class FileSystemCacheStorage : ICacheStorage
     {
         if (_dry)
         {
-            Log.Warning("WARNING: Cache object '{}' will not be saved", objectName);
+            Output.Shared.Warning("cache object will not be saved: {0}", objectName);
             var mem = new MemoryStream();
             return mem;
         }

@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using IceCraft.Api.Caching;
 using IceCraft.Api.Client;
+using IceCraft.Frontend;
 using Serilog;
 
 internal class FileSystemCacheManager : ICacheManager
@@ -22,12 +23,12 @@ internal class FileSystemCacheManager : ICacheManager
     public IEnumerable<ICacheStorage> EnumerateStorages()
     {
         var directories = Directory.GetDirectories(_baseDirectory);
-        Log.Verbose("Base directory: {BaseDirectory}", _baseDirectory);
+        Output.Shared.Verbose("base directory: {0}", _baseDirectory);
         var list = new List<ICacheStorage>(directories.Length);
 
         foreach (var dir in directories)
         {
-            Log.Verbose("Evalutaing directory {Dir}", dir);
+            Output.Shared.Verbose("evalutaing directory {0}", dir);
 
             if (Guid.TryParse(Path.GetFileName(dir), out var id))
             {
@@ -49,11 +50,11 @@ internal class FileSystemCacheManager : ICacheManager
     public void RemoveAll()
     {
         var directories = Directory.GetDirectories(_baseDirectory);
-        Log.Verbose("Base directory: {BaseDirectory}", _baseDirectory);
+        Output.Shared.Verbose("base directory: {0}", _baseDirectory);
 
         foreach (var dir in directories)
         {
-            Log.Verbose("Evalutaing directory {Dir}", dir);
+            Output.Shared.Verbose("evalutaing directory {0}", dir);
 
             if (Guid.TryParse(Path.GetFileName(dir), out _))
             {
