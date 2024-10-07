@@ -120,7 +120,18 @@ public class InstallCommandFactory : ICommandFactory
         else
         {
             selectedVersion = await Task.Run(() =>
-                seriesInfo.Versions.GetLatestSemVersion(includePrerelease));
+                seriesInfo.Versions.GetLatestSemVersionOrDefault(includePrerelease));
+        }
+
+        if (selectedVersion == null)
+        {
+            Output.Shared.Error("Cannot find package version for package {0}", packageName);
+            if (seriesInfo.Versions.Count > 0 && !includePrerelease)
+            {
+                Output.Hint("Prerelease versions may be available");
+                Output.Hint("Try using --include-prerelease");
+            }
+            return ExitCodes.PackageNotFound;
         }
 
         var versionInfo = seriesInfo.Versions[selectedVersion.ToString()];
