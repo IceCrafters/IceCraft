@@ -87,6 +87,13 @@ declare namespace Packages {
     function getLatestInstalledPackage(id: string): PackageMeta | null;
 
     /**
+     * Gets the latest version of a package that is installed.
+     * @param id The ID to get.
+     * @param traceVirtualProvider If set to true, search and return the provider if package is virtual.
+     */
+    function getLatestInstalledPackage(id: string, traceVirtualProvider: boolean): PackageMeta | null;
+
+    /**
      * Imports environment from the specified package.
      * @param package The package to import.
      */

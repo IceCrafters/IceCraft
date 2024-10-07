@@ -59,6 +59,15 @@ public interface IPackageInstallManager
     /// <param name="packageName">The name of the package to get metadata from.</param>
     /// <returns>The created metadata.</returns>
     PackageMeta? GetLatestMetaOrDefault(string packageName);
+
+    /// <summary>
+    /// Gets the <see cref="PackageMeta"/> instance that describes the metadata of the latest
+    /// installed version of a given package.
+    /// </summary>
+    /// <param name="packageName">The name of the package to get metadata from.</param>
+    /// <param name="traceVirtualProvider">If <see langword="true"/>, the provider of a virtual package found under the specified ID will be returned.</param>
+    /// <returns>The created metadata.</returns>
+    PackageMeta? GetLatestMetaOrDefault(string packageName, bool traceVirtualProvider);
     
     /// <summary>
     /// Gets the <see cref="PackageMeta"/> instance that describes the metadata of the latest

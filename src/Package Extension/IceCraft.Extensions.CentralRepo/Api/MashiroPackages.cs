@@ -34,6 +34,15 @@ public class MashiroPackages : ContextApi
     }
 
     [PublicAPI]
+    public PackageMeta? GetLatestInstalledPackage(string id, bool traceVirtualProvider)
+    {
+        EnsureContext();
+        var installManager = _serviceProvider.GetRequiredService<IPackageInstallManager>();
+
+        return installManager.GetLatestMetaOrDefault(id, traceVirtualProvider);
+    }
+
+    [PublicAPI]
     public void ImportEnvironment(PackageMeta package)
     {
         EnsureContext();

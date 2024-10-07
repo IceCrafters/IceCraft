@@ -27,6 +27,13 @@ public static class LocalDatabaseExtensions
         return readHandle.EnumeratePackages(identifier)
             .MaxBy(x => x.Version, SemVersion.SortOrderComparer);
     }
+
+    public static InstalledPackageInfo? GetLatestVersionEntryOrDefault(this ILocalDatabaseReadHandle readHandle, 
+        string identifier)
+    {
+        return readHandle.EnumerateEntries(identifier)
+            .MaxBy(x => x.Metadata.Version, SemVersion.SortOrderComparer);
+    }
     
     public static async Task<PackageMeta?> GetLatestVersionOrDefaultAsync(this ILocalDatabaseReadHandle readHandle, 
         string identifier,

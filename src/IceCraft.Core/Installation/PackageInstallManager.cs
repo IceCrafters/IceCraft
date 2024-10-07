@@ -361,6 +361,30 @@ public class PackageInstallManager : IPackageInstallManager
         return database.GetLatestVersionOrDefault(packageName);
     }
 
+    public PackageMeta? GetLatestMetaOrDefault(string packageName, bool traceVirtualProvider)
+    {
+        var database = _serviceProvider.GetReadHandle();
+
+        var latest = database.GetLatestVersionEntryOrDefault(packageName);
+        if (latest == null)
+        {
+            return null;
+        }
+
+        if (!traceVirtualProvider 
+            || latest.State != InstallationState.Virtual
+            || !latest.ProvidedBy.HasValue)
+        {
+            return latest.Metadata;
+        }
+
+        var providedBy = latest.ProvidedBy.Value;
+        var provider = database.GetValueOrDefault(providedBy)
+         ?? throw new InvalidOperationException($"Provider package {latest.ProvidedBy.Value.PackageId} ({latest.ProvidedBy.Value.PackageVersion}) is null.");
+
+        return provider.Metadata;
+    }
+
     public async Task<PackageMeta?> GetLatestMetaOrDefaultAsync(string packageName,
         CancellationToken cancellationToken = default)
     {
