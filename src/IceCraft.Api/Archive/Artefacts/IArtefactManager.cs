@@ -33,6 +33,15 @@ public interface IArtefactManager
     
     [Obsolete("UseCreateArtefactFile(IArtefactDefinition, PackageMeta) instead.")]
     Stream CreateArtefact(RemoteArtefact artefact, PackageMeta package);
+
+    /// <summary>
+    /// Creates an empty file in the non-volatile storage location of the atrefact, and opens
+    /// it for write access.
+    /// </summary>
+    /// <param name="artefact">The artefact to create file for. Must not be <see cref="VolatileArtefact"/>.</param>
+    /// <param name="package">The package to create file for.</param>
+    /// <returns>The stream opened for the artefact to store at.</returns>
+    /// <exception cref="ArgumentException">The artefact specified is <see cref="VolatileArtefact"/>.</exception>
     Stream CreateArtefactFile(IArtefactDefinition artefact, PackageMeta package);
 
     void CleanArtefacts();

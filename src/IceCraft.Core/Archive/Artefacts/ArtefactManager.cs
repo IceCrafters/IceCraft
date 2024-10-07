@@ -79,14 +79,27 @@ public class ArtefactManager : IArtefactManager
         }
     }
 
-    public Task<bool> VerifyArtefactAsync(IArtefactDefinition artefact, PackageMeta package)
+    public async Task<bool> VerifyArtefactAsync(IArtefactDefinition artefact, PackageMeta package)
     {
-        throw new NotImplementedException();
+        if (artefact is VolatileArtefact)
+        {
+            return false;
+        }
+
+        return await GetSafeArtefactPathAsync(artefact, package) != null;
     }
 
-    public Task<string?> GetSafeArtefactPathAsync(IArtefactDefinition artefact, PackageMeta package)
+    public async Task<string?> GetSafeArtefactPathAsync(IArtefactDefinition artefact, PackageMeta package)
     {
-        throw new NotImplementedException();
+        var fileName = GetArtefactPath(artefact, package);
+        
+        if (!_fileSystem.File.Exists(fileName)
+            || !await _checksumRunner.ValidateAsync(artefact, fileName))
+        {
+            return null;
+        }
+        
+        return fileName;
     }
 
     public string? GetArtefactPath(IArtefactDefinition artefact, PackageMeta package)
@@ -105,6 +118,12 @@ public class ArtefactManager : IArtefactManager
 
     public Stream CreateArtefactFile(IArtefactDefinition artefact, PackageMeta package)
     {
-        throw new NotImplementedException();
+        if (artefact is VolatileArtefact)
+        {
+            throw new ArgumentException("Volatile artefacts are not supported.", nameof(artefact));
+        }
+
+        var fileName = GetArtefactPath(artefact, package);
+        return _fileSystem.File.Create(fileName!);
     }
 }
