@@ -108,3 +108,45 @@ declare namespace Packages {
 }
 
 //#endregion
+
+//#region Os
+
+/**
+ * Provides operating system services. The APIs under this namespace are only
+ * accessible under Installation or Configuration context.
+ */
+declare namespace Os {
+    /**
+     * Executes a command using the operating system shell interpreter.
+     * @param command The command to execute.
+     * @returns The exit code.
+     */
+    function system(command: string): number;
+
+    /**
+     * Sets an environment variable for the current process.
+     * @param key The name of the environment variable to set.
+     * @param value The value to set to.
+     */
+    function setProcessEnv(key: string, value: string): void;
+
+    /**
+     * Removes an environment variable from the current process.
+     * @param key The name of the environment variable to remove.
+     */
+    function removeProcessEnv(key: string): void;
+
+    /**
+     * Adds an entry to the PATH environment variable of the current process.
+     * @param path The path to add.
+     */
+    function addProcessPath(path: string): void;
+
+    /**
+     * Removes an entry from the PATH environment variable of the current process.
+     * @param path The path to remove.
+     */
+    function removeProcessPath(path: string): void;
+}
+
+//#endregion

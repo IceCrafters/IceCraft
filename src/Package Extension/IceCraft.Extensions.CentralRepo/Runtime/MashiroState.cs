@@ -183,7 +183,7 @@ public class MashiroState : IDisposable
 
         _engine.SetValue("Fs", new MashiroFs(_apiRoot));
         _engine.SetValue("CompressedArchive", new MashiroCompressedArchive(_apiRoot));
-        _engine.SetValue("Os", new MashiroOs(_apiRoot));
+        _engine.SetValue("Os", new MashiroOs(_apiRoot, _serviceProvider.GetRequiredService<IEnvironmentManager>()));
         _engine.SetValue("Binary", new MashiroBinary(_apiRoot,
             _serviceProvider.GetRequiredService<IExecutableManager>(),
             this));

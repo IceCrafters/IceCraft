@@ -233,6 +233,8 @@ public class ScriptEngineTests
             .Returns(new Mock<IExecutableManager>().Object);
         result.Setup(x => x.GetService(typeof(IRemoteRepositoryManager)))
             .Returns(Mock.Of<IRemoteRepositoryManager>());
+        result.Setup(x => x.GetService(typeof(IEnvironmentManager)))
+            .Returns(Mock.Of<IEnvironmentManager>());
 
         return result.Object;
     }

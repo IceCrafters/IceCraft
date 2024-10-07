@@ -4,8 +4,10 @@
 
 namespace IceCraft.Tests.CentralRepo;
 
+using IceCraft.Api.Platform;
 using IceCraft.Extensions.CentralRepo.Api;
 using IceCraft.Extensions.CentralRepo.Runtime.Security;
+using Moq;
 
 public class OsTests
 {
@@ -17,7 +19,7 @@ public class OsTests
         {
             CurrentContext = ExecutionContextType.Installation
         };
-        var os = new MashiroOs(root);
+        var os = new MashiroOs(root, Mock.Of<IEnvironmentManager>());
 
         // Act
         var exception = Record.Exception(() => os.System("echo \"Hello World!\""));
