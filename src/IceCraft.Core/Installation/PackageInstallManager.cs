@@ -325,8 +325,13 @@ public class PackageInstallManager : IPackageInstallManager
         await UnregisterPackageAsync(meta);
     }
 
-    public bool IsInstalled(PackageMeta meta)
+    public bool IsInstalled(PackageMeta? meta)
     {
+        if (meta == null)
+        {
+            return false;
+        }
+
         var database = _serviceProvider.GetReadHandle();
 
         return database.ContainsPackage(meta);
@@ -443,6 +448,8 @@ public class PackageInstallManager : IPackageInstallManager
 
     public void ImportEnvironment(PackageMeta meta)
     {
+        ArgumentNullException.ThrowIfNull(meta);
+
         if (!IsInstalled(meta))
         {
             throw new ArgumentException("The package is not installed.", nameof(meta));

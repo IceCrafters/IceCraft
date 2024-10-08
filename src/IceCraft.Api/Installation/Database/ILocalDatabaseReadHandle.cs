@@ -21,7 +21,13 @@ public interface ILocalDatabaseReadHandle
     bool ContainsPackage(string identifier);
     bool ContainsPackage(string identifier, string version);
     bool ContainsPackage(string identifier, SemVersion version);
-    bool ContainsPackage(PackageMeta meta);
+
+    /// <summary>
+    /// Determines whether the database contains the specified metadata.
+    /// </summary>
+    /// <param name="meta">The metadata to query.</param>
+    /// <returns><see langword="true"/> if the database contains such metadata; otherwise or if <see langword="null"/>, <see langword="false"/>.</returns>
+    bool ContainsPackage(PackageMeta? meta);
     
     IEnumerable<string> EnumerateKeys();
     IEnumerable<PackageMeta> EnumeratePackages();

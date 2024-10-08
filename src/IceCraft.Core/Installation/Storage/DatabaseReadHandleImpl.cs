@@ -40,8 +40,13 @@ public class DatabaseReadHandleImpl : ILocalDatabaseReadHandle
         return ContainsPackage(identifier, version.ToString());
     }
 
-    public bool ContainsPackage(PackageMeta meta)
+    public bool ContainsPackage(PackageMeta? meta)
     {
+        if (meta == null)
+        {
+            return false;
+        }
+
         return _database.Value.ContainsMeta(meta);
     }
 

@@ -31,6 +31,8 @@ public sealed class DatabaseObject : Dictionary<string, PackageInstallationIndex
 
     public bool ContainsMeta(PackageMeta meta)
     {
+        ArgumentNullException.ThrowIfNull(meta);
+
         return TryGetValue(meta.Id, out var index)
                && index.TryGetValue(meta.Version.ToString(), out var info)
                && info.Metadata == meta;

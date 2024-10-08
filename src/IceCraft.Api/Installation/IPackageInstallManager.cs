@@ -25,7 +25,12 @@ public interface IPackageInstallManager
     /// <param name="meta">The package to uninstall.</param>
     Task UninstallAsync(PackageMeta meta);
 
-    bool IsInstalled(PackageMeta meta);
+    /// <summary>
+    /// Determines whether the specified package is installed.
+    /// </summary>
+    /// <param name="meta">The metadata to query.</param>
+    /// <returns><see langword="true"/> if metadata is not null and is present in database; otherwise, <see langword="false"/>.</returns>
+    bool IsInstalled(PackageMeta? meta);
     
     /// <summary>
     /// Determines whether at least one version of the specified package is installed.
