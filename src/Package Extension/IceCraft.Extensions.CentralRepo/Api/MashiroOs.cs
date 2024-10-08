@@ -4,6 +4,7 @@
 
 namespace IceCraft.Extensions.CentralRepo.Api;
 
+using System.Diagnostics;
 using IceCraft.Api.Platform;
 using IceCraft.Extensions.CentralRepo.Runtime.Security;
 using IceCraft.Extensions.CentralRepo.Util;
@@ -16,6 +17,28 @@ public class MashiroOs : ContextApi
         IEnvironmentManager environmentManager) : base(ExecutionContextType.Installation | ExecutionContextType.Configuration, parent)
     {
         _environmentManager = environmentManager;
+    }
+
+    /// <summary>
+    /// Executes an executable with the specified arguments.
+    /// </summary>
+    /// <param name="program">The program to execute.</param>
+    /// <param name="args">The arguments to specify for the program.</param>
+    /// <returns>The exit code, or <c>-255</c> if the process have failed to start.</returns>
+    public int Execute(string program, params string[] args)
+    {
+        EnsureContext();
+
+        var startInfo = new ProcessStartInfo(program, args);
+
+        var process = Process.Start(startInfo);
+        if (process == null)
+        {
+            return -255;
+        }
+
+        process.WaitForExit();
+        return process.ExitCode;
     }
 
     public int System(string command)

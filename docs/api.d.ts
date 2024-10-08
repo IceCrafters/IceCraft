@@ -124,7 +124,15 @@ declare namespace Packages {
  */
 declare namespace Os {
     /**
-     * Executes a command using the operating system shell interpreter.
+     * Executes an executable with the specified arguments under the current environment.
+     * @param file The file to execute.
+     * @param arguments The arguments to pass to the executed process.
+     */
+    function execute(file: string, ...arguments: string[]): number; 
+
+    /**
+     * Executes a system command using the operating system shell interpreter. The command will
+     * be executed in a new environment.
      * @param command The command to execute.
      * @returns The exit code.
      */
