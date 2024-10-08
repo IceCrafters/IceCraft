@@ -19,6 +19,11 @@ public static class MashiroGlobals
         return SemVersionRange.Parse(range, SemVersionRangeOptions.Strict);
     }
 
+    public static SemVersionRange SemRangeAny()
+    {
+        return SemVersionRange.All;
+    }
+
     public static SemVersionRange SemRangeExact(string version)
     {
         var semversion = SemVer(version);

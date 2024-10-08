@@ -87,6 +87,7 @@ public class MashiroRuntime
         engine.SetValue("semVer", MashiroGlobals.SemVer);
         engine.SetValue("author", MashiroGlobals.Author);
         engine.SetValue("semRange", MashiroGlobals.SemRange);
+        engine.SetValue("semRangeAny", MashiroGlobals.SemRangeAny);
         engine.SetValue("semRangeExact", MashiroGlobals.SemRangeExact);
         engine.SetValue("semRangeAtLeast", MashiroGlobals.SemRangeAtLeast);
 
