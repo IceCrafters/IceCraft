@@ -6,6 +6,7 @@ namespace IceCraft.Extensions.CentralRepo.Runtime;
 
 using Acornima.Ast;
 using IceCraft.Api.Archive.Artefacts;
+using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
 using IceCraft.Api.Package;
 using IceCraft.Api.Platform;
@@ -191,6 +192,9 @@ public class MashiroState : IDisposable
             _serviceProvider, this));
         _engine.SetValue("Assets", new MashiroAssets(_apiRoot,
             _serviceProvider.GetRequiredService<IRemoteRepositoryManager>()));
+
+        _engine.SetValue("AppBasePath", _serviceProvider.GetRequiredService<IFrontendApp>()
+            .DataBasePath);
     }
 
     public void Dispose()

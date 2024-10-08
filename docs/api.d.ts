@@ -157,3 +157,12 @@ declare namespace Os {
 }
 
 //#endregion
+
+//#region Globals
+
+/**
+ * The application base path.
+ */
+declare const AppBasePath: string;
+
+//#endregion
