@@ -140,7 +140,7 @@ public class LinuxEnvironmentManager : IEnvironmentManager
         var processPath = Environment.GetEnvironmentVariable("PATH");
         var toPath = $"{processPath}:{path}";
         
-        Environment.SetEnvironmentVariable(toPath, processPath);
+        Environment.SetEnvironmentVariable("PATH", toPath);
     }
     
     private void AddUserPath(string path)
