@@ -57,6 +57,11 @@ public class Output : IOutputAdapter
         AnsiConsole.MarkupLineInterpolated($"[bold yellow]HINT:[/] [white]{message}[/]");
     }
 
+    public static void Error(Exception ex)
+    {
+        AnsiConsole.WriteException(ex);
+    }
+
     #region Tagged
 
     [StringFormatMethod("format")]

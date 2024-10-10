@@ -196,7 +196,8 @@ declare namespace mconsole {
     function clear(): void;
 
     /**
-     * Prints the specified message to console at Verbose level. This method has limited support for placeholders; if possible, use
+     * Prints the specified message to console at Verbose level. 
+     * This method has limited support for placeholders; if possible, use
      * {@link debugEx} instead.
      * @param condition The condition assert.
      * @param message The message to print. Can contain certain placeholders.
@@ -213,7 +214,8 @@ declare namespace mconsole {
     function debugEx(message: string, ...values: any[]): void;
 
     /**
-     * Prints the specified message to console at Info level. This method has limited support for placeholders; if possible, use
+     * Prints the specified message to console at Info level. 
+     * This method has limited support for placeholders; if possible, use
      * {@link infoEx} instead.
      * @param condition The condition assert.
      * @param message The message to print. Can contain certain placeholders.
@@ -230,7 +232,8 @@ declare namespace mconsole {
     function infoEx(message: string, ...values: any[]): void;
 
     /**
-     * Prints the specified message to console at Log level. This method has limited support for placeholders; if possible, use
+     * Prints the specified message to console at Log level. 
+     * This method has limited support for placeholders; if possible, use
      * {@link logEx} instead.
      * @param condition The condition assert.
      * @param message The message to print. Can contain certain placeholders.
@@ -247,7 +250,8 @@ declare namespace mconsole {
     function logEx(message: string, ...values: any[]): void;
 
     /**
-     * Prints the specified message to console at Warning level. This method has limited support for placeholders; if possible, use
+     * Prints the specified message to console at Warning level. 
+     * This method has limited support for placeholders; if possible, use
      * {@link warnEx} instead.
      * @param condition The condition assert.
      * @param message The message to print. Can contain certain placeholders.
@@ -264,7 +268,8 @@ declare namespace mconsole {
     function warnEx(message: string, ...values: any[]): void;
 
     /**
-     * Prints the specified message to console at Error level. This method has limited support for placeholders; if possible, use
+     * Prints the specified message to console at Error level. 
+     * This method has limited support for placeholders; if possible, use
      * {@link errorEx} instead.
      * @param condition The condition assert.
      * @param message The message to print. Can contain certain placeholders.

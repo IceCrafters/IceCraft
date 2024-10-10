@@ -4,6 +4,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Builder;
+using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.IO.Abstractions;
 using DotNetConfig;
@@ -81,18 +82,30 @@ builder.AddMiddleware(async (context, next) =>
     await next(context);
 });
 
-try
+builder.UseExceptionHandler((ex, context) =>
 {
-    return await command.InvokeAsync(args);
-}
-catch (KnownException e)
+    if (ex is KnownException known)
+    {
+        AnsiConsole.MarkupLineInterpolated($"[red][bold]{FrontendUtil.BaseName}: {ex.Message}[/][/]");
+        Output.Shared.Verbose(ex.StackTrace ?? "No stack trace available");
+
+        context.ExitCode = ExitCodes.GenericError;
+    }
+    else
+    {
+        Output.Shared.Error("Unknown error occurred!");
+        Output.Error(ex);
+
+        context.ExitCode = ExitCodes.GenericError;
+    }
+});
+
+var parser = builder.Build();
+
+AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
 {
-    AnsiConsole.MarkupLineInterpolated($"[red][bold]{FrontendUtil.BaseName}: {e.Message}[/][/]");
-    Output.Shared.Verbose(e.StackTrace ?? "No stack trace available");
-    return ExitCodes.GenericError;
-}
-catch (Exception e)
-{
-    Console.Error.WriteLine(e.ToString());
-    return ExitCodes.GenericError;
-}
+    Output.Shared.Error("Unhandled error occurred!");
+    Output.Shared.Error(args.ExceptionObject?.ToString() ?? "(no error information available)");
+};
+
+return await parser.InvokeAsync(args);
