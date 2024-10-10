@@ -5,14 +5,17 @@
 namespace IceCraft.Tests.CentralRepo;
 
 using System.IO.Abstractions.TestingHelpers;
+using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
 using IceCraft.Api.Package;
 using IceCraft.Api.Platform;
 using IceCraft.Extensions.CentralRepo.Network;
 using IceCraft.Extensions.CentralRepo.Runtime;
+using IceCraft.Tests.CentralRepo.Helpers;
 using Jint;
 using Moq;
 using Semver;
+using Xunit.Abstractions;
 
 public class ScriptEngineTests
 {
@@ -223,9 +226,14 @@ public class ScriptEngineTests
         """;
     #endregion
 
-    private static readonly IServiceProvider ServiceProvider = CreateServiceProvider();
+    private readonly IServiceProvider ServiceProvider;
 
-    private static IServiceProvider CreateServiceProvider()
+    public ScriptEngineTests(ITestOutputHelper outputHelper)
+    {
+        ServiceProvider = CreateServiceProvider(outputHelper);
+    }
+
+    private static IServiceProvider CreateServiceProvider(ITestOutputHelper outputHelper)
     {
         var result = new Mock<IServiceProvider>();
 
@@ -235,6 +243,8 @@ public class ScriptEngineTests
             .Returns(Mock.Of<IRemoteRepositoryManager>());
         result.Setup(x => x.GetService(typeof(IEnvironmentManager)))
             .Returns(Mock.Of<IEnvironmentManager>());
+        result.Setup(x => x.GetService(typeof(IFrontendApp)))
+            .Returns(new FrontendAppHelper(outputHelper));
 
         return result.Object;
     }

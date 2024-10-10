@@ -45,7 +45,8 @@ public class MashiroRuntime
     {
         Interop =
         {
-            TypeResolver = JintTypeResolver
+            TypeResolver = JintTypeResolver,
+            ExceptionHandler = static ex => ex is IMashiroApiError
         }
     };
 
@@ -83,6 +84,7 @@ public class MashiroRuntime
         var engine = new Engine(JintOptions);
         engine.SetValue(MashiroMetaBuilder.JsName, TypeReference.CreateTypeReference<MashiroMetaBuilder>(engine));
         engine.SetValue("AssetHandle", TypeReference.CreateTypeReference<MashiroAssetHandle>(engine));
+        engine.SetValue("MFormatError", TypeReference.CreateTypeReference<MashiroFormatError>(engine));
 
         engine.SetValue("semVer", MashiroGlobals.SemVer);
         engine.SetValue("author", MashiroGlobals.Author);

@@ -127,6 +127,7 @@ declare namespace Os {
      * Executes an executable with the specified arguments under the current environment.
      * @param file The file to execute.
      * @param arguments The arguments to pass to the executed process.
+     * @returns The exit code of the created process.
      */
     function execute(file: string, ...arguments: string[]): number; 
 
