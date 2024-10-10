@@ -27,6 +27,16 @@ public class OutputHelper : IOutputAdapter
         _testOutput.WriteLine($"IC ERR: {format}", args);
     }
 
+    public void Info(string message)
+    {
+        _testOutput.WriteLine("IC INF: {0}", message);
+    }
+
+    public void Info(string format, params object?[] args)
+    {
+        _testOutput.WriteLine($"IC INF: {format}", args);
+    }
+
     public void Log(string message)
     {
         _testOutput.WriteLine("IC INF: {0}", message);

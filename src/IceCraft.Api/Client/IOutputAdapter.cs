@@ -23,6 +23,10 @@ public interface IOutputAdapter
         Warning(exception, string.Format(format, args));
     }
 
+    void Info(string message);
+    [StringFormatMethod("format")]
+    void Info(string format, params object?[] args);
+
     void Log(string message);
     [StringFormatMethod("format")]
     void Log(string format, params object?[] args);
