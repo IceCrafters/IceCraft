@@ -169,6 +169,8 @@ public class MashiroState : IDisposable
 
     internal void AddFunctions()
     {
+        var frontendApp = _serviceProvider.GetRequiredService<IFrontendApp>();
+    
         _engine.SetValue("setMeta", MashiroSetMeta);
         _engine.SetValue("sha512sum", MashiroSha512Sum);
         _engine.SetValue("voidsum", MashiroVoidSum);
@@ -192,9 +194,10 @@ public class MashiroState : IDisposable
             _serviceProvider, this));
         _engine.SetValue("Assets", new MashiroAssets(_apiRoot,
             _serviceProvider.GetRequiredService<IRemoteRepositoryManager>()));
+        _engine.SetValue("mconsole", new MashiroConsole(frontendApp.Output));
 
-        _engine.SetValue("AppBasePath", _serviceProvider.GetRequiredService<IFrontendApp>()
-            .DataBasePath);
+        _engine.SetValue("AppBasePath", 
+            frontendApp.DataBasePath);
     }
 
     public void Dispose()

@@ -167,6 +167,123 @@ declare namespace Os {
 
 //#endregion
 
+//#region Console
+
+declare namespace mconsole {
+    /**
+     * Asserts for a condition. If the condition fails, prints the specified message
+     * to console. This method has limited support for placeholders; if possible, use
+     * {@link assertEx} instead.
+     * @param condition The condition assert.
+     * @param message The message to print. Can contain certain placeholders.
+     * @param values The values to replace placeholders in the message.
+     */
+    function assert(condition: boolean, message: string, ...values: any[]): void;
+
+    /**
+     * Asserts for a condition. If the condition fails, prints the specified message
+     * to console.
+     * @param condition The condition assert.
+     * @param message The message to print. Can be a .NET composite format string.
+     * @param values The values to replace placeholders in the message.
+     */
+    function assertEx(condition: boolean, message: string, ...values: any[]): void;
+
+     /**
+     * Does nothing and prints a warning message.
+     * @deprecated Do not use.
+     */
+    function clear(): void;
+
+    /**
+     * Prints the specified message to console at Verbose level. This method has limited support for placeholders; if possible, use
+     * {@link debugEx} instead.
+     * @param condition The condition assert.
+     * @param message The message to print. Can contain certain placeholders.
+     * @param values The values to replace placeholders in the message.
+     */
+    function debug(message: string, ...values: any[]): void;
+
+    /**
+     * Prints the specified message to console at Verbose level. 
+     * @param condition The condition assert.
+     * @param message The message to print. Can be a .NET composite format string.
+     * @param values The values to replace placeholders in the message.
+     */
+    function debugEx(message: string, ...values: any[]): void;
+
+    /**
+     * Prints the specified message to console at Info level. This method has limited support for placeholders; if possible, use
+     * {@link infoEx} instead.
+     * @param condition The condition assert.
+     * @param message The message to print. Can contain certain placeholders.
+     * @param values The values to replace placeholders in the message.
+     */
+    function info(message: string, ...values: any[]): void;
+
+    /**
+     * Prints the specified message to console at Info level.
+     * @param condition The condition assert.
+     * @param message The message to print. Can be a .NET composite format string.
+     * @param values The values to replace placeholders in the message.
+     */
+    function infoEx(message: string, ...values: any[]): void;
+
+    /**
+     * Prints the specified message to console at Log level. This method has limited support for placeholders; if possible, use
+     * {@link logEx} instead.
+     * @param condition The condition assert.
+     * @param message The message to print. Can contain certain placeholders.
+     * @param values The values to replace placeholders in the message.
+     */
+    function log(message: string, ...values: any[]): void;
+
+    /**
+     * Prints the specified message to console at Log level.
+     * @param condition The condition assert.
+     * @param message The message to print. Can be a .NET composite format string.
+     * @param values The values to replace placeholders in the message.
+     */
+    function logEx(message: string, ...values: any[]): void;
+
+    /**
+     * Prints the specified message to console at Warning level. This method has limited support for placeholders; if possible, use
+     * {@link warnEx} instead.
+     * @param condition The condition assert.
+     * @param message The message to print. Can contain certain placeholders.
+     * @param values The values to replace placeholders in the message.
+     */
+    function warn(message: string, ...values: any[]): void;
+
+    /**
+     * Prints the specified message to console at Warning level.
+     * @param condition The condition assert.
+     * @param message The message to print. Can be a .NET composite format string.
+     * @param values The values to replace placeholders in the message.
+     */
+    function warnEx(message: string, ...values: any[]): void;
+
+    /**
+     * Prints the specified message to console at Error level. This method has limited support for placeholders; if possible, use
+     * {@link errorEx} instead.
+     * @param condition The condition assert.
+     * @param message The message to print. Can contain certain placeholders.
+     * @param values The values to replace placeholders in the message.
+     */
+    function error(message: string, ...values: any[]): void;
+
+    /**
+     * Prints the specified message to console at Error level.
+     * @param condition The condition assert.
+     * @param message The message to print. Can be a .NET composite format string.
+     * @param values The values to replace placeholders in the message.
+     */
+    function errorEx(message: string, ...values: any[]): void;
+}
+
+
+//#endregion
+
 //#region Globals
 
 /**
