@@ -9,10 +9,11 @@ using System.Diagnostics.CodeAnalysis;
 public readonly record struct DownloadTarget
 {
     [SetsRequiredMembers]
-    public DownloadTarget(Uri link, int contentLength = -1)
+    public DownloadTarget(Uri link, int contentLength = -1, string? fileName = null)
     {
         Link = link;
         ContentLength = contentLength;
+        FileName = fileName;
     }
 
     /// <summary>
@@ -25,4 +26,6 @@ public readonly record struct DownloadTarget
     /// by server however will override this property.
     /// </summary>
     public int ContentLength { get; init; }
+
+    public string? FileName { get; init; }
 }

@@ -43,6 +43,32 @@ public class DownloadMission
         }
     }
 
+    public async ValueTask<DownloadMissionResult> DownloadAsync(DownloadTarget target,
+        Stream toStream,
+        CancellationToken cancellation = default)
+    {
+        var response = await _client.GetAsync(target.Link, cancellation);
+        if (!response.IsSuccessStatusCode)
+        {
+            return DownloadMissionResult.CreateWithStatusCode(response.StatusCode);
+        }
+
+        var length = response.Content.Headers.ContentLength;
+        if (!length.HasValue)
+        {
+            if (target.ContentLength > 0)
+            {
+                return await DownloadDeterminateInternalAsync(response, toStream, target.ContentLength, cancellation);
+            }
+
+            return await DownloadIndeterminateInternalAsync(response, toStream, cancellation);
+        }
+        else
+        {
+            return await DownloadDeterminateInternalAsync(response, toStream, length.Value, cancellation);
+        }
+    }
+
     private async Task<DownloadMissionResult> DownloadDeterminateInternalAsync(HttpResponseMessage response,
         Stream objective,
         long length,
