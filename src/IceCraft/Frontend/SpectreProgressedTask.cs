@@ -21,6 +21,7 @@ public class SpectreProgressedTask : IProgressedTask
         _progressTask.IsIndeterminate = false;
         _progressTask.MaxValue = 100;
         _progressTask.Value = precentage;
+        _progressTask.Increment(0);
     }
 
     public void SetDefiniteProgress(long progress, long max)
@@ -28,11 +29,14 @@ public class SpectreProgressedTask : IProgressedTask
         _progressTask.IsIndeterminate = false;
         _progressTask.MaxValue = max;
         _progressTask.Value = progress;
+        _progressTask.Increment(0);
     }
 
     public void SetIntermediateProgress()
     {
         _progressTask.IsIndeterminate = true;
+        _progressTask.Value = 50;
+        _progressTask.Increment(0);
     }
 
     public void SetText(string text)

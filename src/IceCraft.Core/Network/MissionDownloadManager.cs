@@ -41,7 +41,7 @@ public class MissionDownloadManager : IDownloadManager
         IProgressedTask? downloadTask = null,
         string? fileName = null)
     {
-        var target = new DownloadTarget(from, fileName: fileName);
+        var target = new DownloadTarget(from, -1, fileName: fileName);
         var mission = new DownloadMission(_frontend.GetClient());
 
         if (downloadTask != null)
