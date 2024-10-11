@@ -80,9 +80,8 @@ builder.AddMiddleware(async (context, next) =>
 {
     context.ConfigureVerbose();
     await next(context);
-});
-
-builder.UseExceptionHandler((ex, context) =>
+})
+.UseExceptionHandler((ex, context) =>
 {
     if (ex is KnownException known)
     {
@@ -98,7 +97,9 @@ builder.UseExceptionHandler((ex, context) =>
 
         context.ExitCode = ExitCodes.GenericError;
     }
-});
+})
+.UseHelp()
+.UseVersionOption();
 
 var parser = builder.Build();
 

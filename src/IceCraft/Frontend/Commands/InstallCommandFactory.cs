@@ -30,7 +30,7 @@ public class InstallCommandFactory : ICommandFactory
     private readonly IDependencyResolver _dependencyResolver;
     private readonly IFrontendApp _frontend;
     private readonly IArtefactManager _artefactManager;
-
+    private readonly IMirrorSearcher _mirrorSearcher;
     private readonly InteractiveInstaller _interactiveInstaller;
 
     public InstallCommandFactory(IServiceProvider serviceProvider)
@@ -41,12 +41,13 @@ public class InstallCommandFactory : ICommandFactory
         _dependencyResolver = serviceProvider.GetRequiredService<IDependencyResolver>();
         _frontend = serviceProvider.GetRequiredService<IFrontendApp>();
         _artefactManager = serviceProvider.GetRequiredService<IArtefactManager>();
+        _mirrorSearcher = serviceProvider.GetRequiredService<IMirrorSearcher>();
 
         var checksumRunner = serviceProvider.GetRequiredService<IChecksumRunner>();
         var downloadManager = serviceProvider.GetRequiredService<IDownloadManager>();
         var dependencyMapper = serviceProvider.GetRequiredService<IDependencyMapper>();
         _interactiveInstaller = new InteractiveInstaller(downloadManager, _installManager, _artefactManager,
-            checksumRunner, dependencyMapper);
+            checksumRunner, dependencyMapper, _mirrorSearcher);
     }
 
     public Command CreateCommand()
