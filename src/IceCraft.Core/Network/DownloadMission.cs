@@ -1,3 +1,7 @@
+// Copyright (C) WithLithum & IceCraft contributors 2024.
+// Licensed under GNU General Public License, version 3 or (at your opinion)
+// any later version. See COPYING in repository root.
+
 namespace IceCraft.Core.Network;
 
 using System;
@@ -5,10 +9,16 @@ using System;
 public class DownloadMission
 {
     private readonly HttpClient _client;
+    private readonly DownloadMissionConfig _config;
 
-    public DownloadMission(HttpClient client)
+    public DownloadMission(HttpClient client) : this(client, DownloadMissionConfig.Default)
+    {
+    }
+
+    public DownloadMission(HttpClient client, DownloadMissionConfig missionConfig)
     {
         _client = client;
+        _config = missionConfig;
     }
 
     public delegate void MissionProgressDelegate(DownloadMission mission, DownloadMissionProgress progress);
@@ -75,7 +85,7 @@ public class DownloadMission
         CancellationToken cancellation)
     {
         using var stream = await response.Content.ReadAsStreamAsync(cancellation);
-        var buffer = new byte[250].AsMemory();
+        var buffer = new byte[CalculateBufferSize(length)].AsMemory();
         var downloaded = 0;
 
         do
@@ -104,7 +114,7 @@ public class DownloadMission
         CancellationToken cancellation)
     {
         using var stream = await response.Content.ReadAsStreamAsync(cancellation);
-        var buffer = new byte[250].AsMemory();
+        var buffer = new byte[_config.MinBufferSize].AsMemory();
         var downloaded = 0;
 
         do
@@ -123,6 +133,51 @@ public class DownloadMission
         } while (true);
 
         return DownloadMissionResult.CreateSuccess();
+    }
+
+    internal int CalculateBufferSize(long contentLength)
+    {
+        // Just to prevent people filling zero to this.
+        if (contentLength == 0L)
+        {
+            return _config.MinBufferSize;
+        }
+
+        // Securely cast to int. A file exceeding int max value limit has to be rediciously big
+        // and most likely result buffer size is waaay over the configured maximum size limit, so
+        // maximum size limit is used.
+        int smallerLength;
+        if (contentLength > int.MaxValue)
+        {
+            // So we throw numbers larger than int MaxValue away. This doesn't mean we can throw away the size
+            // and just return MaxBufferSize.
+            smallerLength = int.MaxValue;
+        }
+        else
+        {
+            smallerLength = (int)contentLength;
+        }
+
+        // Default config is 250 -> 250000
+        if (smallerLength < _config.MinBufferSize * 1000)
+        {
+            return _config.MinBufferSize;
+        }
+
+        // Normally, 1000th of a file is enough for a buffer
+        var devided = smallerLength / 1000;
+
+        // Bounds check.
+        if (devided < _config.MinBufferSize)
+        {
+            return _config.MinBufferSize;
+        }
+        else if (devided > _config.MaxBufferSize)
+        {
+            return _config.MaxBufferSize;
+        }
+
+        return devided;
     }
 
     private static int CalculatePrecentage(int reached, long total)
