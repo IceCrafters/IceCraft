@@ -1,0 +1,79 @@
+#!/bin/sh
+
+# Definitions
+TARGET_VERSION="0.1.0-alpha.1"
+
+TARGET_PATH="$PWD/bin/prep"
+
+PROJECT_PATH="$PWD/src/IceCraft/IceCraft.csproj"
+TEMPLATE_PATH="$PWD/scripts/build-prepped_dbtemplate"
+
+# Basic variables
+SCRNAME=$(basename "$0")
+
+# Functions
+printmsg() {
+    echo "$SCRNAME: $1"
+}
+
+expand() {
+    local template="$(cat $1)"
+    eval "echo \"${template}\"" > $2
+}
+
+# Argument parsing
+SH_OPTSTRING="l:v:h"
+
+OPTIND=1
+while getopts $SH_OPTSTRING flag; do
+    if [ $flag == '?' ]; then
+        exit 1
+    fi
+
+    if [ $flag == 'h' ]; then
+        echo "usage: $SCRNAME [-i <install_location>] [-h]"
+        echo ""
+        echo "-i: The location to install bootstrapped instance to"
+        echo "-v: Set target version"
+        echo "-h: Shows this help message and exit"
+        exit 0
+    fi
+
+    if [ $flag == 'l' ]; then
+        TARGET_PATH=$OPTARG
+    fi
+
+    if [ $flag == 'v' ]; then
+        TARGET_VERSION=$OPTARG
+    fi
+done
+
+INSTALL_BIN="$TARGET_PATH/packages/icecraft/unitary"
+DB_PATH="$TARGET_PATH/packages/db.json"
+
+# Test for src folder (must run in repo root)
+if [ ! -d "src" ]; then
+    printmsg "probably not IceCraft dev directory ('src' doesn't exist)"
+    printmsg "if you are in scripts directory, move upwards"
+    printmsg "then call 'scripts/install.sh'"
+    exit 1
+fi
+
+printmsg "Initiating .NET build"
+
+dotnet clean "$PROJECT_PATH" --configuration Release --nologo --output "$INSTALL_BIN" --verbosity quiet
+dotnet build "$PROJECT_PATH" --configuration Release --no-self-contained --nologo --output "$INSTALL_BIN" --verbosity quiet
+
+BuildExitCode=$?
+if [ $BuildExitCode -ne 0 ]; then
+    printmsg ".NET build have failed"
+    exit 1
+fi
+
+printmsg ".NET build complete"
+printmsg "Expanding DB template"
+
+# Evaluate package db template
+expand "$TEMPLATE_PATH" "$DB_PATH"
+
+printmsg "DB template expanded"
