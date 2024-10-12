@@ -124,6 +124,7 @@ public static class CommandUtil
             }
 
             PrintError(error);
+            count++;
         }
 
         return false;
