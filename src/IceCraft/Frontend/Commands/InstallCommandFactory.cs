@@ -32,7 +32,7 @@ public class InstallCommandFactory : ICommandFactory
     private readonly IFrontendApp _frontend;
     private readonly IArtefactManager _artefactManager;
     private readonly IMirrorSearcher _mirrorSearcher;
-    private readonly InteractiveInstaller _interactiveInstaller;
+    private readonly IServiceProvider _serviceProvider;
 
     public InstallCommandFactory(IServiceProvider serviceProvider)
     {
@@ -43,12 +43,7 @@ public class InstallCommandFactory : ICommandFactory
         _frontend = serviceProvider.GetRequiredService<IFrontendApp>();
         _artefactManager = serviceProvider.GetRequiredService<IArtefactManager>();
         _mirrorSearcher = serviceProvider.GetRequiredService<IMirrorSearcher>();
-
-        var checksumRunner = serviceProvider.GetRequiredService<IChecksumRunner>();
-        var downloadManager = serviceProvider.GetRequiredService<IDownloadManager>();
-        var dependencyMapper = serviceProvider.GetRequiredService<IDependencyMapper>();
-        _interactiveInstaller = new InteractiveInstaller(downloadManager, _installManager, _artefactManager,
-            checksumRunner, dependencyMapper, _mirrorSearcher);
+        _serviceProvider = serviceProvider;
     }
 
     public Command CreateCommand()
@@ -64,6 +59,11 @@ public class InstallCommandFactory : ICommandFactory
         argVersion.AddValidator(result =>
         {
             var value = result.GetValueForArgument(argVersion);
+            if (value == null)
+            {
+                return;
+            }
+            
             if (!SemVersion.TryParse(value, SemVersionStyles.Any, out _))
             {
                 result.ErrorMessage = "Invalid semantic version";
@@ -200,9 +200,11 @@ public class InstallCommandFactory : ICommandFactory
 
         _frontend.Output.Verbose("Initializing download for {0} packages", allPackagesSet.Count);
 
-        // Step 3: download artefacts
+        // Step 3: install
         AnsiConsole.MarkupLine("[bold white]:gear:[/] [deepskyblue1]Installing packages[/]");
-        return await _interactiveInstaller.InstallAsync(allPackagesSet, index!, forceRedownload);
+
+        var installer = _serviceProvider.GetRequiredService<InteractiveInstaller>();
+        return await installer.InstallAsync(allPackagesSet, index!, forceRedownload);
     }
 
     private bool ComparePackage(PackageMeta meta)

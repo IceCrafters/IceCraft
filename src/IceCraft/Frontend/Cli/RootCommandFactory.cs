@@ -58,7 +58,8 @@ internal static class RootCommandFactory
             .CreateCommand();
 
         var removeCmd = new CliRemoveCommandFactory(serviceProvider.GetRequiredService<IPackageInstallManager>(),
-            serviceProvider.GetRequiredService<IDependencyMapper>())
+            serviceProvider.GetRequiredService<IDependencyMapper>(),
+            serviceProvider)
             .CreateCommand();
 
         // Create root command

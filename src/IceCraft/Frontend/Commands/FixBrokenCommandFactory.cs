@@ -32,11 +32,11 @@ public class FixBrokenCommandFactory : ICommandFactory
         _sourceManager = serviceProvider.GetRequiredService<IRepositorySourceManager>();
 
         _installer = new InteractiveInstaller(serviceProvider.GetRequiredService<IDownloadManager>(),
-            serviceProvider.GetRequiredService<IPackageInstallManager>(),
             serviceProvider.GetRequiredService<IArtefactManager>(),
             serviceProvider.GetRequiredService<IChecksumRunner>(),
             serviceProvider.GetRequiredService<IDependencyMapper>(),
-            serviceProvider.GetRequiredService<IMirrorSearcher>());
+            serviceProvider.GetRequiredService<IMirrorSearcher>(),
+            serviceProvider.GetRequiredService<IPackageSetupAgent>());
     }
 
     public Command CreateCommand()

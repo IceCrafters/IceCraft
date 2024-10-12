@@ -18,25 +18,25 @@ using Spectre.Console;
 public class InteractiveInstaller
 {
     private readonly IDownloadManager _downloadManager;
-    private readonly IPackageInstallManager _installManager;
     private readonly IArtefactManager _artefactManager;
     private readonly IChecksumRunner _checksumRunner;
     private readonly IDependencyMapper _dependencyMapper;
     private readonly IMirrorSearcher _mirrorSearcher;
+    private readonly IPackageSetupAgent _setupAgent;
 
     public InteractiveInstaller(IDownloadManager downloadManager,
-        IPackageInstallManager installManager,
         IArtefactManager artefactManager,
         IChecksumRunner checksumRunner,
         IDependencyMapper dependencyMapper,
-        IMirrorSearcher mirrorSearcher)
+        IMirrorSearcher mirrorSearcher,
+        IPackageSetupAgent setupAgent)
     {
         _downloadManager = downloadManager;
-        _installManager = installManager;
         _artefactManager = artefactManager;
         _checksumRunner = checksumRunner;
         _dependencyMapper = dependencyMapper;
         _mirrorSearcher = mirrorSearcher;
+        _setupAgent = setupAgent;
     }
 
     private readonly record struct QueuedDownloadTask
@@ -151,7 +151,7 @@ public class InteractiveInstaller
 
         // Step 4: install artefacts and map dependencies
 
-        await _installManager.BulkInstallAsync(ValidateAndInsertInternalAsync(artefactTasks),
+        await _setupAgent.InstallManyAsync(ValidateAndInsertInternalAsync(artefactTasks),
             artefactTasks.Length);
 
         AnsiConsole.MarkupLine("[bold white]:gear:[/] [deepskyblue1]Resolve dependencies[/]");
