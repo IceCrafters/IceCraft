@@ -6,6 +6,7 @@ namespace IceCraft.Plugin;
 using IceCraft.Api.Configuration;
 using IceCraft.Api.Plugin;
 using IceCraft.Frontend.Configuration;
+using IceCraft.Interactive;
 
 public class ClientPlugin : IPlugin
 {
@@ -17,6 +18,7 @@ public class ClientPlugin : IPlugin
 
     public void Initialize(IServiceRegistry serviceRegistry)
     {
-        serviceRegistry.RegisterSingleton<IConfigManager, ClientConfigManager>();
+        serviceRegistry.RegisterSingleton<IConfigManager, ClientConfigManager>()
+            .RegisterTransitent<InteractiveInstaller>();
     }
 }

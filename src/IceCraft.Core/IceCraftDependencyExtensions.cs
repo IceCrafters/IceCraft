@@ -84,7 +84,8 @@ public static class IceCraftDependencyExtensions
                 var file = provider.GetRequiredService<DatabaseFile>();
                 return new DatabaseReadHandleImpl(file);
             })
-            .AddTransient<ILocalDatabaseMutator, LocalDatabaseMutatorImpl>();
+            .AddTransient<ILocalDatabaseMutator, LocalDatabaseMutatorImpl>()
+            .AddTransient<IPackageSetupAgent, PackageSetupAgent>();
     }
 
     public static IServiceCollection AddChecksumValidators(this IServiceCollection services)

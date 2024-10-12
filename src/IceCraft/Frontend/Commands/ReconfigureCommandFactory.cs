@@ -36,21 +36,10 @@ public class ReconfigureCommandFactory : ICommandFactory
 
     private async Task ExecuteAsync(string package)
     {
-        var meta = await _installManager.GetLatestMetaOrDefaultAsync(package);
-        if (meta == null)
-        {
-            throw new KnownException($"No such package '{package}'");
-        }
-
-        var configurator = _serviceProvider.GetKeyedService<IPackageConfigurator>(meta.PluginInfo.ConfiguratorRef);
-        if (configurator == null)
-        {
-            throw new KnownException($"Package '{meta.Id}' ({meta.Version}) does not define a valid configurator.");
-        }
-
-        var installDir = _installManager.GetInstalledPackageDirectory(meta);
-        
-        await configurator.UnconfigurePackageAsync(installDir, meta);
-        await configurator.ConfigurePackageAsync(installDir, meta);
+        var meta = await _installManager.GetLatestMetaOrDefaultAsync(package)
+            ?? throw new KnownException($"No such package '{package}'");
+            
+        var agent = _serviceProvider.GetRequiredService<IPackageSetupAgent>();
+        await agent.ReconfigureAsync(meta);
     }
 }

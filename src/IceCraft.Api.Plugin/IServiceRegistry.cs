@@ -15,6 +15,9 @@ public interface IServiceRegistry
 
     IServiceRegistry RegisterSingleton<[MeansImplicitUse(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature)] T>()
         where T : class;
+
+    IServiceRegistry RegisterTransitent<[MeansImplicitUse(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature)] T>()
+        where T : class;
     
     IServiceRegistry RegisterKeyedSingleton<TInterface, 
         [MeansImplicitUse(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature)] TImplementation>(string? key)
