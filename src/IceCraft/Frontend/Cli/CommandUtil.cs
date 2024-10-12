@@ -102,7 +102,7 @@ public static class CommandUtil
     {
         var totalErrors = context.ParseResult.Errors.Count;
 
-        if (totalErrors < 0)
+        if (totalErrors <= 0)
         {
             return true;
         }
