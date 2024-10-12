@@ -53,9 +53,47 @@ public class PackageSetupAgent : IPackageSetupAgent
         await _mutator.StoreAsync();
     }
 
-    public Task UninstallAsync(PackageMeta package)
+    public async Task UninstallAsync(PackageMeta meta)
     {
-        throw new NotImplementedException();
+        if (!_installManager.IsInstalled(meta))
+        {
+            throw new ArgumentException("No such package meta installed.", nameof(meta));
+        }
+
+        var configurator = _serviceProvider.GetRequiredKeyedService<IPackageConfigurator>(meta.PluginInfo.ConfiguratorRef);
+        var installer = _serviceProvider.GetRequiredKeyedService<IPackageInstaller>(meta.PluginInfo.InstallerRef);
+
+        var directory = _installManager.GetUnsafePackageDirectory(meta);
+
+        _frontend.Output.Log("Removing package {0} ({1})...", meta.Id, meta.Version);
+        await configurator.UnconfigurePackageAsync(directory, meta);
+        await installer.RemovePackageAsync(directory, meta);
+
+        try
+        {
+            if (Directory.Exists(directory))
+            {
+                Directory.Delete(directory);
+            }
+        }
+        catch (IOException ex)
+        {
+            _frontend.Output.Warning(ex, "IOException caught, retrying with recursive delete");
+            _frontend.Output.Warning("TO AUTHOR OF {0}: did you forget to clean the directory?", installer.GetType().FullName);
+            Directory.Delete(directory, true);
+        }
+
+        await _installManager.UnregisterPackageAsync(meta);
+    }
+
+    public async Task ReconfigureAsync(PackageMeta package)
+    {
+        var configurator = _serviceProvider.GetKeyedService<IPackageConfigurator>(package.PluginInfo.ConfiguratorRef)
+            ?? throw new KnownException($"Package '{package.Id}' ({package.Version}) does not define a valid configurator.");
+        var installDir = _installManager.GetInstalledPackageDirectory(package);
+        
+        await configurator.UnconfigurePackageAsync(installDir, package);
+        await configurator.ConfigurePackageAsync(installDir, package);
     }
 
     #region Installation implementation

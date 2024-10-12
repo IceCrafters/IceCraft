@@ -31,4 +31,6 @@ public interface IPackageSetupAgent
     /// <param name="packages">The packages to install.</param>
     /// <param name="expectedCount">The expected count of packages that will be installed.</param>
     Task InstallManyAsync(IAsyncEnumerable<DueInstallTask> packages, int expectedCount);
+
+    Task ReconfigureAsync(PackageMeta package);
 }
