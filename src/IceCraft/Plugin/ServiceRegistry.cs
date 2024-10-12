@@ -5,6 +5,7 @@
 namespace IceCraft.Plugin;
 
 using IceCraft.Api.Plugin;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 public class ServiceRegistry : IServiceRegistry
@@ -35,6 +36,12 @@ public class ServiceRegistry : IServiceRegistry
         where TImplementation : class, TInterface
     {
         _serviceCollection.AddKeyedSingleton<TInterface, TImplementation>(key);
+        return this;
+    }
+
+    public IServiceRegistry RegisterTransitent<[MeansImplicitUse(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature)] T>() where T : class
+    {
+        _serviceCollection.AddTransient<T>();
         return this;
     }
 }
