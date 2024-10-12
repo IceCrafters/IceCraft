@@ -4,15 +4,16 @@
 
 namespace IceCraft.Api.Installation;
 
-using IceCraft.Api.Archive.Indexing;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
 using Semver;
 
 public interface IPackageInstallManager
 {
+    [Obsolete("Use IPackageSetupAgent.InstallAsync instead.")]
     Task InstallAsync(PackageMeta meta, string artefactPath);
 
+    [Obsolete("Use IPackageSetupAgent.InstallManyAsync instead.")]
     Task BulkInstallAsync(IAsyncEnumerable<DueInstallTask> packages, int expectedCount);
 
     string GetUnsafePackageDirectory(PackageMeta meta);
@@ -23,6 +24,7 @@ public interface IPackageInstallManager
     /// Uninstalls the latest version of the specified package.
     /// </summary>
     /// <param name="meta">The package to uninstall.</param>
+    [Obsolete("Use IPackageSetupAgent.UninstallAsync instead.")]
     Task UninstallAsync(PackageMeta meta);
 
     /// <summary>
