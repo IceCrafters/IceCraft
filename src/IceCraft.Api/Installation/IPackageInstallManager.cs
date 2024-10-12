@@ -10,23 +10,10 @@ using Semver;
 
 public interface IPackageInstallManager
 {
-    [Obsolete("Use IPackageSetupAgent.InstallAsync instead.")]
-    Task InstallAsync(PackageMeta meta, string artefactPath);
-
-    [Obsolete("Use IPackageSetupAgent.InstallManyAsync instead.")]
-    Task BulkInstallAsync(IAsyncEnumerable<DueInstallTask> packages, int expectedCount);
-
     string GetUnsafePackageDirectory(PackageMeta meta);
 
     string GetInstalledPackageDirectory(PackageMeta meta);
-
-    /// <summary>
-    /// Uninstalls the latest version of the specified package.
-    /// </summary>
-    /// <param name="meta">The package to uninstall.</param>
-    [Obsolete("Use IPackageSetupAgent.UninstallAsync instead.")]
-    Task UninstallAsync(PackageMeta meta);
-
+    
     /// <summary>
     /// Determines whether the specified package is installed.
     /// </summary>

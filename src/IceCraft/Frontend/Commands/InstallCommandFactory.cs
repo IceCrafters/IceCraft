@@ -59,6 +59,11 @@ public class InstallCommandFactory : ICommandFactory
         argVersion.AddValidator(result =>
         {
             var value = result.GetValueForArgument(argVersion);
+            if (value == null)
+            {
+                return;
+            }
+            
             if (!SemVersion.TryParse(value, SemVersionStyles.Any, out _))
             {
                 result.ErrorMessage = "Invalid semantic version";

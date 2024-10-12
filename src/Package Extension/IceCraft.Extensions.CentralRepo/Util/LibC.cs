@@ -5,10 +5,12 @@
 namespace IceCraft.Extensions.CentralRepo.Util;
 
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
 [SupportedOSPlatform("linux")]
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public static partial class LibC
 {
     [LibraryImport("libc.so.6", SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
