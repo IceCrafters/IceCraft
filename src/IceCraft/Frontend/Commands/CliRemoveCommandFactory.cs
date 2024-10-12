@@ -7,30 +7,29 @@ namespace IceCraft.Frontend.Commands;
 using System.Threading.Tasks;
 using IceCraft.Frontend.Cli;
 using Semver;
-using Serilog;
 using Spectre.Console;
 using System.CommandLine;
 using IceCraft.Api.Caching;
 using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
+using Microsoft.Extensions.DependencyInjection;
 
 public class CliRemoveCommandFactory : ICommandFactory
 {
     private readonly IPackageInstallManager _installManager;
     private readonly IDependencyMapper _dependencyMapper;
+    private readonly IServiceProvider _serviceProvider;
 
-    #if LEGACY_INTERFACE
-    public UninstallCommand(IPackageInstallManager installManager,
-    #else
     public CliRemoveCommandFactory(IPackageInstallManager installManager,
-        IDependencyMapper dependencyMapper)
-    #endif
+        IDependencyMapper dependencyMapper,
+        IServiceProvider serviceProvider)
     {
         _installManager = installManager;
         _dependencyMapper = dependencyMapper;
+        _serviceProvider = serviceProvider;
     }
-    
+
     public Command CreateCommand()
     {
         var argPackage = new Argument<string>("package", "Package to uninstall");
@@ -112,7 +111,8 @@ public class CliRemoveCommandFactory : ICommandFactory
             return ExitCodes.Cancelled;
         }
 
-        await _installManager.UninstallAsync(selectedVersion);
+        var agent = _serviceProvider.GetRequiredService<IPackageSetupAgent>();
+        await agent.UninstallAsync(selectedVersion);
 
         await AnsiConsole.Status()
             .StartAsync("Evaluating dependency information",

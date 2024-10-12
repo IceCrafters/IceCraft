@@ -14,7 +14,7 @@ internal static class Util
     /// <param name="fileName">The file name.</param>
     /// <param name="argName">The name of the argument of the file name.</param>
     /// <exception cref="ArgumentException">The file name is invalid.</exception>
-    /// <exception cref="ArgumentNullExcpetion">The file name is null.</exception>
+    /// <exception cref="ArgumentNullException">The file name is null.</exception>
     internal static void CheckFileName(string? fileName, [CallerArgumentExpression(nameof(fileName))] string? argName = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
