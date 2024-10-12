@@ -6,6 +6,7 @@ namespace IceCraft.Frontend;
 
 using System;
 using IceCraft.Api.Client;
+using IceCraft.Frontend.Cli;
 using JetBrains.Annotations;
 using Spectre.Console;
 
@@ -144,5 +145,19 @@ public class Output : IOutputAdapter
     void IOutputAdapter.Info(string format, params object?[] args)
     {
         Info(format, args);
+    }
+
+    internal static void BaseError(string message)
+    {
+        Console.Error.WriteLine("{0}: {1}", FrontendUtil.BaseName, message);
+    }
+
+    [StringFormatMethod(nameof(args))]
+    internal static void BaseError(string format, params object?[] args)
+    {
+        Console.Error.Write(FrontendUtil.BaseName);
+        Console.Error.Write(": ");
+
+        Console.Error.WriteLine(format, args);
     }
 }

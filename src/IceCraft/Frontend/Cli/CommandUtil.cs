@@ -97,4 +97,42 @@ public static class CommandUtil
             Output.Shared.Verbose("Verbose logging is enabled");
         }
     }
+
+    public static bool CheckErrors(this InvocationContext context)
+    {
+        var totalErrors = context.ParseResult.Errors.Count;
+
+        if (totalErrors < 0)
+        {
+            return true;
+        }
+
+        if (totalErrors == 1)
+        {
+            PrintError(context.ParseResult.Errors[0]);
+            return false;
+        }
+
+        var count = 0;
+        Output.BaseError($"{totalErrors} errors found in arguments");
+        foreach (var error in context.ParseResult.Errors)
+        {
+            if (count > 3)
+            {
+                Output.BaseError($"...{totalErrors - 3} more");
+                break;
+            }
+
+            PrintError(error);
+        }
+
+        return false;
+
+        static void PrintError(System.CommandLine.Parsing.ParseError error)
+        {
+            Output.BaseError("{0}: {1}",
+                error.SymbolResult?.Symbol.Name ?? "<???>",
+                error.Message);
+        }
+    }
 }

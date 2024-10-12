@@ -5,6 +5,7 @@
 namespace IceCraft.Frontend.Commands;
 
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Archive.Indexing;
 using IceCraft.Api.Archive.Repositories;
@@ -60,6 +61,15 @@ public class InstallCommandFactory : ICommandFactory
         var optOverwrite = new Option<bool>("--overwrite", "Overwrites existing installation even if it is equivalent to the version being installed.");
         var optPrerelease = new Option<bool>(["-P", "--include-prerelease"], "Include prerelease versions when selecting latest version");
 
+        argVersion.AddValidator(result =>
+        {
+            var value = result.GetValueForArgument(argVersion);
+            if (!SemVersion.TryParse(value, SemVersionStyles.Any, out _))
+            {
+                result.ErrorMessage = "Invalid semantic version";
+            }
+        }); 
+
         var command = new Command("install", "Install a package")
         {
             argPackage,
@@ -72,6 +82,12 @@ public class InstallCommandFactory : ICommandFactory
 
         command.SetHandler(async context =>
         {
+            if (!context.CheckErrors())
+            {
+                context.ExitCode = ExitCodes.GenericError;
+                return; 
+            }
+
             context.ExitCode = await ExecuteInternalAsync(context.GetOpt(optNoCleanArtefact),
                 context.GetArgNotNull(argPackage),
                 context.GetArg(argVersion),
@@ -82,7 +98,6 @@ public class InstallCommandFactory : ICommandFactory
 
         return command;
     }
-
     private async Task<int> ExecuteInternalAsync(bool noCleanArtefact,
         string packageName,
         string? version,
@@ -122,20 +137,26 @@ public class InstallCommandFactory : ICommandFactory
         {
             selectedVersion = await Task.Run(() =>
                 seriesInfo.Versions.GetLatestSemVersionOrDefault(includePrerelease));
+
+            // If cannot find a valid version for package in current circumstances.
+            if (selectedVersion == null)
+            {
+                Output.Shared.Error("Cannot find valid package version for package {0}", packageName);
+                if (seriesInfo.Versions.Count > 0 && !includePrerelease)
+                {
+                    Output.Hint("Prerelease versions may be available");
+                    Output.Hint("Try using --include-prerelease");
+                }
+                return ExitCodes.PackageNotFound;
+            }
         }
 
-        if (selectedVersion == null)
+        if (!seriesInfo.Versions.TryGetValue(selectedVersion.ToString(), out var versionInfo))
         {
-            Output.Shared.Error("Cannot find package version for package {0}", packageName);
-            if (seriesInfo.Versions.Count > 0 && !includePrerelease)
-            {
-                Output.Hint("Prerelease versions may be available");
-                Output.Hint("Try using --include-prerelease");
-            }
+            Output.Shared.Error("Version {0} does not exist for package {1}", selectedVersion, packageName);
             return ExitCodes.PackageNotFound;
         }
 
-        var versionInfo = seriesInfo.Versions[selectedVersion.ToString()];
         meta = versionInfo.Metadata;
 
         // Check if the package is already installed, and if the selected version matches.
@@ -154,7 +175,7 @@ public class InstallCommandFactory : ICommandFactory
         {
             await _dependencyResolver.ResolveTree(meta, index!, allPackagesSet,
                 _frontend.GetCancellationToken());
-            allPackagesSet.Add(new DependencyLeaf(meta, true));                
+            allPackagesSet.Add(new DependencyLeaf(meta, true));
         }
         catch (DependencyException ex)
         {
