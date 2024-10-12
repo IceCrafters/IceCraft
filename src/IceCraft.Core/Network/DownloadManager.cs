@@ -166,6 +166,7 @@ public class DownloadManager : IDownloadManager
         return File.Create(path);
     }
 
+    [Obsolete("Use DownloadManagerExtensions.DownloadAtrefactAsync instead.")]
     public async Task<string> DownloadTemporaryArtefactAsync(CachedPackageInfo packageInfo, IProgressedTask? downloadTask = null, string? fileName = null)
     {
         // Get the best mirror.
@@ -179,6 +180,7 @@ public class DownloadManager : IDownloadManager
         return await DownloadTemporaryArtefactAsync(bestMirror, downloadTask, fileName);
     }
 
+    [Obsolete("Callers should manage temporary files themselves.")]
     public async Task<string> DownloadTemporaryArtefactAsync(ArtefactMirrorInfo mirror, IProgressedTask? downloadTask = null, string? fileName = null)
     {
         await using var tempFile = CreateTemporaryPackageFile(out var path);
@@ -186,6 +188,7 @@ public class DownloadManager : IDownloadManager
         return path;
     }
 
+    [Obsolete("Callers should manage temporary files themselves.")]
     public async Task<string> DownloadTemporaryArtefactSecureAsync(CachedPackageInfo packageInfo, IProgressedTask? downloadTask = null, string? fileName = null)
     {
         // Get the best mirror.
@@ -220,6 +223,7 @@ public class DownloadManager : IDownloadManager
         return path;
     }
 
+    [Obsolete("Use DownloadManagerExtensions.DownloadAtrefactAsync instead.")]
     public async Task<DownloadResult> DownloadAsync(CachedPackageInfo packageInfo, Stream to, IProgressedTask? downloadTask = null, string? fileName = null)
     {
         // Get the best mirror.
@@ -233,6 +237,7 @@ public class DownloadManager : IDownloadManager
         return await DownloadAsync(bestMirror, to, downloadTask, fileName);
     }
 
+    [Obsolete("Use DownloadManagerExtensions.DownloadAtrefactAsync instead.")]
     public async Task<DownloadResult> DownloadAsync(ArtefactMirrorInfo bestMirror,
         Stream stream,
         IProgressedTask? downloadTask = null,
@@ -244,6 +249,7 @@ public class DownloadManager : IDownloadManager
             fileName);
     }
 
+    [Obsolete("Callers should manage temporary files and compare checksums themselves.")]
     public async Task<string> DownloadTemporaryArtefactSecureAsync(IArtefactDefinition artefact,
         ArtefactMirrorInfo mirror,
         IProgressedTask? downloadTask = null, string? fileName = null)

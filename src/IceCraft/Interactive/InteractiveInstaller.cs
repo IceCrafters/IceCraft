@@ -22,18 +22,21 @@ public class InteractiveInstaller
     private readonly IArtefactManager _artefactManager;
     private readonly IChecksumRunner _checksumRunner;
     private readonly IDependencyMapper _dependencyMapper;
+    private readonly IMirrorSearcher _mirrorSearcher;
 
     public InteractiveInstaller(IDownloadManager downloadManager,
         IPackageInstallManager installManager,
         IArtefactManager artefactManager,
         IChecksumRunner checksumRunner,
-        IDependencyMapper dependencyMapper)
+        IDependencyMapper dependencyMapper,
+        IMirrorSearcher mirrorSearcher)
     {
         _downloadManager = downloadManager;
         _installManager = installManager;
         _artefactManager = artefactManager;
         _checksumRunner = checksumRunner;
         _dependencyMapper = dependencyMapper;
+        _mirrorSearcher = mirrorSearcher;
     }
 
     private readonly record struct QueuedDownloadTask
@@ -80,7 +83,9 @@ public class InteractiveInstaller
 
                         artefactList.Add(new QueuedDownloadTask()
                         {
-                            Task = _downloadManager.DownloadAsync(packageInfo,
+                            Task = _downloadManager.DownloadArtefactAsync(
+                                    _mirrorSearcher,
+                                    packageInfo,
                                     vStream,
                                     new SpectreProgressedTask(vTask),
                                     $"{packageInfo.Metadata.Id} {packageInfo.Metadata.Version}"),
@@ -123,7 +128,9 @@ public class InteractiveInstaller
 
                     artefactList.Add(new QueuedDownloadTask()
                     {
-                        Task = _downloadManager.DownloadAsync(packageInfo,
+                        Task = _downloadManager.DownloadArtefactAsync(
+                                _mirrorSearcher,
+                                packageInfo,
                                 stream,
                                 new SpectreProgressedTask(task),
                                 $"{packageInfo.Metadata.Id} {packageInfo.Metadata.Version}"),

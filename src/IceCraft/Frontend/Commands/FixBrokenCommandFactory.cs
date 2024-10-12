@@ -35,7 +35,8 @@ public class FixBrokenCommandFactory : ICommandFactory
             serviceProvider.GetRequiredService<IPackageInstallManager>(),
             serviceProvider.GetRequiredService<IArtefactManager>(),
             serviceProvider.GetRequiredService<IChecksumRunner>(),
-            serviceProvider.GetRequiredService<IDependencyMapper>());
+            serviceProvider.GetRequiredService<IDependencyMapper>(),
+            serviceProvider.GetRequiredService<IMirrorSearcher>());
     }
 
     public Command CreateCommand()

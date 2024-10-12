@@ -67,7 +67,7 @@ public static class IceCraftDependencyExtensions
     public static IServiceCollection AddIceCraftServices(this IServiceCollection services)
     {
         return services.AddSingleton<IMirrorSearcher, MirrorSearcher>()
-            .AddSingleton<IDownloadManager, DownloadManager>()
+            .AddSingleton<IDownloadManager, MissionDownloadManager>()
             .AddSingleton<IRepositorySourceManager, RepositoryManager>()
             .AddSingleton<IChecksumRunner, DependencyChecksumRunner>()
             .AddSingleton<IPackageIndexer, CachedIndexer>()

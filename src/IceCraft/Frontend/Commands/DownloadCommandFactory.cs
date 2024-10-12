@@ -139,10 +139,13 @@ public class DownloadCommandFactory : ICommandFactory
             .StartAsync(async ctx =>
             {
                 var task = ctx.AddTask("Download");
+                task.StartTask();
 
                 await _downloadManager.DownloadAsync(bestMirror.DownloadUri,
                     targetPath,
                     new SpectreProgressedTask(task));
+
+                task.StopTask();
             });
         
         return 0;
