@@ -17,8 +17,8 @@ printmsg() {
 }
 
 expand() {
-    local template="$(cat $1)"
-    eval "echo \"${template}\"" > $2
+    template="$(cat "$1")"
+    eval "echo \"${template}\"" > "$2"
 }
 
 # Argument parsing
@@ -26,11 +26,11 @@ SH_OPTSTRING="l:v:h"
 
 OPTIND=1
 while getopts $SH_OPTSTRING flag; do
-    if [ $flag == '?' ]; then
+    if [ "$flag" = '?' ]; then
         exit 1
     fi
 
-    if [ $flag == 'h' ]; then
+    if [ "$flag" = 'h' ]; then
         echo "usage: $SCRNAME [-i <install_location>] [-h]"
         echo ""
         echo "-i: The location to install bootstrapped instance to"
@@ -39,11 +39,11 @@ while getopts $SH_OPTSTRING flag; do
         exit 0
     fi
 
-    if [ $flag == 'l' ]; then
+    if [ "$flag" = 'l' ]; then
         TARGET_PATH=$OPTARG
     fi
 
-    if [ $flag == 'v' ]; then
+    if [ "$flag" = 'v' ]; then
         TARGET_VERSION=$OPTARG
     fi
 done
@@ -76,4 +76,8 @@ printmsg "Expanding DB template"
 # Evaluate package db template
 expand "$TEMPLATE_PATH" "$DB_PATH"
 
+export TARGET_VERSION
+
 printmsg "DB template expanded"
+
+echo "Prepped information" > "$TARGET_PATH/.prepped_ic"
