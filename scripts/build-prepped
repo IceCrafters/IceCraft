@@ -33,7 +33,7 @@ while getopts $SH_OPTSTRING flag; do
     if [ "$flag" = 'h' ]; then
         echo "usage: $SCRNAME [-i <install_location>] [-h]"
         echo ""
-        echo "-i: The location to install bootstrapped instance to"
+        echo "-i: The location to build bootstrapped instance to"
         echo "-v: Set target version"
         echo "-h: Shows this help message and exit"
         exit 0
@@ -55,7 +55,7 @@ DB_PATH="$TARGET_PATH/packages/db.json"
 if [ ! -d "src" ]; then
     printmsg "probably not IceCraft dev directory ('src' doesn't exist)"
     printmsg "if you are in scripts directory, move upwards"
-    printmsg "then call 'scripts/install.sh'"
+    printmsg "then call 'scripts/$SCRNAME'"
     exit 1
 fi
 
@@ -81,3 +81,5 @@ export TARGET_VERSION
 printmsg "DB template expanded"
 
 echo "Prepped information" > "$TARGET_PATH/.prepped_ic"
+cp "$PWD/scripts/prepres/install-prepped.sh" "$TARGET_PATH/install.sh"
+cp "$PWD/scripts/prepres/runInfo.json" "$TARGET_PATH/runInfo.json"
