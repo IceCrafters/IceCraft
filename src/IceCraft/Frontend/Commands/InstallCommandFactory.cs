@@ -5,7 +5,6 @@
 namespace IceCraft.Frontend.Commands;
 
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Archive.Indexing;
 using IceCraft.Api.Archive.Repositories;
@@ -13,7 +12,6 @@ using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
 using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Dependency;
-using IceCraft.Api.Network;
 using IceCraft.Api.Package;
 using IceCraft.Frontend.Cli;
 using IceCraft.Interactive;
@@ -31,7 +29,6 @@ public class InstallCommandFactory : ICommandFactory
     private readonly IDependencyResolver _dependencyResolver;
     private readonly IFrontendApp _frontend;
     private readonly IArtefactManager _artefactManager;
-    private readonly IMirrorSearcher _mirrorSearcher;
     private readonly IServiceProvider _serviceProvider;
 
     public InstallCommandFactory(IServiceProvider serviceProvider)
@@ -42,7 +39,6 @@ public class InstallCommandFactory : ICommandFactory
         _dependencyResolver = serviceProvider.GetRequiredService<IDependencyResolver>();
         _frontend = serviceProvider.GetRequiredService<IFrontendApp>();
         _artefactManager = serviceProvider.GetRequiredService<IArtefactManager>();
-        _mirrorSearcher = serviceProvider.GetRequiredService<IMirrorSearcher>();
         _serviceProvider = serviceProvider;
     }
 
@@ -203,7 +199,9 @@ public class InstallCommandFactory : ICommandFactory
         // Step 3: install
         AnsiConsole.MarkupLine("[bold white]:gear:[/] [deepskyblue1]Installing packages[/]");
 
-        var installer = _serviceProvider.GetRequiredService<InteractiveInstaller>();
+        using var scope = _serviceProvider.CreateScope();
+
+        var installer = scope.ServiceProvider.GetRequiredService<InteractiveInstaller>();
         return await installer.InstallAsync(allPackagesSet, index!, forceRedownload);
     }
 

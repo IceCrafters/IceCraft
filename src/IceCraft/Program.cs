@@ -15,12 +15,14 @@ using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Caching;
 using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
+using IceCraft.Api.Installation;
 using IceCraft.Core;
 using IceCraft.Developer;
 using IceCraft.Extensions.CentralRepo;
 using IceCraft.Extensions.DotNet;
 using IceCraft.Frontend;
 using IceCraft.Frontend.Cli;
+using IceCraft.Frontend.Injection;
 using IceCraft.Plugin;
 using IceCraft.Repositories.Adoptium;
 using Microsoft.Extensions.DependencyInjection;
@@ -122,6 +124,9 @@ internal static class Program
         builder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();
 
         builder.Populate(others);
+
+        builder.RegisterType<PackageSetupLifetimeImpl>()
+            .As<IPackageSetupLifetime>();
 
 #if DEBUG
         DummyRepositorySource.AddDummyRepositorySource(builder);

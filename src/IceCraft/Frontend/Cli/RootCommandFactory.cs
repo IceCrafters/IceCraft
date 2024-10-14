@@ -96,7 +96,10 @@ internal static class RootCommandFactory
             mirrorSearcher)
             .CreateCli();
 
-        var fixBroken = new FixBrokenCommandFactory(serviceProvider)
+        var fixBroken = new FixBrokenCommandFactory(serviceProvider.GetRequiredService<IDependencyMapper>(), indexer,
+            serviceProvider.GetRequiredService<IDependencyResolver>(),
+            sourceManager,
+            serviceProvider)
             .CreateCommand();
 
         var list = new ListVersionCommandFactory(sourceManager, indexer, serviceProvider.GetRequiredService<IFrontendApp>())

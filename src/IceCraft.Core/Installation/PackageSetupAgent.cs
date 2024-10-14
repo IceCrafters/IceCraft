@@ -13,7 +13,6 @@ using IceCraft.Api.Exceptions;
 using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Database;
 using IceCraft.Api.Package;
-using Microsoft.Extensions.DependencyInjection;
 
 public class PackageSetupAgent : IPackageSetupAgent
 {
@@ -21,19 +20,19 @@ public class PackageSetupAgent : IPackageSetupAgent
     private readonly IFileSystem _fileSystem;
     private readonly IFrontendApp _frontend;
     private readonly ILocalDatabaseMutator _mutator;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IPackageSetupLifetime _lifetime;
 
     public PackageSetupAgent(IPackageInstallManager installManager,
         IFileSystem fileSystem,
         IFrontendApp frontend,
         ILocalDatabaseMutator mutator,
-        IServiceProvider serviceProvider)
+        IPackageSetupLifetime lifetime)
     {
         _installManager = installManager;
         _fileSystem = fileSystem;
         _frontend = frontend;
         _mutator = mutator;
-        _serviceProvider = serviceProvider;
+        _lifetime = lifetime;
     }
 
     public async Task InstallManyAsync(IAsyncEnumerable<DueInstallTask> packages, int expectedCount)
@@ -60,8 +59,8 @@ public class PackageSetupAgent : IPackageSetupAgent
             throw new ArgumentException("No such package meta installed.", nameof(meta));
         }
 
-        var configurator = _serviceProvider.GetRequiredKeyedService<IPackageConfigurator>(meta.PluginInfo.ConfiguratorRef);
-        var installer = _serviceProvider.GetRequiredKeyedService<IPackageInstaller>(meta.PluginInfo.InstallerRef);
+        var configurator = _lifetime.GetConfigurator(meta.PluginInfo.ConfiguratorRef);
+        var installer = _lifetime.GetInstaller(meta.PluginInfo.InstallerRef);
 
         var directory = _installManager.GetUnsafePackageDirectory(meta);
 
@@ -88,8 +87,7 @@ public class PackageSetupAgent : IPackageSetupAgent
 
     public async Task ReconfigureAsync(PackageMeta package)
     {
-        var configurator = _serviceProvider.GetKeyedService<IPackageConfigurator>(package.PluginInfo.ConfiguratorRef)
-            ?? throw new KnownException($"Package '{package.Id}' ({package.Version}) does not define a valid configurator.");
+        var configurator = _lifetime.GetConfigurator(package.PluginInfo.ConfiguratorRef);
         var installDir = _installManager.GetInstalledPackageDirectory(package);
         
         await configurator.UnconfigurePackageAsync(installDir, package);
@@ -174,17 +172,12 @@ public class PackageSetupAgent : IPackageSetupAgent
     {
         // Create a scope for each package installation task.
 
-        using var scope = _serviceProvider.CreateAsyncScope();
         var pkgDir = _installManager.GetUnsafePackageDirectory(meta);
 
-        var installer = scope.ServiceProvider.GetKeyedService<IPackageInstaller>(meta.PluginInfo.InstallerRef)
-                        ?? throw new ArgumentException($"Installer '{meta.PluginInfo.InstallerRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta));
-        var configurator = scope.ServiceProvider.GetKeyedService<IPackageConfigurator>(meta.PluginInfo.ConfiguratorRef)
-            ?? throw new ArgumentException($"Configurator '{meta.PluginInfo.ConfiguratorRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta));
-
+        var installer = _lifetime.GetInstaller(meta.PluginInfo.InstallerRef);
+        var configurator = _lifetime.GetConfigurator(meta.PluginInfo.ConfiguratorRef);
         var preprocessor = meta.PluginInfo.PreProcessorRef != null
-            ? scope.ServiceProvider.GetKeyedService<IArtefactPreprocessor>(meta.PluginInfo.PreProcessorRef)
-                ?? throw new ArgumentException($"Preprocessor '{meta.PluginInfo.PreProcessorRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta))
+            ? _lifetime.GetPreprocessor(meta.PluginInfo.PreProcessorRef)
             : null;
 
         Directory.CreateDirectory(pkgDir);

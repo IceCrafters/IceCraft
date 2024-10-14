@@ -5,12 +5,9 @@
 namespace IceCraft.Frontend.Commands;
 
 using System.CommandLine;
-using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Archive.Indexing;
 using IceCraft.Api.Archive.Repositories;
-using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Dependency;
-using IceCraft.Api.Network;
 using IceCraft.Frontend.Cli;
 using IceCraft.Interactive;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,21 +19,19 @@ public class FixBrokenCommandFactory : ICommandFactory
     private readonly IPackageIndexer _indexer;
     private readonly IDependencyResolver _resolver;
     private readonly IRepositorySourceManager _sourceManager;
-    private readonly InteractiveInstaller _installer;
+    private readonly IServiceProvider _serviceProvider;
 
-    public FixBrokenCommandFactory(IServiceProvider serviceProvider)
+    public FixBrokenCommandFactory(IDependencyMapper dependencyMapper,
+        IPackageIndexer indexer,
+        IDependencyResolver resolver,
+        IRepositorySourceManager sourceManager,
+        IServiceProvider serviceProvider)
     {
-        _dependencyMapper = serviceProvider.GetRequiredService<IDependencyMapper>();
-        _indexer = serviceProvider.GetRequiredService<IPackageIndexer>();
-        _resolver = serviceProvider.GetRequiredService<IDependencyResolver>();
-        _sourceManager = serviceProvider.GetRequiredService<IRepositorySourceManager>();
-
-        _installer = new InteractiveInstaller(serviceProvider.GetRequiredService<IDownloadManager>(),
-            serviceProvider.GetRequiredService<IArtefactManager>(),
-            serviceProvider.GetRequiredService<IChecksumRunner>(),
-            serviceProvider.GetRequiredService<IDependencyMapper>(),
-            serviceProvider.GetRequiredService<IMirrorSearcher>(),
-            serviceProvider.GetRequiredService<IPackageSetupAgent>());
+        _dependencyMapper = dependencyMapper;
+        _indexer = indexer;
+        _resolver = resolver;
+        _sourceManager = sourceManager;
+        _serviceProvider = serviceProvider;
     }
 
     public Command CreateCommand()
@@ -90,6 +85,8 @@ public class FixBrokenCommandFactory : ICommandFactory
             return ExitCodes.Ok;
         }
 
-        return await _installer.InstallAsync(packages, index, false);
+        var scope = _serviceProvider.CreateScope();
+        var installer = scope.ServiceProvider.GetRequiredService<InteractiveInstaller>();
+        return await installer.InstallAsync(packages, index, false);
     }
 }
