@@ -7,6 +7,7 @@ using IceCraft.Api.Configuration;
 using IceCraft.Api.Plugin;
 using IceCraft.Frontend.Configuration;
 using IceCraft.Interactive;
+using Microsoft.Extensions.DependencyInjection;
 
 public class ClientPlugin : IPlugin
 {
@@ -16,9 +17,9 @@ public class ClientPlugin : IPlugin
         Version = IceCraftApp.ProductVersion
     };
 
-    public void Initialize(IServiceRegistry serviceRegistry)
+    public void Initialize(IServiceCollection services)
     {
-        serviceRegistry.RegisterSingleton<IConfigManager, ClientConfigManager>()
-            .RegisterTransitent<InteractiveInstaller>();
+        services.AddSingleton<IConfigManager, ClientConfigManager>()
+            .AddTransient<InteractiveInstaller>();
     }
 }

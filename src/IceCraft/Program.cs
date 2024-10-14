@@ -41,7 +41,6 @@ appServices
     .AddSingleton<ICacheManager, FileSystemCacheManager>()
     .AddSingleton<IRepositoryDefaultsSupplier, DefaultSource>()
     .AddSingleton<IFileSystem, FileSystem>()
-    .AddSingleton<ICustomConfig, CustomConfigImpl>()
     .AddLogging(configure => configure.AddSerilog())
     // Core
     .AddIceCraftDefaults()

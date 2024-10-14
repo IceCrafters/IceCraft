@@ -10,6 +10,7 @@ using IceCraft.Extensions.CentralRepo.Impl;
 using IceCraft.Extensions.CentralRepo.Network;
 using IceCraft.Extensions.CentralRepo.Runtime;
 using IceCraft.Extensions.CentralRepo.Util;
+using Microsoft.Extensions.DependencyInjection;
 
 public class CsrPlugin : IPlugin
 {
@@ -19,17 +20,17 @@ public class CsrPlugin : IPlugin
         Version = "1.0.0",
         Name = "Central Source Repository plugin"
     };
-    
-    public void Initialize(IServiceRegistry serviceRegistry)
+
+    public void Initialize(IServiceCollection services)
     {
-        serviceRegistry.RegisterRepositorySource<RemoteRepositorySourceFactory>()
-            .RegisterSingleton<IRemoteRepositoryManager, RemoteRepositoryManager>()
-            .RegisterSingleton<RemoteRepositoryIndexer>()
-            .RegisterSingleton<MashiroStatePool>()
-            .RegisterSingleton<MashiroRuntime>()
-            .RegisterKeyedSingleton<IPackageInstaller, MashiroInstaller>("mashiro")
-            .RegisterKeyedSingleton<IArtefactPreprocessor, MashiroPreprocessor>("mashiro")
-            .RegisterKeyedSingleton<IPackageConfigurator, MashiroConfigurator>("mashiro")
-            .RegisterSingleton<RepoConfigFactory>();
+        services.AddRepositorySource<RemoteRepositorySourceFactory>()
+            .AddSingleton<IRemoteRepositoryManager, RemoteRepositoryManager>()
+            .AddSingleton<RemoteRepositoryIndexer>()
+            .AddSingleton<MashiroStatePool>()
+            .AddSingleton<MashiroRuntime>()
+            .AddKeyedSingleton<IPackageInstaller, MashiroInstaller>("mashiro")
+            .AddKeyedSingleton<IArtefactPreprocessor, MashiroPreprocessor>("mashiro")
+            .AddKeyedSingleton<IPackageConfigurator, MashiroConfigurator>("mashiro")
+            .AddSingleton<RepoConfigFactory>();
     }
 }
