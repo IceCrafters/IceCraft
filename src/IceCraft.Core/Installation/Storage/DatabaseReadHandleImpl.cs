@@ -15,7 +15,7 @@ public class DatabaseReadHandleImpl : ILocalDatabaseReadHandle
 {
     private readonly DatabaseFile _database;
 
-    internal DatabaseReadHandleImpl(DatabaseFile database)
+    public DatabaseReadHandleImpl(DatabaseFile database)
     {
         _database = database;
     }

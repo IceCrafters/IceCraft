@@ -18,6 +18,7 @@ using IceCraft.Api.Exceptions;
 using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Database;
 using IceCraft.Core;
+using IceCraft.Core.Installation.Storage;
 using IceCraft.Developer;
 using IceCraft.Extensions.CentralRepo;
 using IceCraft.Extensions.DotNet;
@@ -45,7 +46,6 @@ internal static class Program
 
         var others = new ServiceCollection()
             .AddLogging(configure => configure.AddSerilog())
-            .AddIceCraftDefaults()
             .AddAdoptiumSource()
             .AddDotNetExtension();
 
@@ -116,7 +116,7 @@ internal static class Program
         var builder = new ContainerBuilder();
 
         builder.RegisterInstance(AppImpl).As<IFrontendApp>().SingleInstance();
-        builder.RegisterInstance(dbFile).AsSelf().SingleInstance();
+        builder.RegisterInstance(dbFile).As<DatabaseFile>().SingleInstance();
         builder.RegisterInstance(ConfigInstance).As<Config>().SingleInstance();
 
         builder.RegisterType<DotNetConfigServiceImpl>().As<IManagerConfiguration>().SingleInstance();
@@ -126,6 +126,7 @@ internal static class Program
         builder.RegisterType<LocalDatabaseAccessImpl>().As<ILocalDatabaseAccess>();
         builder.RegisterType<PackageSetupLifetimeImpl>().As<IPackageSetupLifetime>();
 
+        builder.PopulateIceCraftCore();
         builder.Populate(others);
 
 #if DEBUG
