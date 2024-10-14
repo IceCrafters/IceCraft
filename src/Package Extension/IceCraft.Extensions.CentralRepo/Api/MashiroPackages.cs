@@ -9,58 +9,58 @@ using IceCraft.Api.Package;
 using IceCraft.Extensions.CentralRepo.Runtime;
 using IceCraft.Extensions.CentralRepo.Runtime.Security;
 using JetBrains.Annotations;
-using Microsoft.Extensions.DependencyInjection;
 
 public class MashiroPackages : ContextApi
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly Func<ILocalPackageImporter> _importerSupplier;
     private readonly MashiroState _state;
     private const ExecutionContextType ContextTypes = ExecutionContextType.Configuration
                                                       | ExecutionContextType.Installation;
-    
-    public MashiroPackages(ContextApiRoot parent, IServiceProvider serviceProvider, MashiroState state) : base(ContextTypes, parent)
+    private readonly IPackageInstallManager _installManager;
+
+    public MashiroPackages(ContextApiRoot parent, 
+        Func<ILocalPackageImporter> importerSupplier, 
+        MashiroState state, 
+        IPackageInstallManager installManager) : base(ContextTypes, parent)
     {
-        _serviceProvider = serviceProvider;
+        _importerSupplier = importerSupplier;
         _state = state;
+        _installManager = installManager;
     }
 
     [PublicAPI]
     public PackageMeta? GetLatestInstalledPackage(string id)
     {
         EnsureContext();
-        var installManager = _serviceProvider.GetRequiredService<IPackageInstallManager>();
-
-        return installManager.GetLatestMetaOrDefault(id);
+        return _installManager.GetLatestMetaOrDefault(id);
     }
 
     [PublicAPI]
     public PackageMeta? GetLatestInstalledPackage(string id, bool traceVirtualProvider)
     {
         EnsureContext();
-        var installManager = _serviceProvider.GetRequiredService<IPackageInstallManager>();
 
-        return installManager.GetLatestMetaOrDefault(id, traceVirtualProvider);
+        return _installManager.GetLatestMetaOrDefault(id, traceVirtualProvider);
     }
 
     [PublicAPI]
     public void ImportEnvironment(PackageMeta package)
     {
         EnsureContext();
-        var installManager = _serviceProvider.GetRequiredService<IPackageInstallManager>();
+        var importer = _importerSupplier();
 
-        installManager.ImportEnvironment(package);
+        importer.ImportEnvironment(package);
     }
 
     [PublicAPI]
     public Task RegisterVirtual(string id)
     {
         EnsureContext(ExecutionContextType.Configuration);
-        var installManager = _serviceProvider.GetRequiredService<IPackageInstallManager>();
 
         _state.EnsureMetadata();
         var metadata = _state.GetPackageMeta()!;
 
-        return installManager.RegisterVirtualPackageAsync(metadata with
+        return _installManager.RegisterVirtualPackageAsync(metadata with
         {
             Id = id
         }, metadata.CreateReference());
@@ -70,9 +70,8 @@ public class MashiroPackages : ContextApi
     public Task RegisterVirtual(PackageMeta package)
     {
         EnsureContext(ExecutionContextType.Configuration);
-        var installManager = _serviceProvider.GetRequiredService<IPackageInstallManager>();
 
         _state.EnsureMetadata();
-        return installManager.RegisterVirtualPackageAsync(package, _state.GetPackageMeta()!.CreateReference());
+        return _installManager.RegisterVirtualPackageAsync(package, _state.GetPackageMeta()!.CreateReference());
     }
 }

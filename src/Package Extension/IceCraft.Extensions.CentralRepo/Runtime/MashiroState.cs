@@ -8,6 +8,7 @@ using Acornima.Ast;
 using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
+using IceCraft.Api.Installation;
 using IceCraft.Api.Package;
 using IceCraft.Api.Platform;
 using IceCraft.Extensions.CentralRepo.Api;
@@ -190,10 +191,15 @@ public class MashiroState : IDisposable
         _engine.SetValue("Binary", new MashiroBinary(_apiRoot,
             _serviceProvider.GetRequiredService<IExecutableManager>(),
             this));
+            
         _engine.SetValue("Packages", new MashiroPackages(_apiRoot,
-            _serviceProvider, this));
+            () => _serviceProvider.GetRequiredService<ILocalPackageImporter>(), 
+            this, 
+            _serviceProvider.GetRequiredService<IPackageInstallManager>()));
+
         _engine.SetValue("Assets", new MashiroAssets(_apiRoot,
             _serviceProvider.GetRequiredService<IRemoteRepositoryManager>()));
+
         _engine.SetValue("mconsole", new MashiroConsole(frontendApp.Output));
 
         _engine.SetValue("AppBasePath", 

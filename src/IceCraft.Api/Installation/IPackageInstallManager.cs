@@ -88,5 +88,6 @@ public interface IPackageInstallManager
     Task PutPackageAsync(InstalledPackageInfo info);
     Task UnregisterPackageAsync(PackageMeta meta);
 
+    [Obsolete("Use ILocalPackageImporter.ImportEnvironment instead.")]
     void ImportEnvironment(PackageMeta meta);
 }
