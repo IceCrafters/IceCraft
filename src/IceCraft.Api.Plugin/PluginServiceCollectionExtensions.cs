@@ -14,7 +14,7 @@ public static class PluginServiceCollectionExtensions
     public static IServiceCollection AddRepositorySource<T>(this IServiceCollection registry)
         where T : class, IRepositorySourceFactory
     {
-        return registry.AddKeyedSingleton<IRepositorySourceFactory, T>(null);
+        return registry.AddSingleton<IRepositorySourceFactory, T>();
     }
 
     /// <summary>
@@ -26,7 +26,7 @@ public static class PluginServiceCollectionExtensions
     public static IServiceCollection AddInstaller<T>(this IServiceCollection registry, string key)
         where T : class, IPackageInstaller
     {
-        return registry.AddKeyedSingleton<IPackageInstaller, T>(key);
+        return registry.AddKeyedScoped<IPackageInstaller, T>(key);
     }
 
     /// <summary>
@@ -38,7 +38,7 @@ public static class PluginServiceCollectionExtensions
     public static IServiceCollection AddConfigurator<T>(this IServiceCollection registry, string key)
         where T : class, IPackageConfigurator
     {
-        return registry.AddKeyedSingleton<IPackageConfigurator, T>(key);
+        return registry.AddKeyedScoped<IPackageConfigurator, T>(key);
     }
 
     /// <summary>
@@ -50,7 +50,7 @@ public static class PluginServiceCollectionExtensions
     public static IServiceCollection AddPreprocessor<T>(this IServiceCollection registry, string key)
         where T : class, IArtefactPreprocessor
     {
-        return registry.AddKeyedSingleton<IArtefactPreprocessor, T>(key);
+        return registry.AddKeyedScoped<IArtefactPreprocessor, T>(key);
     }
 
     public static IServiceCollection AddDependencyHook<T>(this IServiceCollection registry)

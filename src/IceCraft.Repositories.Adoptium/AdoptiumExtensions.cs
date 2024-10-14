@@ -21,8 +21,8 @@ public static class AdoptiumExtensions
 
     public static IServiceCollection AddAdoptiumSource(this IServiceCollection collection)
     {
-        return collection.AddKeyedTransient<IRepositorySourceFactory, SourceFactory>(null)
-            .AddKeyedSingleton<IPackageInstaller, AdoptiumInstaller>("adoptium")
-            .AddKeyedSingleton<IPackageConfigurator, AdoptiumConfigurator>("adoptium");
+        return collection.AddTransient<IRepositorySourceFactory, SourceFactory>()
+            .AddKeyedScoped<IPackageInstaller, AdoptiumInstaller>("adoptium")
+            .AddKeyedScoped<IPackageConfigurator, AdoptiumConfigurator>("adoptium");
     }
 }

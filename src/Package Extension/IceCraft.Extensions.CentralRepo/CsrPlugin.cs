@@ -28,9 +28,9 @@ public class CsrPlugin : IPlugin
             .AddSingleton<RemoteRepositoryIndexer>()
             .AddSingleton<MashiroStatePool>()
             .AddSingleton<MashiroRuntime>()
-            .AddKeyedSingleton<IPackageInstaller, MashiroInstaller>("mashiro")
-            .AddKeyedSingleton<IArtefactPreprocessor, MashiroPreprocessor>("mashiro")
-            .AddKeyedSingleton<IPackageConfigurator, MashiroConfigurator>("mashiro")
+            .AddInstaller<MashiroInstaller>("mashiro")
+            .AddPreprocessor<MashiroPreprocessor>("mashiro")
+            .AddConfigurator<MashiroConfigurator>("mashiro")
             .AddSingleton<RepoConfigFactory>();
     }
 }
