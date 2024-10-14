@@ -4,9 +4,16 @@
 
 namespace IceCraft.Api.Plugin;
 
+using Microsoft.Extensions.DependencyInjection;
+
 public interface IPlugin
 {
     PluginMetadata Metadata { get; }
 
-    void Initialize(IServiceRegistry serviceRegistry);
+    [Obsolete("Service registry API is deprecated. Clients may ignore this method.")]
+    void Initialize(IServiceRegistry serviceRegistry)
+    {
+    }
+
+    void Initialize(IServiceCollection services);
 }

@@ -8,6 +8,7 @@ using IceCraft.Api.Plugin;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
+[Obsolete("Service Registry APIs are obsolete")]
 public class ServiceRegistry : IServiceRegistry
 {
     private readonly IServiceCollection _serviceCollection;

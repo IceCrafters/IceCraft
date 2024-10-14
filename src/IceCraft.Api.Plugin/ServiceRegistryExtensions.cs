@@ -9,6 +9,7 @@ using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
 
+[Obsolete("Service registry API is deprecated. Use IServiceCollection instead.")]
 public static class ServiceRegistryExtensions
 {
     public static IServiceRegistry RegisterRepositorySource<T>(this IServiceRegistry registry)

@@ -5,6 +5,7 @@
 namespace IceCraft.Plugin;
 
 using IceCraft.Api.Plugin;
+using Microsoft.Extensions.DependencyInjection;
 
 public class PluginManager
 {
@@ -15,11 +16,11 @@ public class PluginManager
         _plugins.Add(plugin);
     }
 
-    public void InitializeAll(IServiceRegistry serviceRegistry)
+    public void InitializeAll(IServiceCollection services)
     {
         foreach (var plugin in _plugins)
         {
-            plugin.Initialize(serviceRegistry);
+            plugin.Initialize(services);
         }
     }
 }

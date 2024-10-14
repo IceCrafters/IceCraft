@@ -6,6 +6,7 @@ namespace IceCraft.Api.Plugin;
 
 using JetBrains.Annotations;
 
+[Obsolete("Service registry API is deprecated. Use IServiceCollection instead.")]
 public interface IServiceRegistry
 {
     IServiceRegistry RegisterSingleton<TInterface, 

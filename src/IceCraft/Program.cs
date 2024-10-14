@@ -14,7 +14,6 @@ using IceCraft.Api.Caching;
 using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
 using IceCraft.Core;
-using IceCraft.Core.Installation.Storage;
 using IceCraft.Developer;
 using IceCraft.Extensions.CentralRepo;
 using IceCraft.Extensions.DotNet;
@@ -54,7 +53,7 @@ var pluginManager = new PluginManager();
 pluginManager.Add(new CsrPlugin());
 pluginManager.Add(new ClientPlugin());
 
-pluginManager.InitializeAll(new ServiceRegistry(appServices));
+pluginManager.InitializeAll(appServices);
 
 #if DEBUG
 if (!Debugger.IsAttached && args.Contains("--debug"))
