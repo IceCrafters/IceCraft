@@ -10,12 +10,14 @@ using IceCraft.Api.Client;
 using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Dependency;
 using IceCraft.Api.Package;
+using Microsoft.Extensions.DependencyInjection;
 using Semver;
 
 public class DependencyResolver : IDependencyResolver
 {
     private readonly IPackageInstallManager _installManager;
     private readonly IOutputAdapter _output;
+    private readonly IServiceProvider? _serviceProvider;
 
     private readonly record struct StackBranch
     {
@@ -30,10 +32,12 @@ public class DependencyResolver : IDependencyResolver
     }
 
     public DependencyResolver(IPackageInstallManager installManager,
-        IFrontendApp frontendApp)
+        IFrontendApp frontendApp,
+        IServiceProvider? serviceProvider = null)
     {
         _installManager = installManager;
         _output = frontendApp.Output;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task ResolveTree(PackageMeta meta, PackageIndex index, ISet<DependencyLeaf> setToAppend, CancellationToken cancellationToken = default)
@@ -52,7 +56,7 @@ public class DependencyResolver : IDependencyResolver
         int layer;
 
         const int mainBranchLayer = 1;
-        
+
         // Step 1: generate dependency trees for all dependencies.
         await Task.Run(async () =>
         {
@@ -73,9 +77,9 @@ public class DependencyResolver : IDependencyResolver
                 {
                     continue;
                 }
-                
+
                 var deps = ResolveDependencies(branch.Package, index, cancellationToken);
-                
+
                 // Add into dependency trunk and push the dependency package into the resolving
                 // stack.
                 await Task.Run(async () =>
@@ -96,7 +100,7 @@ public class DependencyResolver : IDependencyResolver
 
                         currentIsParent = true;
                         cancellationToken.ThrowIfCancellationRequested();
-                        
+
                         // Detect circular reference to current parent.
                         if (dependency.Dependencies?.Any(x => x.PackageId == meta.Id) == true)
                         {
@@ -114,7 +118,7 @@ public class DependencyResolver : IDependencyResolver
                 }, cancellationToken);
             }
         }, cancellationToken);
-        
+
         // Faster logic for expandable lists.
         if (setToAppend is HashSet<DependencyLeaf> expandableList)
         {
@@ -133,7 +137,7 @@ public class DependencyResolver : IDependencyResolver
         // Much slower logic.
         _output.Warning("ResolveTree was called with a set that cannot EnsureCapacity");
         _output.Warning("Expect upcoming worsened performance");
-        
+
         await Task.Run(() =>
         {
             foreach (var entry in depTrunk)
@@ -144,8 +148,8 @@ public class DependencyResolver : IDependencyResolver
         }, cancellationToken);
     }
 
-    public async IAsyncEnumerable<PackageMeta> ResolveDependencies(PackageMeta meta, 
-        PackageIndex index, 
+    public async IAsyncEnumerable<PackageMeta> ResolveDependencies(PackageMeta meta,
+        PackageIndex index,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (meta.Dependencies == null)
@@ -171,6 +175,17 @@ public class DependencyResolver : IDependencyResolver
 
             if (!index.TryGetValue(dependency.PackageId, out var seriesInfo))
             {
+                if (_serviceProvider != null)
+                {
+                    // Get all dependency hooks
+                    var hooks = _serviceProvider.GetServices<IDependencyHook>();
+                    if (hooks.Any(x => x.EvaluateSatisfactory(dependency)))
+                    {
+                        // Dependency hook passed
+                        continue;
+                    }
+                }
+
                 // Fail: No such package series
                 throw DependencyException.Unsatisfied(dependency);
             }
@@ -188,9 +203,9 @@ public class DependencyResolver : IDependencyResolver
         }
     }
 
-     internal static async Task<PackageMeta?> SelectBestPackageDependencyOrDefault(IEnumerable<PackageMeta> metas, 
-        DependencyReference dependency, 
-        CancellationToken cancellationToken = default)
+    internal static async Task<PackageMeta?> SelectBestPackageDependencyOrDefault(IEnumerable<PackageMeta> metas,
+       DependencyReference dependency,
+       CancellationToken cancellationToken = default)
     {
         return await Task.Run(() =>
             metas
@@ -200,8 +215,8 @@ public class DependencyResolver : IDependencyResolver
                 .MaxBy(x => x.Version, SemVersion.SortOrderComparer), cancellationToken);
     }
 
-    internal static async Task<PackageMeta> SelectBestPackageDependency(IEnumerable<PackageMeta> metas, 
-        DependencyReference dependency, 
+    internal static async Task<PackageMeta> SelectBestPackageDependency(IEnumerable<PackageMeta> metas,
+        DependencyReference dependency,
         CancellationToken cancellationToken = default)
     {
         return await SelectBestPackageDependencyOrDefault(metas, dependency, cancellationToken)
