@@ -6,12 +6,81 @@ namespace IceCraft.Tests;
 
 using System.IO.Abstractions.TestingHelpers;
 using IceCraft.Api.Installation;
+using IceCraft.Api.Installation.Database;
 using IceCraft.Api.Package;
 using IceCraft.Core.Installation;
+using IceCraft.Tests.Helpers;
 using Moq;
+using Xunit.Abstractions;
 
 public class SetupAgentTests
 {
+    private readonly FrontendAppHelper _frontendHelper;
+
+    public SetupAgentTests(ITestOutputHelper outputHelper)
+    {
+        _frontendHelper = new FrontendAppHelper(outputHelper, "/ictest");
+    }
+
+    [Fact]
+    public async Task Uninstall_UnconfigureThenUninstall()
+    {
+        // Arrange
+        #region Uninstall_UnconfigureThenUninstall Arrange
+        var fileSystem = new MockFileSystem();
+        const string TestPkgPath = "/testPkg";
+
+        fileSystem.AddDirectory(TestPkgPath);
+
+        var sequence = new MockSequence();
+
+        var meta = new PackageMeta()
+        {
+            Id = "test",
+            PluginInfo = new PackagePluginInfo("test", "test"),
+            ReleaseDate = DateTime.UtcNow,
+            Version = new Semver.SemVersion(1, 0, 0)
+        };
+
+        // Setup lifetime
+        var installer = new Mock<IPackageInstaller>(MockBehavior.Strict);
+        var configurator = new Mock<IPackageConfigurator>(MockBehavior.Strict);
+        var lifetime = new Mock<IPackageSetupLifetime>();
+
+        lifetime.Setup(x => x.GetInstaller("test"))
+            .Returns(installer.Object);
+        lifetime.Setup(x => x.GetConfigurator("test"))
+            .Returns(configurator.Object);
+
+        configurator.InSequence(sequence)
+            .Setup(x => x.UnconfigurePackageAsync(TestPkgPath, meta))
+            .Returns(Task.CompletedTask)
+            .Verifiable();
+        installer.InSequence(sequence)
+            .Setup(x => x.RemovePackageAsync(TestPkgPath, meta))
+            .Returns(Task.CompletedTask)
+            .Verifiable();
+            
+        // Setup install manager
+        var manager = new Mock<IPackageInstallManager>();
+        manager.Setup(x => x.IsInstalled(meta)).Returns(true);
+        manager.Setup(x => x.GetUnsafePackageDirectory(meta)).Returns(TestPkgPath);
+
+        var agent = new PackageSetupAgent(manager.Object,
+            fileSystem,
+            _frontendHelper,
+            Mock.Of<ILocalDatabaseMutator>(),
+            lifetime.Object);
+        #endregion
+
+        // Act
+        await agent.UninstallAsync(meta);
+
+        // Assert
+        configurator.Verify();
+        installer.Verify();
+    }
+
     [Fact]
     public async Task ExpandInternal_CallExpander()
     {
