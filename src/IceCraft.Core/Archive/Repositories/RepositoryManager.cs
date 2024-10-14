@@ -44,7 +44,7 @@ public class RepositoryManager : IRepositorySourceManager
         }
 
         var factoryDefaults = 0;
-        var factories = _serviceProvider.GetKeyedServices<IRepositorySourceFactory>(null);
+        var factories = _serviceProvider.GetServices<IRepositorySourceFactory>();
         foreach (var factory in factories)
         {
             factoryDefaults++;

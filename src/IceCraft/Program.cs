@@ -7,6 +7,8 @@ using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.IO.Abstractions;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using DotNetConfig;
 using IceCraft;
 using IceCraft.Api.Archive.Repositories;
@@ -25,86 +27,106 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Spectre.Console;
 
-IceCraftApp.Initialize();
-var app = new IceCraftApp();
-var config = Config.Build();
+internal static class Program
+{
+    private static readonly IceCraftApp AppImpl = new();
+    private static readonly Config ConfigInstance = Config.Build();
 
-var dbFile = await app.ReadDatabase();
+    private static async Task<int> Main(string[] args)
+    {
+        IceCraftApp.Initialize();
+        var app = new IceCraftApp();
+        var config = Config.Build();
 
-var appServices = new ServiceCollection();
-appServices
-    // Application
-    .AddSingleton(config)
-    .AddSingleton(dbFile)
-    .AddSingleton<IManagerConfiguration, DotNetConfigServiceImpl>()
-    .AddSingleton<IFrontendApp, IceCraftApp>()
-    .AddSingleton<ICacheManager, FileSystemCacheManager>()
-    .AddSingleton<IRepositoryDefaultsSupplier, DefaultSource>()
-    .AddSingleton<IFileSystem, FileSystem>()
-    .AddLogging(configure => configure.AddSerilog())
-    // Core
-    .AddIceCraftDefaults()
-    // Sources
-    .AddAdoptiumSource()
-    .AddDotNetExtension();
+        var dbFile = await app.ReadDatabase();
 
-var pluginManager = new PluginManager();
-pluginManager.Add(new CsrPlugin());
-pluginManager.Add(new ClientPlugin());
+        var others = new ServiceCollection()
+            .AddLogging(configure => configure.AddSerilog())
+            .AddIceCraftDefaults()
+            .AddAdoptiumSource()
+            .AddDotNetExtension();
 
-pluginManager.InitializeAll(appServices);
+        var pluginManager = new PluginManager();
+        pluginManager.Add(new CsrPlugin());
+        pluginManager.Add(new ClientPlugin());
+
+        pluginManager.InitializeAll(others);
 
 #if DEBUG
-if (!Debugger.IsAttached && args.Contains("--debug"))
-{
-    AnsiConsole.WriteLine($"{Path.GetFileNameWithoutExtension(FrontendUtil.BaseName)}: Attach a debugger, and then PRESS ANY KEY...");
-    Console.ReadKey(true);
-}
-
-DummyRepositorySource.AddDummyRepositorySource(appServices);
+        if (!Debugger.IsAttached && args.Contains("--debug"))
+        {
+            AnsiConsole.WriteLine($"{Path.GetFileNameWithoutExtension(FrontendUtil.BaseName)}: Attach a debugger, and then PRESS ANY KEY...");
+            Console.ReadKey(true);
+        }
 #endif
 
-// New interface with System.CommandLine
+        // Register all services.
+        var services = await BuildContainerAsync(others);
+        var serviceProvider = new AutofacServiceProvider(services);
 
-var serviceProvider = appServices.BuildServiceProvider();
+        var command = RootCommandFactory.CreateCommand(serviceProvider);
 
-var command = RootCommandFactory.CreateCommand(serviceProvider);
+        // Build middleware
+        var builder = new CommandLineBuilder(command);
 
-// Build middleware
-var builder = new CommandLineBuilder(command);
+        // Verbose
+        builder.AddMiddleware(async (context, next) =>
+        {
+            context.ConfigureVerbose();
+            await next(context);
+        })
+        .UseExceptionHandler((ex, context) =>
+        {
+            if (ex is KnownException known)
+            {
+                AnsiConsole.MarkupLineInterpolated($"[red][bold]{FrontendUtil.BaseName}: {ex.Message}[/][/]");
+                Output.Shared.Verbose(ex.StackTrace ?? "No stack trace available");
 
-// Verbose
-builder.AddMiddleware(async (context, next) =>
-{
-    context.ConfigureVerbose();
-    await next(context);
-})
-.UseExceptionHandler((ex, context) =>
-{
-    if (ex is KnownException known)
-    {
-        AnsiConsole.MarkupLineInterpolated($"[red][bold]{FrontendUtil.BaseName}: {ex.Message}[/][/]");
-        Output.Shared.Verbose(ex.StackTrace ?? "No stack trace available");
+                context.ExitCode = ExitCodes.GenericError;
+            }
+            else
+            {
+                Output.Shared.Error("Unknown error occurred!");
+                Output.Error(ex);
 
-        context.ExitCode = ExitCodes.GenericError;
+                context.ExitCode = ExitCodes.GenericError;
+            }
+        })
+        .UseHelp()
+        .UseVersionOption();
+
+        var parser = builder.Build();
+
+        AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+        {
+            Output.Shared.Error("Unhandled error occurred!");
+            Output.Shared.Error(args.ExceptionObject?.ToString() ?? "(no error information available)");
+        };
+
+        return await parser.InvokeAsync(args);
     }
-    else
+
+    private static async Task<IContainer> BuildContainerAsync(IServiceCollection others)
     {
-        Output.Shared.Error("Unknown error occurred!");
-        Output.Error(ex);
+        var dbFile = await AppImpl.ReadDatabase();
 
-        context.ExitCode = ExitCodes.GenericError;
+        var builder = new ContainerBuilder();
+
+        builder.RegisterInstance(AppImpl).As<IFrontendApp>().SingleInstance();
+        builder.RegisterInstance(dbFile).AsSelf().SingleInstance();
+        builder.RegisterInstance(ConfigInstance).As<Config>().SingleInstance();
+
+        builder.RegisterType<DotNetConfigServiceImpl>().As<IManagerConfiguration>().SingleInstance();
+        builder.RegisterType<FileSystemCacheManager>().As<ICacheManager>().SingleInstance();
+        builder.RegisterType<DefaultSource>().As<IRepositoryDefaultsSupplier>();
+        builder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();
+
+        builder.Populate(others);
+
+#if DEBUG
+        DummyRepositorySource.AddDummyRepositorySource(builder);
+#endif
+
+        return builder.Build();
     }
-})
-.UseHelp()
-.UseVersionOption();
-
-var parser = builder.Build();
-
-AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
-{
-    Output.Shared.Error("Unhandled error occurred!");
-    Output.Shared.Error(args.ExceptionObject?.ToString() ?? "(no error information available)");
-};
-
-return await parser.InvokeAsync(args);
+}
