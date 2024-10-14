@@ -172,15 +172,18 @@ public class PackageSetupAgent : IPackageSetupAgent
 
     private async Task InternalInstallAsync(ILocalDatabaseMutator mutator, PackageMeta meta, string artefactPath)
     {
+        // Create a scope for each package installation task.
+
+        using var scope = _serviceProvider.CreateAsyncScope();
         var pkgDir = _installManager.GetUnsafePackageDirectory(meta);
 
-        var installer = _serviceProvider.GetKeyedService<IPackageInstaller>(meta.PluginInfo.InstallerRef)
+        var installer = scope.ServiceProvider.GetKeyedService<IPackageInstaller>(meta.PluginInfo.InstallerRef)
                         ?? throw new ArgumentException($"Installer '{meta.PluginInfo.InstallerRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta));
-        var configurator = _serviceProvider.GetKeyedService<IPackageConfigurator>(meta.PluginInfo.ConfiguratorRef)
+        var configurator = scope.ServiceProvider.GetKeyedService<IPackageConfigurator>(meta.PluginInfo.ConfiguratorRef)
             ?? throw new ArgumentException($"Configurator '{meta.PluginInfo.ConfiguratorRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta));
 
         var preprocessor = meta.PluginInfo.PreProcessorRef != null
-            ? _serviceProvider.GetKeyedService<IArtefactPreprocessor>(meta.PluginInfo.PreProcessorRef)
+            ? scope.ServiceProvider.GetKeyedService<IArtefactPreprocessor>(meta.PluginInfo.PreProcessorRef)
                 ?? throw new ArgumentException($"Preprocessor '{meta.PluginInfo.PreProcessorRef}' not found for package '{meta.Id}' '{meta.Version}'.", nameof(meta))
             : null;
 

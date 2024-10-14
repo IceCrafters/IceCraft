@@ -12,8 +12,8 @@ public static class DotNetExtensionUtil
 {
     public static IServiceCollection AddDotNetExtension(this IServiceCollection services)
     {
-        return services.AddKeyedSingleton<IRepositorySourceFactory, DotNetRepositorySourceFactory>(null)
-            .AddKeyedSingleton<IPackageInstaller, DotNetSdkInstaller>("dotnet-sdk")
-            .AddKeyedSingleton<IPackageConfigurator, DotNetSdkConfigurator>("dotnet-sdk");
+        return services.AddTransient<IRepositorySourceFactory, DotNetRepositorySourceFactory>()
+            .AddKeyedScoped<IPackageInstaller, DotNetSdkInstaller>("dotnet-sdk")
+            .AddKeyedScoped<IPackageConfigurator, DotNetSdkConfigurator>("dotnet-sdk");
     }
 }

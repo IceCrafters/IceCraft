@@ -7,6 +7,7 @@ namespace IceCraft.Developer;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Autofac;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Installation;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,5 +38,16 @@ public class DummyRepositorySource : IRepositorySource
     public IEnumerable<RepositoryInfo> CreateRepositories()
     {
         yield return new RepositoryInfo("dummy-test", new DummyRepository());
+    }
+
+    internal static void AddDummyRepositorySource(ContainerBuilder builder)
+    {
+        builder.RegisterType<Factory>().As<IRepositorySourceFactory>();
+        builder.RegisterType<DummyPackageConfigurator>()
+            .As<IPackageConfigurator>()
+            .Keyed<IPackageConfigurator>("dummy-test");
+        builder.RegisterType<DummyPackageInstaller>()
+            .As<IPackageInstaller>()
+            .Keyed<IPackageInstaller>("dummy-test");
     }
 }
