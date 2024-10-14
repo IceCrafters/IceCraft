@@ -30,11 +30,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 public static class IceCraftDependencyExtensions
 {
+    [Obsolete("Use ILocalDatabaseAccess.GetMutator() instead.")]
     public static ILocalDatabaseMutator GetMutator(this IServiceProvider serviceProvider)
     {
         return serviceProvider.GetRequiredService<ILocalDatabaseMutator>();
     }
     
+    [Obsolete("Use ILocalDatabaseAccess.GetReadHandle() instead.")]
     public static ILocalDatabaseReadHandle GetReadHandle(this IServiceProvider serviceProvider)
     {
         return serviceProvider.GetRequiredService<ILocalDatabaseReadHandle>();

@@ -16,6 +16,7 @@ using IceCraft.Api.Caching;
 using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
 using IceCraft.Api.Installation;
+using IceCraft.Api.Installation.Database;
 using IceCraft.Core;
 using IceCraft.Developer;
 using IceCraft.Extensions.CentralRepo;
@@ -122,11 +123,10 @@ internal static class Program
         builder.RegisterType<FileSystemCacheManager>().As<ICacheManager>().SingleInstance();
         builder.RegisterType<DefaultSource>().As<IRepositoryDefaultsSupplier>();
         builder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();
+        builder.RegisterType<LocalDatabaseAccessImpl>().As<ILocalDatabaseAccess>();
+        builder.RegisterType<PackageSetupLifetimeImpl>().As<IPackageSetupLifetime>();
 
         builder.Populate(others);
-
-        builder.RegisterType<PackageSetupLifetimeImpl>()
-            .As<IPackageSetupLifetime>();
 
 #if DEBUG
         DummyRepositorySource.AddDummyRepositorySource(builder);

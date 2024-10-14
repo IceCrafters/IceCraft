@@ -17,17 +17,20 @@ public class PackageInstallManager : IPackageInstallManager
 {
     private readonly IFrontendApp _frontend;
     private readonly IServiceProvider _serviceProvider;
+    private readonly ILocalDatabaseAccess _databaseAccess;
 
     private readonly string _packagesPath;
 
     public PackageInstallManager(IFrontendApp frontend,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        ILocalDatabaseAccess databaseAccess)
     {
         _frontend = frontend;
         _serviceProvider = serviceProvider;
 
         _packagesPath = Path.Combine(frontend.DataBasePath, "packages");
         CreateDirectories();
+        _databaseAccess = databaseAccess;
     }
 
     private void CreateDirectories()
@@ -87,28 +90,28 @@ public class PackageInstallManager : IPackageInstallManager
             return false;
         }
 
-        var database = _serviceProvider.GetReadHandle();
+        var database = _databaseAccess.GetReadHandle();
 
         return database.ContainsPackage(meta);
     }
 
     public bool IsInstalled(string packageName)
     {
-        var database = _serviceProvider.GetReadHandle();
+        var database = _databaseAccess.GetReadHandle();
         
         return database.ContainsPackage(packageName);
     }
 
     public bool IsInstalled(string packageName, string version)
     {
-        var database = _serviceProvider.GetReadHandle();
+        var database = _databaseAccess.GetReadHandle();
 
         return database.ContainsPackage(packageName, version);
     }
 
     public bool IsInstalled(DependencyReference dependency)
     {
-        var database = _serviceProvider.GetReadHandle();
+        var database = _databaseAccess.GetReadHandle();
 
         return database.ContainsPackage(dependency.PackageId)
                && database.EnumeratePackages().Any(x => dependency.VersionRange.Contains(x.Version));
@@ -116,14 +119,14 @@ public class PackageInstallManager : IPackageInstallManager
 
     public PackageMeta? GetLatestMetaOrDefault(string packageName)
     {
-        var database = _serviceProvider.GetReadHandle();
+        var database = _databaseAccess.GetReadHandle();
 
         return database.GetLatestVersionOrDefault(packageName);
     }
 
     public PackageMeta? GetLatestMetaOrDefault(string packageName, bool traceVirtualProvider)
     {
-        var database = _serviceProvider.GetReadHandle();
+        var database = _databaseAccess.GetReadHandle();
 
         var latest = database.GetLatestVersionEntryOrDefault(packageName);
         if (latest == null)
@@ -148,7 +151,7 @@ public class PackageInstallManager : IPackageInstallManager
     public async Task<PackageMeta?> GetLatestMetaOrDefaultAsync(string packageName,
         CancellationToken cancellationToken = default)
     {
-        var database = _serviceProvider.GetReadHandle();
+        var database = _databaseAccess.GetReadHandle();
 
         return await database.GetLatestVersionOrDefaultAsync(packageName,
             cancellationToken);
@@ -156,13 +159,13 @@ public class PackageInstallManager : IPackageInstallManager
 
     public PackageMeta GetMeta(string packageName, SemVersion version)
     {
-        var reader = _serviceProvider.GetReadHandle();
+        var reader = _databaseAccess.GetReadHandle();
         return reader[packageName, version.ToString()].Metadata;
     }
 
     public PackageMeta? GetMetaOrDefault(string packageName, SemVersion version)
     {
-        var reader = _serviceProvider.GetReadHandle();
+        var reader = _databaseAccess.GetReadHandle();
 
         return !reader.TryGetValue(packageName, version, out var result)
             ? null
@@ -171,7 +174,7 @@ public class PackageInstallManager : IPackageInstallManager
 
     public async Task RegisterVirtualPackageAsync(PackageMeta virtualMeta, PackageReference origin)
     {
-        var database = _serviceProvider.GetMutator();
+        var database = _databaseAccess.GetMutator();
 
         database.Put(new InstalledPackageInfo
         {
@@ -186,7 +189,7 @@ public class PackageInstallManager : IPackageInstallManager
 
     public async Task PutPackageAsync(InstalledPackageInfo info)
     {
-        var database = _serviceProvider.GetMutator();
+        var database = _databaseAccess.GetMutator();
         database.Put(info);
         
         await database.StoreAsync();
@@ -194,7 +197,7 @@ public class PackageInstallManager : IPackageInstallManager
 
     public async Task UnregisterPackageAsync(PackageMeta meta)
     {
-        var database = _serviceProvider.GetMutator();
+        var database = _databaseAccess.GetMutator();
         
         database.Remove(meta.Id, meta.Version);
         await database.MaintainAsync();
@@ -228,7 +231,7 @@ public class PackageInstallManager : IPackageInstallManager
             return true;
         }
 
-        var database = _serviceProvider.GetReadHandle();
+        var database = _databaseAccess.GetReadHandle();
         var isConflictFree = true;
 
         // Check for virtual packages with the same name
