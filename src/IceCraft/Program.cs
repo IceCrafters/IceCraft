@@ -8,6 +8,7 @@ using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.IO.Abstractions;
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using DotNetConfig;
 using IceCraft;
 using IceCraft.Api.Archive.Repositories;
@@ -39,20 +40,9 @@ internal static class Program
 
         var dbFile = await app.ReadDatabase();
 
-        var appServices = new ServiceCollection();
-        appServices
-            // Application
-            .AddSingleton(config)
-            .AddSingleton(dbFile)
-            .AddSingleton<IManagerConfiguration, DotNetConfigServiceImpl>()
-            .AddSingleton<IFrontendApp, IceCraftApp>()
-            .AddSingleton<ICacheManager, FileSystemCacheManager>()
-            .AddSingleton<IRepositoryDefaultsSupplier, DefaultSource>()
-            .AddSingleton<IFileSystem, FileSystem>()
+        var others = new ServiceCollection()
             .AddLogging(configure => configure.AddSerilog())
-            // Core
             .AddIceCraftDefaults()
-            // Sources
             .AddAdoptiumSource()
             .AddDotNetExtension();
 
@@ -60,7 +50,7 @@ internal static class Program
         pluginManager.Add(new CsrPlugin());
         pluginManager.Add(new ClientPlugin());
 
-        pluginManager.InitializeAll(appServices);
+        pluginManager.InitializeAll(others);
 
 #if DEBUG
         if (!Debugger.IsAttached && args.Contains("--debug"))
@@ -68,13 +58,11 @@ internal static class Program
             AnsiConsole.WriteLine($"{Path.GetFileNameWithoutExtension(FrontendUtil.BaseName)}: Attach a debugger, and then PRESS ANY KEY...");
             Console.ReadKey(true);
         }
-
-        DummyRepositorySource.AddDummyRepositorySource(appServices);
 #endif
 
-        // New interface with System.CommandLine
-
-        var serviceProvider = appServices.BuildServiceProvider();
+        // Register all services.
+        var services = await BuildContainerAsync(others);
+        var serviceProvider = new AutofacServiceProvider(services);
 
         var command = RootCommandFactory.CreateCommand(serviceProvider);
 
@@ -118,33 +106,26 @@ internal static class Program
         return await parser.InvokeAsync(args);
     }
 
-    private static async Task<IContainer> BuildContainerAsync()
+    private static async Task<IContainer> BuildContainerAsync(IServiceCollection others)
     {
         var dbFile = await AppImpl.ReadDatabase();
 
         var builder = new ContainerBuilder();
-        builder.RegisterType<DotNetConfigServiceImpl>()
-            .As<IManagerConfiguration>()
-            .SingleInstance();
 
-        builder.RegisterType<FileSystemCacheManager>()
-            .As<ICacheManager>()
-            .SingleInstance();
+        builder.RegisterInstance(AppImpl).As<IFrontendApp>().SingleInstance();
+        builder.RegisterInstance(dbFile).AsSelf().SingleInstance();
+        builder.RegisterInstance(ConfigInstance).As<Config>().SingleInstance();
 
-        builder.RegisterType<DefaultSource>()
-            .As<IRepositoryDefaultsSupplier>();
+        builder.RegisterType<DotNetConfigServiceImpl>().As<IManagerConfiguration>().SingleInstance();
+        builder.RegisterType<FileSystemCacheManager>().As<ICacheManager>().SingleInstance();
+        builder.RegisterType<DefaultSource>().As<IRepositoryDefaultsSupplier>();
+        builder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();
 
-        builder.RegisterType<FileSystem>()
-            .As<IFileSystem>()
-            .SingleInstance();
+        builder.Populate(others);
 
-        builder.RegisterInstance(AppImpl)
-            .As<IFrontendApp>()
-            .SingleInstance();
-
-        #if DEBUG
+#if DEBUG
         DummyRepositorySource.AddDummyRepositorySource(builder);
-        #endif
+#endif
 
         return builder.Build();
     }
