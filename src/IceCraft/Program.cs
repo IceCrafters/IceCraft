@@ -80,20 +80,18 @@ internal static class Program
         })
         .UseExceptionHandler((ex, context) =>
         {
-            if (ex is KnownException known)
+            if (ex is KnownException)
             {
                 AnsiConsole.MarkupLineInterpolated($"[red][bold]{FrontendUtil.BaseName}: {ex.Message}[/][/]");
-                Output.Shared.Verbose(ex.StackTrace ?? "No stack trace available");
-
-                context.ExitCode = ExitCodes.GenericError;
+                Output.Shared.Verbose(ex.ToString());
             }
             else
             {
                 Output.Shared.Error("Unknown error occurred!");
                 Output.Error(ex);
-
-                context.ExitCode = ExitCodes.GenericError;
             }
+
+            context.ExitCode = ExitCodes.GenericError;
         })
         .UseHelp()
         .UseVersionOption();

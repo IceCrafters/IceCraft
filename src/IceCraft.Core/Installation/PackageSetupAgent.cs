@@ -185,7 +185,7 @@ public class PackageSetupAgent : IPackageSetupAgent
         // If preprocessor is specified, create a temp directory that will await preprocessing
         if (preprocessor != null)
         {
-            var tempExtraction = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+            var tempExtraction = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(tempExtraction);
         }
 
