@@ -45,7 +45,7 @@ public class MashiroStatePool : IDisposable
 
         if (!_fileSystem.File.Exists(path))
         {
-            throw new InvalidOperationException("Package is non-existent on local cache");
+            throw new InvalidOperationException($"Package ({packageMeta.Id}) is non-existent on local cache (requested: {fileName})");
         }
         
         return _runtime.CreateStateLifetime(await _fileSystem.File.ReadAllTextAsync(path), 
