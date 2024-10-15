@@ -48,6 +48,7 @@ internal static class Util
         builder.RegisterType<DatabaseReadHandleImpl>().As<ILocalDatabaseReadHandle>().InstancePerDependency();
         builder.RegisterType<LocalDatabaseMutatorImpl>().As<ILocalDatabaseMutator>().InstancePerDependency();
         builder.RegisterType<PackageSetupAgent>().As<IPackageSetupAgent>().InstancePerDependency();
+        builder.RegisterType<LocalPackageImporter>().As<ILocalPackageImporter>().InstancePerDependency();
 
         builder.RegisterType<Sha256ChecksumValidator>().As<IChecksumValidator>().Keyed<IChecksumValidator>("sha256");
         builder.RegisterType<Sha512ChecksumValidator>().As<IChecksumValidator>().Keyed<IChecksumValidator>("sha512");
