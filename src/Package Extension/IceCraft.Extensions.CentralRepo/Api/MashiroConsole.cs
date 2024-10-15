@@ -8,7 +8,7 @@ using IceCraft.Api.Client;
 using IceCraft.Extensions.CentralRepo.Runtime;
 using Jint.Native;
 
-public class MashiroConsole
+public class MashiroConsole : IMashiroConsoleApi
 {
     private readonly IOutputAdapter _output;
 

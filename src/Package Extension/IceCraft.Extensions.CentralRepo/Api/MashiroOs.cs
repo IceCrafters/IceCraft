@@ -9,7 +9,7 @@ using IceCraft.Api.Platform;
 using IceCraft.Extensions.CentralRepo.Runtime.Security;
 using IceCraft.Extensions.CentralRepo.Util;
 
-public class MashiroOs : ContextApi
+public class MashiroOs : ContextApi, IMashiroOsApi
 {
     private readonly IEnvironmentManager _environmentManager;
 

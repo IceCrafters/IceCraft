@@ -8,7 +8,7 @@ using IceCraft.Api.Platform;
 using IceCraft.Extensions.CentralRepo.Runtime;
 using IceCraft.Extensions.CentralRepo.Runtime.Security;
 
-public class MashiroBinary : ContextApi
+public class MashiroBinary : ContextApi, IMashiroBinaryApi
 {
     private readonly IExecutableManager _executableManager;
     private readonly MashiroState _state;

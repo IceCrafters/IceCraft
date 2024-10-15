@@ -10,17 +10,18 @@ using System.Text.Json;
 using IceCraft.Extensions.CentralRepo.Api;
 using Jint;
 using Jint.Runtime.Interop;
+using Microsoft.Extensions.DependencyInjection;
 
 // Full Speed Astern!
 
 public class MashiroRuntime
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IMashiroLifetimeFactory _lifetimeFactory;
     private readonly IFileSystem _fileSystem;
 
-    public MashiroRuntime(IServiceProvider serviceProvider, IFileSystem fileSystem)
+    public MashiroRuntime(IMashiroLifetimeFactory lifetimeFactory, IFileSystem fileSystem)
     {
-        _serviceProvider = serviceProvider;
+        _lifetimeFactory = lifetimeFactory;
         _fileSystem = fileSystem;
     }
     
@@ -60,22 +61,21 @@ public class MashiroRuntime
         yield return info.Name;
     }
 
-    public MashiroState CreateState(string scriptCode, string? fileName)
+    public IMashiroStateLifetime CreateStateLifetime(string scriptCode, string? fileName)
     {
-        var engine = CreateJintEngine();
-
         var script = Engine.PrepareScript(scriptCode,
-            fileName);   
+            fileName);
 
-        var result = new MashiroState(_serviceProvider, engine, script, fileName);
-        result.AddFunctions();
+        var result = _lifetimeFactory.Create();
+        result.State.SetScript(script);
+        result.State.AddApis();
 
         return result;
     }
     
-    public async Task<MashiroState> CreateStateAsync(string scriptFile)
+    public async Task<IMashiroStateLifetime> CreateStateLifetimeAsync(string scriptFile)
     {
-        return CreateState(await _fileSystem.File.ReadAllTextAsync(scriptFile), 
+        return CreateStateLifetime(await _fileSystem.File.ReadAllTextAsync(scriptFile), 
             _fileSystem.Path.GetFileNameWithoutExtension(scriptFile));
     }
     

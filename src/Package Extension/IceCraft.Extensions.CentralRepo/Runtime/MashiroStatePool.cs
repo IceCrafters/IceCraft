@@ -9,12 +9,13 @@ using IceCraft.Api.Package;
 using IceCraft.Extensions.CentralRepo.Network;
 using IceCraft.Extensions.CentralRepo.Util;
 
-public class MashiroStatePool
+public class MashiroStatePool : IDisposable
 {
     private readonly IRemoteRepositoryManager _remoteManager;
-    private readonly Dictionary<PackageMeta, MashiroState> _mashiroStates = new();
+    private Dictionary<PackageMeta, IMashiroStateLifetime>? _mashiroStates = [];
     private readonly MashiroRuntime _runtime;
     private readonly IFileSystem _fileSystem;
+    private bool _disposedValue;
 
     public MashiroStatePool(IRemoteRepositoryManager remoteManager, 
         MashiroRuntime runtime,
@@ -27,14 +28,16 @@ public class MashiroStatePool
     
     public async Task<MashiroState> GetAsync(PackageMeta packageMeta)
     {
-        if (_mashiroStates.TryGetValue(packageMeta, out var value)) return value;
+        ObjectDisposedException.ThrowIf(_disposedValue || _mashiroStates == null, this);
+
+        if (_mashiroStates.TryGetValue(packageMeta, out var value)) return value.State;
         
-        var result = await LoadLocalStateAsync(packageMeta);
+        var result = await LoadLifetimeAsync(packageMeta);
         _mashiroStates.Add(packageMeta, result);
-        return result;
+        return result.State;
     }
 
-    private async Task<MashiroState> LoadLocalStateAsync(PackageMeta packageMeta)
+    private async Task<IMashiroStateLifetime> LoadLifetimeAsync(PackageMeta packageMeta)
     {
         var fileName = GetScriptFileName(packageMeta);
 
@@ -45,7 +48,7 @@ public class MashiroStatePool
             throw new InvalidOperationException("Package is non-existent on local cache");
         }
         
-        return _runtime.CreateState(await _fileSystem.File.ReadAllTextAsync(path), 
+        return _runtime.CreateStateLifetime(await _fileSystem.File.ReadAllTextAsync(path), 
             Path.GetFileNameWithoutExtension(path));
     }
 
@@ -64,5 +67,26 @@ public class MashiroStatePool
         }
 
         return fileName;
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                _mashiroStates?.Clear();
+            }
+
+            _mashiroStates = null;
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }

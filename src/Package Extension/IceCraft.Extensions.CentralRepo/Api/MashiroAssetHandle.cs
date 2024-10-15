@@ -6,15 +6,13 @@ namespace IceCraft.Extensions.CentralRepo.Api;
 
 public readonly record struct MashiroAssetHandle : IDisposable
 {
-    private readonly string _fileName;
     private readonly FileStream _fileStream;
 
-    internal MashiroAssetHandle(string fileName, FileStream fileStream)
+    internal MashiroAssetHandle(FileStream fileStream)
     {
-        _fileName = fileName;
         _fileStream = fileStream;
     }
-
+    
     internal Stream GetStream()
     {
         return _fileStream;

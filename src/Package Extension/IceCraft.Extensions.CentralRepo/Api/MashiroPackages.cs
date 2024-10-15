@@ -10,7 +10,7 @@ using IceCraft.Extensions.CentralRepo.Runtime;
 using IceCraft.Extensions.CentralRepo.Runtime.Security;
 using JetBrains.Annotations;
 
-public class MashiroPackages : ContextApi
+public class MashiroPackages : ContextApi, IMashiroPackagesApi
 {
     private readonly Func<ILocalPackageImporter> _importerSupplier;
     private readonly MashiroState _state;

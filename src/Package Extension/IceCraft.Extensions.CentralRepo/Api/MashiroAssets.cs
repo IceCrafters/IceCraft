@@ -6,7 +6,7 @@ namespace IceCraft.Extensions.CentralRepo.Api;
 using IceCraft.Extensions.CentralRepo.Network;
 using IceCraft.Extensions.CentralRepo.Runtime.Security;
 
-public class MashiroAssets : ContextApi
+public class MashiroAssets : ContextApi, IMashiroAssetsApi
 {
     private readonly IRemoteRepositoryManager _repoManager;
 
@@ -21,6 +21,6 @@ public class MashiroAssets : ContextApi
         EnsureContext();
 
         var stream = _repoManager.GetAssetFileStream(assetName);
-        return new MashiroAssetHandle(assetName, stream);
+        return new MashiroAssetHandle(stream);
     }
 }

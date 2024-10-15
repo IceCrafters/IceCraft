@@ -6,10 +6,13 @@ namespace IceCraft.Extensions.CentralRepo;
 
 using IceCraft.Api.Installation;
 using IceCraft.Api.Plugin;
+using IceCraft.Extensions.CentralRepo.Api;
 using IceCraft.Extensions.CentralRepo.Impl;
 using IceCraft.Extensions.CentralRepo.Network;
 using IceCraft.Extensions.CentralRepo.Runtime;
+using IceCraft.Extensions.CentralRepo.Runtime.Security;
 using IceCraft.Extensions.CentralRepo.Util;
+using Jint;
 using Microsoft.Extensions.DependencyInjection;
 
 public class CsrPlugin : IPlugin
@@ -31,6 +34,24 @@ public class CsrPlugin : IPlugin
             .AddInstaller<MashiroInstaller>("mashiro")
             .AddPreprocessor<MashiroPreprocessor>("mashiro")
             .AddConfigurator<MashiroConfigurator>("mashiro")
-            .AddSingleton<RepoConfigFactory>();
+            .AddSingleton<RepoConfigFactory>()
+            .AddScoped<ContextApiRoot>()
+            .AddScoped<IMashiroApiProvider, MashiroApiProvider>()
+            .AddScoped<MashiroState>()
+            .AddTransient(_ => MashiroRuntime.CreateJintEngine())
+            .AddTransient<IMashiroLifetimeFactory, MashiroLifetimeFactory>();
+        
+        AddMashiroApis(services);
+    }
+
+    private static void AddMashiroApis(IServiceCollection services)
+    {
+        services.AddScoped<IMashiroBinaryApi, MashiroBinary>()
+            .AddScoped<IMashiroAssetsApi, MashiroAssets>()
+            .AddScoped<IMashiroCompressedArchiveApi, MashiroCompressedArchive>()
+            .AddScoped<IMashiroConsoleApi, MashiroConsole>()
+            .AddScoped<IMashiroFsApi, MashiroFs>()
+            .AddScoped<IMashiroOsApi, MashiroOs>()
+            .AddScoped<IMashiroPackagesApi, MashiroPackages>();
     }
 }

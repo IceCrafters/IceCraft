@@ -11,8 +11,10 @@ using IceCraft.Api.Package;
 using IceCraft.Api.Platform;
 using IceCraft.Extensions.CentralRepo.Network;
 using IceCraft.Extensions.CentralRepo.Runtime;
+using IceCraft.Extensions.CentralRepo.Runtime.Security;
 using IceCraft.Tests.CentralRepo.Helpers;
 using Jint;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Semver;
 using Xunit.Abstractions;
@@ -226,35 +228,23 @@ public class ScriptEngineTests
         """;
     #endregion
 
-    private readonly IServiceProvider ServiceProvider;
+    private readonly FrontendAppHelper _frontend;
 
     public ScriptEngineTests(ITestOutputHelper outputHelper)
     {
-        ServiceProvider = CreateServiceProvider(outputHelper);
-    }
-
-    private static IServiceProvider CreateServiceProvider(ITestOutputHelper outputHelper)
-    {
-        var result = new Mock<IServiceProvider>();
-
-        result.Setup(x => x.GetService(typeof(IExecutableManager)))
-            .Returns(new Mock<IExecutableManager>().Object);
-        result.Setup(x => x.GetService(typeof(IRemoteRepositoryManager)))
-            .Returns(Mock.Of<IRemoteRepositoryManager>());
-        result.Setup(x => x.GetService(typeof(IEnvironmentManager)))
-            .Returns(Mock.Of<IEnvironmentManager>());
-        result.Setup(x => x.GetService(typeof(IFrontendApp)))
-            .Returns(new FrontendAppHelper(outputHelper));
-
-        return result.Object;
+        _frontend = new FrontendAppHelper(outputHelper);
     }
 
     [Fact]
     public void MashiroState_Meta_NoPreprocessor()
     {
         // Arrange
-        var runtime = new MashiroRuntime(ServiceProvider, new MockFileSystem());
-        var state = runtime.CreateState(TestScriptWithNoPreprocessor, nameof(TestScriptWithNoPreprocessor));
+        var apiMock = new Mock<IMashiroApiProvider>();
+        var apiRoot = new ContextApiRoot();
+
+        var state = new MashiroState(apiMock.Object, MashiroRuntime.CreateJintEngine(), _frontend, apiRoot);
+        state.AddApis();
+        state.SetScript(TestScriptWithNoPreprocessor, nameof(TestScriptWithNoPreprocessor));
         
         // Act
         state.EnsureMetadata();
@@ -269,8 +259,12 @@ public class ScriptEngineTests
     public void MashiroState_Meta_WithPreprocessor()
     {
         // Arrange
-        var runtime = new MashiroRuntime(ServiceProvider, new MockFileSystem());
-        var state = runtime.CreateState(TestScriptWithPreprocessor, nameof(TestScriptWithPreprocessor));
+        var apiMock = new Mock<IMashiroApiProvider>();
+        var apiRoot = new ContextApiRoot();
+
+        var state = new MashiroState(apiMock.Object, MashiroRuntime.CreateJintEngine(), _frontend, apiRoot);
+        state.AddApis();
+        state.SetScript(TestScriptWithPreprocessor, nameof(TestScriptWithPreprocessor));
         
         // Act
         state.EnsureMetadata();
@@ -285,8 +279,12 @@ public class ScriptEngineTests
     public void MashiroState_Mirror_OriginNotSet()
     {
         // Arrange
-        var runtime = new MashiroRuntime(ServiceProvider, new MockFileSystem());
-        var state = runtime.CreateState(TestScriptMirrorOriginNotSet, nameof(TestScriptMirrorOriginNotSet));
+        var apiMock = new Mock<IMashiroApiProvider>();
+        var apiRoot = new ContextApiRoot();
+
+        var state = new MashiroState(apiMock.Object, MashiroRuntime.CreateJintEngine(), _frontend, apiRoot);
+        state.AddApis();
+        state.SetScript(TestScriptMirrorOriginNotSet, nameof(TestScriptMirrorOriginNotSet));
         
         // Act
         state.EnsureMetadata();
@@ -300,8 +298,12 @@ public class ScriptEngineTests
     public void MashiroState_Mirror_OriginAndMirror()
     {
         // Arrange
-        var runtime = new MashiroRuntime(ServiceProvider, new MockFileSystem());
-        var state = runtime.CreateState(TestScriptWithOriginMirror, nameof(TestScriptWithOriginMirror));
+        var apiMock = new Mock<IMashiroApiProvider>();
+        var apiRoot = new ContextApiRoot();
+
+        var state = new MashiroState(apiMock.Object, MashiroRuntime.CreateJintEngine(), _frontend, apiRoot);
+        state.AddApis();
+        state.SetScript(TestScriptWithOriginMirror, nameof(TestScriptWithOriginMirror));
         
         // Act
         state.EnsureMetadata();
@@ -317,8 +319,12 @@ public class ScriptEngineTests
     public void MashiroState_Mirror_OriginOnly()
     {
         // Arrange
-        var runtime = new MashiroRuntime(ServiceProvider, new MockFileSystem());
-        var state = runtime.CreateState(TestScriptWithOnlyOrigin, nameof(TestScriptWithOnlyOrigin));
+        var apiMock = new Mock<IMashiroApiProvider>();
+        var apiRoot = new ContextApiRoot();
+
+        var state = new MashiroState(apiMock.Object, MashiroRuntime.CreateJintEngine(), _frontend, apiRoot);
+        state.AddApis();
+        state.SetScript(TestScriptWithOnlyOrigin, nameof(TestScriptWithOnlyOrigin));
         
         // Act
         state.EnsureMetadata();
@@ -333,8 +339,12 @@ public class ScriptEngineTests
     public void MashiroState_Delegate_WithNone()
     {
         // Arrange
-        var runtime = new MashiroRuntime(ServiceProvider, new MockFileSystem());
-        var state = runtime.CreateState(TestScriptWithNoDelegates, nameof(TestScriptWithNoDelegates));
+        var apiMock = new Mock<IMashiroApiProvider>();
+        var apiRoot = new ContextApiRoot();
+
+        var state = new MashiroState(apiMock.Object, MashiroRuntime.CreateJintEngine(), _frontend, apiRoot);
+        state.AddApis();
+        state.SetScript(TestScriptWithNoDelegates, nameof(TestScriptWithNoDelegates));
         
         // Act
         state.EnsureMetadata();
@@ -348,8 +358,12 @@ public class ScriptEngineTests
     public void MashiroState_Delegate_WithRequired()
     {
         // Arrange
-        var runtime = new MashiroRuntime(ServiceProvider, new MockFileSystem());
-        var state = runtime.CreateState(TestScriptWithRequiredDelegates, nameof(TestScriptWithRequiredDelegates));
+        var apiMock = new Mock<IMashiroApiProvider>();
+        var apiRoot = new ContextApiRoot();
+
+        var state = new MashiroState(apiMock.Object, MashiroRuntime.CreateJintEngine(), _frontend, apiRoot);
+        state.AddApis();
+        state.SetScript(TestScriptWithRequiredDelegates, nameof(TestScriptWithRequiredDelegates));
         
         // Act
         state.EnsureMetadata();

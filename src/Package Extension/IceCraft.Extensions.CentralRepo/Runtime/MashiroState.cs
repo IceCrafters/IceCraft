@@ -8,23 +8,19 @@ using Acornima.Ast;
 using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
-using IceCraft.Api.Installation;
 using IceCraft.Api.Package;
-using IceCraft.Api.Platform;
-using IceCraft.Extensions.CentralRepo.Api;
-using IceCraft.Extensions.CentralRepo.Network;
 using IceCraft.Extensions.CentralRepo.Runtime.Security;
 using Jint;
-using Microsoft.Extensions.DependencyInjection;
 
 public class MashiroState : IDisposable
 {
     private readonly Engine _engine;
-    private readonly Prepared<Script> _preparedScript;
-    private readonly IServiceProvider _serviceProvider;
     
     private readonly List<ArtefactMirrorInfo> _mirrors = [];
-    private readonly ContextApiRoot _apiRoot = new();
+    private readonly IMashiroApiProvider _apiProvider;
+    private readonly IFrontendApp _frontendApp;
+    private readonly ContextApiRoot _context;
+    private Prepared<Script>? _script;
 
     private bool _metadataRan;
     
@@ -35,13 +31,15 @@ public class MashiroState : IDisposable
     internal MashiroRuntime.UnConfigureDelegate? UnConfigurePackageDelegate { get; private set; }
     internal MashiroRuntime.OnPreprocessDelegate? PreprocessPackageDelegate { get; private set; }
 
-    public MashiroState(IServiceProvider serviceProvider, Engine engine, Prepared<Script> preparedScript,
-        string? fileName = null)
+    public MashiroState(IMashiroApiProvider apiProvider, 
+        Engine engine,
+        IFrontendApp frontendApp,
+        ContextApiRoot context)
     {
         _engine = engine;
-        _preparedScript = preparedScript;
-        _serviceProvider = serviceProvider;
-        FileName = fileName;
+        _apiProvider = apiProvider;
+        _frontendApp = frontendApp;
+        _context = context;
     }
 
     private PackageMeta? PackageMeta { get; set; }
@@ -49,8 +47,6 @@ public class MashiroState : IDisposable
     public IArtefactDefinition? ArtefactDefinition { get; private set; }
 
     public ArtefactMirrorInfo? Origin { get; private set; }
-    
-    public string? FileName { get; }
 
     #region Mashiro functions
 
@@ -127,15 +123,30 @@ public class MashiroState : IDisposable
 
     #endregion
 
+    public void SetScript(string code, string name)
+    {
+        SetScript(Engine.PrepareScript(code, name));
+    }
+    
+    public void SetScript(Prepared<Script> script)
+    {
+        _script = script;
+    }
+
     public void EnsureMetadata()
     {
         if (_metadataRan)
         {
             return;
         }
+
+        if (!_script.HasValue)
+        {
+            throw new InvalidOperationException("Script not set. Call SetScript() first.");
+        }
         
-        _apiRoot.DoContext(ExecutionContextType.Metadata,
-            () => _engine.Execute(_preparedScript));
+        _context.DoContext(ExecutionContextType.Metadata,
+            () => _engine.Execute(_script.Value));
         _metadataRan = true;
     }
 
@@ -168,10 +179,8 @@ public class MashiroState : IDisposable
         };
     }
 
-    internal void AddFunctions()
+    internal void AddApis()
     {
-        var frontendApp = _serviceProvider.GetRequiredService<IFrontendApp>();
-    
         _engine.SetValue("setMeta", MashiroSetMeta);
         _engine.SetValue("sha512sum", MashiroSha512Sum);
         _engine.SetValue("voidsum", MashiroVoidSum);
@@ -185,25 +194,16 @@ public class MashiroState : IDisposable
         _engine.SetValue("onExportEnv", MashiroOnExportEnvironment);
         _engine.SetValue("onPreprocess", MashiroOnPreprocess);
 
-        _engine.SetValue("Fs", new MashiroFs(_apiRoot));
-        _engine.SetValue("CompressedArchive", new MashiroCompressedArchive(_apiRoot));
-        _engine.SetValue("Os", new MashiroOs(_apiRoot, _serviceProvider.GetRequiredService<IEnvironmentManager>()));
-        _engine.SetValue("Binary", new MashiroBinary(_apiRoot,
-            _serviceProvider.GetRequiredService<IExecutableManager>(),
-            this));
-            
-        _engine.SetValue("Packages", new MashiroPackages(_apiRoot,
-            () => _serviceProvider.GetRequiredService<ILocalPackageImporter>(), 
-            this, 
-            _serviceProvider.GetRequiredService<IPackageInstallManager>()));
-
-        _engine.SetValue("Assets", new MashiroAssets(_apiRoot,
-            _serviceProvider.GetRequiredService<IRemoteRepositoryManager>()));
-
-        _engine.SetValue("mconsole", new MashiroConsole(frontendApp.Output));
+        _engine.SetValue("Fs", _apiProvider.Fs);
+        _engine.SetValue("CompressedArchive", _apiProvider.CompressedArchive);
+        _engine.SetValue("Os", _apiProvider.Os);
+        _engine.SetValue("Binary", _apiProvider.Binary);
+        _engine.SetValue("Packages", _apiProvider.Packages);
+        _engine.SetValue("Assets", _apiProvider.Assets);
+        _engine.SetValue("mconsole", _apiProvider.MConsole);
 
         _engine.SetValue("AppBasePath", 
-            frontendApp.DataBasePath);
+            _frontendApp.DataBasePath);
     }
 
     public void Dispose()
@@ -232,11 +232,11 @@ public class MashiroState : IDisposable
 
     public void DoContext(ExecutionContextType contextType, Action action)
     {
-        _apiRoot.DoContext(contextType, action);
+        _context.DoContext(contextType, action);
     }
     
     public async Task DoContextAsync(ExecutionContextType contextType, Func<Task> action)
     {
-        await _apiRoot.DoContextAsync(contextType, action);
+        await _context.DoContextAsync(contextType, action);
     }
 }

@@ -8,7 +8,7 @@ using IceCraft.Extensions.CentralRepo.Runtime.Security;
 using SharpCompress.Common;
 using SharpCompress.Readers;
 
-public class MashiroCompressedArchive : ContextApi
+public class MashiroCompressedArchive : ContextApi, IMashiroCompressedArchiveApi
 {
     public MashiroCompressedArchive(ContextApiRoot parent) : base(ExecutionContextType.Installation, parent)
     {

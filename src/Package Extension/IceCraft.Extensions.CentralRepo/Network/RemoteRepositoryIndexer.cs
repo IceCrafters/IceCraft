@@ -66,11 +66,11 @@ public class RemoteRepositoryIndexer
                 continue;
             }
 
-            var state = await _runtime.CreateStateAsync(file);
+            var lifetime = await _runtime.CreateStateLifetimeAsync(file);
 
             try
             {
-                state.EnsureMetadata();
+                lifetime.State.EnsureMetadata();
             }
             catch (JavaScriptException e)
             {
@@ -82,7 +82,7 @@ public class RemoteRepositoryIndexer
 
             try
             {
-                state.VerifyRequiredDelegates();
+                lifetime.State.VerifyRequiredDelegates();
             }
             catch (InvalidOperationException e)
             {
@@ -90,29 +90,29 @@ public class RemoteRepositoryIndexer
                 continue;
             }
 
-            var meta = state.GetPackageMeta();
-            if (state.ArtefactDefinition == null
-                || state.Origin == null
+            var meta = lifetime.State.GetPackageMeta();
+            if (lifetime.State.ArtefactDefinition == null
+                || lifetime.State.Origin == null
                 || meta == null)
             {
                 continue;
             }
 
             var customData = new PackageCustomDataDictionary();
-            customData.AddSerialize(RemoteRepoData, new RemotePackageData(state.FileName),
+            customData.AddSerialize(RemoteRepoData, new RemotePackageData(Path.GetFileNameWithoutExtension(file)),
                 CsrJsonContext.Default.RemotePackageData);
             
             yield return new RemotePackageInfo
             {
-                Artefact = state.ArtefactDefinition,
+                Artefact = lifetime.State.ArtefactDefinition,
                 Metadata = meta with
                 {
                     CustomData = customData
                 },
-                Mirrors = state.GetMirrors()
+                Mirrors = lifetime.State.GetMirrors()
             };
 
-            state.Dispose();
+            lifetime.Dispose();
         }
     }
 }

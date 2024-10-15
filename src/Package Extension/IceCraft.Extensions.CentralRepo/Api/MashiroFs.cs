@@ -8,7 +8,7 @@ using IceCraft.Extensions.CentralRepo.Runtime.Security;
 using JetBrains.Annotations;
 
 [PublicAPI]
-public class MashiroFs : ContextApi
+public class MashiroFs : ContextApi, IMashiroFsApi
 {
     public MashiroFs(ContextApiRoot parent) : base(ExecutionContextType.Installation | ExecutionContextType.Configuration, parent)
     {
