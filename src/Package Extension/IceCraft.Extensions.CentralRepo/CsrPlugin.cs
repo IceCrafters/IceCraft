@@ -38,6 +38,8 @@ public class CsrPlugin : IPlugin
             .AddScoped<ContextApiRoot>()
             .AddScoped<IMashiroApiProvider, MashiroApiProvider>()
             .AddScoped<MashiroState>()
+            .AddScoped<IMashiroMetaTransfer, MashiroMetaTransfer>()
+            .AddTransient<Func<ILocalPackageImporter>>(ctx => ctx.GetRequiredService<ILocalPackageImporter>)
             .AddTransient(_ => MashiroRuntime.CreateJintEngine())
             .AddTransient<IMashiroLifetimeFactory, MashiroLifetimeFactory>();
         

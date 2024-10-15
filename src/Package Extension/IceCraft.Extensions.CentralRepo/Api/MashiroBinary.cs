@@ -11,26 +11,26 @@ using IceCraft.Extensions.CentralRepo.Runtime.Security;
 public class MashiroBinary : ContextApi, IMashiroBinaryApi
 {
     private readonly IExecutableManager _executableManager;
-    private readonly MashiroState _state;
+    private readonly IMashiroMetaTransfer _metaTransfer;
     
     public MashiroBinary(ContextApiRoot parent, 
         IExecutableManager executableManager, 
-        MashiroState state) : base(ExecutionContextType.Configuration, parent)
+        IMashiroMetaTransfer metaTransfer) : base(ExecutionContextType.Configuration, parent)
     {
         _executableManager = executableManager;
-        _state = state;
+        _metaTransfer = metaTransfer;
     }
 
     public async Task Register(string fileName, string path)
     {
-        await _executableManager.RegisterAsync(_state.GetPackageMeta()!,
+        await _executableManager.RegisterAsync(_metaTransfer.PackageMeta!,
             fileName,
             path);
     }
     
     public async Task Register(string fileName, string path, EnvironmentVariableDictionary envVars)
     {
-        await _executableManager.RegisterAsync(_state.GetPackageMeta()!,
+        await _executableManager.RegisterAsync(_metaTransfer.PackageMeta!,
             fileName,
             path,
             envVars);
@@ -38,7 +38,7 @@ public class MashiroBinary : ContextApi, IMashiroBinaryApi
 
     public async Task Unregister(string fileName)
     {
-        await _executableManager.UnregisterAsync(_state.GetPackageMeta()!,
+        await _executableManager.UnregisterAsync(_metaTransfer.PackageMeta!,
             fileName);
     }
 }

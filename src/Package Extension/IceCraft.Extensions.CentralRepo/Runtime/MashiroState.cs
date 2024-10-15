@@ -20,6 +20,7 @@ public class MashiroState : IDisposable
     private readonly IMashiroApiProvider _apiProvider;
     private readonly IFrontendApp _frontendApp;
     private readonly ContextApiRoot _context;
+    private readonly IMashiroMetaTransfer _metaTransfer;
     private Prepared<Script>? _script;
 
     private bool _metadataRan;
@@ -34,15 +35,17 @@ public class MashiroState : IDisposable
     public MashiroState(IMashiroApiProvider apiProvider, 
         Engine engine,
         IFrontendApp frontendApp,
-        ContextApiRoot context)
+        ContextApiRoot context, 
+        IMashiroMetaTransfer metaTransfer)
     {
         _engine = engine;
         _apiProvider = apiProvider;
         _frontendApp = frontendApp;
         _context = context;
-    }
+        _metaTransfer = metaTransfer;
 
-    private PackageMeta? PackageMeta { get; set; }
+        metaTransfer.EnsureMetadataAction = EnsureMetadata;
+    }
 
     public IArtefactDefinition? ArtefactDefinition { get; private set; }
 
@@ -52,7 +55,7 @@ public class MashiroState : IDisposable
 
     private void MashiroSetMeta(PackageMeta packageMeta)
     {
-        PackageMeta = packageMeta;
+        _metaTransfer.PackageMeta = packageMeta;
     }
 
     private void MashiroSha512Sum(string sha)
@@ -165,7 +168,7 @@ public class MashiroState : IDisposable
 
     public PackageMeta? GetPackageMeta()
     {
-        if (PackageMeta == null)
+        if (_metaTransfer.PackageMeta == null)
         {
             return null;
         }
@@ -173,7 +176,8 @@ public class MashiroState : IDisposable
         var pluginInfo = new PackagePluginInfo("mashiro",
             "mashiro",
             PreprocessPackageDelegate != null ? "mashiro" : null);
-        return PackageMeta with
+        
+        return _metaTransfer.PackageMeta with
         {
             PluginInfo = pluginInfo
         };

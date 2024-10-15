@@ -13,18 +13,18 @@ using JetBrains.Annotations;
 public class MashiroPackages : ContextApi, IMashiroPackagesApi
 {
     private readonly Func<ILocalPackageImporter> _importerSupplier;
-    private readonly MashiroState _state;
+    private readonly IMashiroMetaTransfer _metaTransfer;
     private const ExecutionContextType ContextTypes = ExecutionContextType.Configuration
                                                       | ExecutionContextType.Installation;
     private readonly IPackageInstallManager _installManager;
 
     public MashiroPackages(ContextApiRoot parent, 
         Func<ILocalPackageImporter> importerSupplier, 
-        MashiroState state, 
+        IMashiroMetaTransfer metaTransfer, 
         IPackageInstallManager installManager) : base(ContextTypes, parent)
     {
         _importerSupplier = importerSupplier;
-        _state = state;
+        _metaTransfer = metaTransfer;
         _installManager = installManager;
     }
 
@@ -57,8 +57,8 @@ public class MashiroPackages : ContextApi, IMashiroPackagesApi
     {
         EnsureContext(ExecutionContextType.Configuration);
 
-        _state.EnsureMetadata();
-        var metadata = _state.GetPackageMeta()!;
+        _metaTransfer.EnsureMetadata();
+        var metadata = _metaTransfer.PackageMeta!;
 
         return _installManager.RegisterVirtualPackageAsync(metadata with
         {
@@ -71,7 +71,7 @@ public class MashiroPackages : ContextApi, IMashiroPackagesApi
     {
         EnsureContext(ExecutionContextType.Configuration);
 
-        _state.EnsureMetadata();
-        return _installManager.RegisterVirtualPackageAsync(package, _state.GetPackageMeta()!.CreateReference());
+        _metaTransfer.EnsureMetadata();
+        return _installManager.RegisterVirtualPackageAsync(package, _metaTransfer.PackageMeta!.CreateReference());
     }
 }

@@ -242,7 +242,11 @@ public class ScriptEngineTests
         var apiMock = new Mock<IMashiroApiProvider>();
         var apiRoot = new ContextApiRoot();
 
-        var state = new MashiroState(apiMock.Object, MashiroRuntime.CreateJintEngine(), _frontend, apiRoot);
+        var state = new MashiroState(apiMock.Object, 
+            MashiroRuntime.CreateJintEngine(), 
+            _frontend, 
+            apiRoot,
+            new MashiroMetaTransfer());
         state.AddApis();
         state.SetScript(TestScriptWithNoPreprocessor, nameof(TestScriptWithNoPreprocessor));
         
@@ -262,7 +266,11 @@ public class ScriptEngineTests
         var apiMock = new Mock<IMashiroApiProvider>();
         var apiRoot = new ContextApiRoot();
 
-        var state = new MashiroState(apiMock.Object, MashiroRuntime.CreateJintEngine(), _frontend, apiRoot);
+        var state = new MashiroState(apiMock.Object, 
+            MashiroRuntime.CreateJintEngine(), 
+            _frontend, 
+            apiRoot,
+            new MashiroMetaTransfer());
         state.AddApis();
         state.SetScript(TestScriptWithPreprocessor, nameof(TestScriptWithPreprocessor));
         
@@ -282,7 +290,11 @@ public class ScriptEngineTests
         var apiMock = new Mock<IMashiroApiProvider>();
         var apiRoot = new ContextApiRoot();
 
-        var state = new MashiroState(apiMock.Object, MashiroRuntime.CreateJintEngine(), _frontend, apiRoot);
+        var state = new MashiroState(apiMock.Object, 
+            MashiroRuntime.CreateJintEngine(), 
+            _frontend, 
+            apiRoot,
+            new MashiroMetaTransfer());
         state.AddApis();
         state.SetScript(TestScriptMirrorOriginNotSet, nameof(TestScriptMirrorOriginNotSet));
         
@@ -301,7 +313,11 @@ public class ScriptEngineTests
         var apiMock = new Mock<IMashiroApiProvider>();
         var apiRoot = new ContextApiRoot();
 
-        var state = new MashiroState(apiMock.Object, MashiroRuntime.CreateJintEngine(), _frontend, apiRoot);
+        var state = new MashiroState(apiMock.Object, 
+            MashiroRuntime.CreateJintEngine(), 
+            _frontend, 
+            apiRoot,
+            new MashiroMetaTransfer());
         state.AddApis();
         state.SetScript(TestScriptWithOriginMirror, nameof(TestScriptWithOriginMirror));
         
@@ -322,7 +338,11 @@ public class ScriptEngineTests
         var apiMock = new Mock<IMashiroApiProvider>();
         var apiRoot = new ContextApiRoot();
 
-        var state = new MashiroState(apiMock.Object, MashiroRuntime.CreateJintEngine(), _frontend, apiRoot);
+        var state = new MashiroState(apiMock.Object, 
+            MashiroRuntime.CreateJintEngine(), 
+            _frontend, 
+            apiRoot,
+            new MashiroMetaTransfer());
         state.AddApis();
         state.SetScript(TestScriptWithOnlyOrigin, nameof(TestScriptWithOnlyOrigin));
         
@@ -342,7 +362,11 @@ public class ScriptEngineTests
         var apiMock = new Mock<IMashiroApiProvider>();
         var apiRoot = new ContextApiRoot();
 
-        var state = new MashiroState(apiMock.Object, MashiroRuntime.CreateJintEngine(), _frontend, apiRoot);
+        var state = new MashiroState(apiMock.Object, 
+            MashiroRuntime.CreateJintEngine(), 
+            _frontend, 
+            apiRoot,
+            new MashiroMetaTransfer());
         state.AddApis();
         state.SetScript(TestScriptWithNoDelegates, nameof(TestScriptWithNoDelegates));
         
@@ -361,7 +385,11 @@ public class ScriptEngineTests
         var apiMock = new Mock<IMashiroApiProvider>();
         var apiRoot = new ContextApiRoot();
 
-        var state = new MashiroState(apiMock.Object, MashiroRuntime.CreateJintEngine(), _frontend, apiRoot);
+        var state = new MashiroState(apiMock.Object, 
+            MashiroRuntime.CreateJintEngine(), 
+            _frontend, 
+            apiRoot,
+            new MashiroMetaTransfer());
         state.AddApis();
         state.SetScript(TestScriptWithRequiredDelegates, nameof(TestScriptWithRequiredDelegates));
         
