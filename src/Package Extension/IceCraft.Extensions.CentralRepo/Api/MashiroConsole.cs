@@ -12,9 +12,9 @@ public class MashiroConsole : IMashiroConsoleApi
 {
     private readonly IOutputAdapter _output;
 
-    public MashiroConsole(IOutputAdapter output)
+    public MashiroConsole(IFrontendApp app)
     {
-        _output = output;
+        _output = app.Output;
     }
 
     public void Assert(bool assertion, string message, params JsValue[] values)
