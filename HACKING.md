@@ -79,3 +79,25 @@ By default, "known" exceptions only have their `Message` shown. You can add a
 `--verbose` option to show the full stack trace and inner exception information.
 
 The `scripts/runicr` script may only be invoked from repository root.
+
+## Hacking the shell scripts
+
+### Shell script principles
+
+- All shell scripts should not include bashisms. They intends to work on FreeBSD.
+
+### Testing installer
+
+| 💬 Note |
+| ------- |
+| The IceCraft installer is currently only available for Linux, but may work for FreeBSD (the install script is checked of bashisms). |
+
+First, create a directory under your `HOME`. For this instance, we will use
+`test-home-icr`. After [building the prepped archive](BUILDING.md#building-installable-prepped-archive),
+use the following command:
+
+```sh
+HOME="$HOME/test-home-icr" bin/prep/install.sh
+```
+
+This will cause IceCraft to be installed to `$HOME/test-home-icr` rather than `$HOME`.
