@@ -68,6 +68,8 @@ internal static class Program
         var serviceProvider = new AutofacServiceProvider(services);
 
         var command = RootCommandFactory.CreateCommand(serviceProvider);
+        var exC = new ExtensibleClientImpl(command);
+        pluginManager.InitializeClient(exC, serviceProvider);
 
         // Build middleware
         var builder = new CommandLineBuilder(command);

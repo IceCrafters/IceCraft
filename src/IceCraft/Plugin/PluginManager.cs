@@ -23,4 +23,15 @@ public class PluginManager
             plugin.Initialize(services);
         }
     }
+
+    public void InitializeClient(IExtensibleClient client, IServiceProvider serviceProvider)
+    {
+        foreach (var plugin in _plugins)
+        {
+            if (plugin is IClientExtension extension)
+            {
+                extension.InitializeClient(client, serviceProvider);
+            }
+        }
+    }
 }
