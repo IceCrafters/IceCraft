@@ -83,6 +83,12 @@ public class MashiroStatePool : IDisposable
         }
     }
 
+    public void Inject(PackageMeta package, IMashiroStateLifetime lifetime)
+    {
+        ObjectDisposedException.ThrowIf(_disposedValue || _mashiroStates == null, this);
+        _mashiroStates.Add(package, lifetime);
+    }
+
     public void Dispose()
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method

@@ -4,9 +4,11 @@
 
 namespace IceCraft.Extensions.CentralRepo;
 
+using System;
 using IceCraft.Api.Installation;
 using IceCraft.Api.Plugin;
 using IceCraft.Extensions.CentralRepo.Api;
+using IceCraft.Extensions.CentralRepo.Client;
 using IceCraft.Extensions.CentralRepo.Impl;
 using IceCraft.Extensions.CentralRepo.Network;
 using IceCraft.Extensions.CentralRepo.Runtime;
@@ -15,7 +17,7 @@ using IceCraft.Extensions.CentralRepo.Util;
 using Jint;
 using Microsoft.Extensions.DependencyInjection;
 
-public class CsrPlugin : IPlugin
+public class CsrPlugin : IPlugin, IClientExtension
 {
     public PluginMetadata Metadata { get; } = new()
     {
@@ -41,7 +43,8 @@ public class CsrPlugin : IPlugin
             .AddScoped<IMashiroMetaTransfer, MashiroMetaTransfer>()
             .AddTransient<Func<ILocalPackageImporter>>(ctx => ctx.GetRequiredService<ILocalPackageImporter>)
             .AddTransient(_ => MashiroRuntime.CreateJintEngine())
-            .AddTransient<IMashiroLifetimeFactory, MashiroLifetimeFactory>();
+            .AddTransient<IMashiroLifetimeFactory, MashiroLifetimeFactory>()
+            .AddSingleton<CsrBuildCommand>();
         
         AddMashiroApis(services);
     }
@@ -55,5 +58,12 @@ public class CsrPlugin : IPlugin
             .AddScoped<IMashiroFsApi, MashiroFs>()
             .AddScoped<IMashiroOsApi, MashiroOs>()
             .AddScoped<IMashiroPackagesApi, MashiroPackages>();
+    }
+
+    public void InitializeClient(IExtensibleClient client, IServiceProvider serviceProvider)
+    {
+        var command = client.CreateCommand(this, "build");
+        var buildCmd = serviceProvider.GetRequiredService<CsrBuildCommand>();
+        buildCmd.Configure(command);
     }
 }
