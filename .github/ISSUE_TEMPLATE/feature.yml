@@ -1,0 +1,26 @@
+name: Feature Proposal
+description: File a feature request or proposal.
+labels:
+  - '💡 type: feature'
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Thank you for taking your time on creating a feature request for the
+        project.
+  - type: textarea
+    id: synopsis
+    attributes:
+      label: Synopsis
+      description: >-
+        Please provide a synopsis (summary) for the feature or enhancement you
+        seek to request.
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: >-
+        Please provide detailed information if applicable. This includes
+        proposed implementation details.

@@ -15,7 +15,7 @@ Sometimes IceCraft may not work correctly as expected; you may something useful
 to be added to IceCraft; moreover, sometimes there are techinical issues within
 IceCraft that may become problematic.
 
-These requests and reports above can be reported to the [Issues section](https://gitlab.com/icecrafters/IceCraft/-/issues).
+These requests and reports above can be reported to the [Issues section](https://github.com/icecrafters/IceCraft/issues).
 
 ### Requesting features
 
@@ -49,7 +49,7 @@ proceed.
 
 ### Forking the repository
 
-You can start by [forking the IceCraft repository](https://gitlab.com/icecrafters/IceCraft/-/forks/new).
+You can start by [forking the IceCraft repository](https://github.com/icecrafters/IceCraft/fork).
 This will create a copy of the repository under your own personal namespace
 or any group that you are permitted to create repositories.
 
@@ -61,7 +61,7 @@ You can then clone your fork of IceCraft repository and starting making changes.
 | ----------- |
 | It is not recommended to use GitPod with its default VSCode-based editor. |
 
-Please note that it is best to [GPG-sign your commits](https://docs.gitlab.com/ee/user/project/repository/signed_commits/gpg.html),
+Please note that it is best to [GPG-sign your commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits),
 and you must agree to the [Developer's Certificate of Origin](https://developercertificate.org)
 by sign-off your commits. The workspace configuration for VSCode-based editors
 is set to enable sign-off.
@@ -69,15 +69,15 @@ is set to enable sign-off.
 You are recommended to follow the commit convention as described in the [Developer Guide](HACKING.md).
 This way, the commit history looks tidy.
 
-### Submitting a Merge Request
+### Submitting a Pull Request
 
-Once you are done with your changes, you can submit a Merge Request to this
+Once you are done with your changes, you can submit a Pull Request to this
 repository. This will allow your changes to be reviewed.
 
 | 💬 **Note** |
 | ----------- |
-| Please do not surprise us with big merge requests. Create an issue first if you are looking to implement major changes. |
+| Please do not surprise us with big pull requests. Create an issue first if you are looking to implement major changes. |
 
-Your merge request will be reviewed by a maintainer. If there is no response,
+Your pull request will be reviewed by a maintainer. If there is no response,
 wait patiently. If there hasn't been any response for a week, please nag a
 maintainer about it.

@@ -1,0 +1,31 @@
+name: Bug report
+description: Issue a bug report
+labels:
+  - '🐛 type: bug'
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for taking your time submitting a bug report!
+  - type: textarea
+    id: actual_behaviour
+    attributes:
+      label: What happened?
+      description: Please provide a description of what exactly happened.
+    validations:
+      required: true
+  - type: textarea
+    id: expected_behaviour
+    attributes:
+      label: What was you expecting to happen?
+      description: Please provide a description of what you think should have happened.
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: >-
+        Please provide the operating system you are using. Note: OSes other than
+        the ones selectable aren't supportable.
+      options:
+        - Windows
+        - GNU/Linux
+        - Other Unix (FreeBSD, etc.)

@@ -23,5 +23,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release.
 
-[Unreleased]: https://gitlab.com/Icecrafters/IceCraft/-/compare/v0.1.0-alpha.1...HEAD
-[0.1.0-alpha.1]: https://gitlab.com/Icecrafters/IceCraft/-/tree/v0.1.0-alpha.1
+[Unreleased]: https://github.com/Icecrafters/IceCraft/compare/v0.1.0-alpha.1...HEAD
+[0.1.0-alpha.1]: https://github.com/Icecrafters/IceCraft/releases/tag/v0.1.0-alpha.1
