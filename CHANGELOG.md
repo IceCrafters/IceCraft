@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - No reference to `System.CommandLine` is required.
   - Not available for dependency injection but is passed to `IPluginExtension` initialisation method.
 
+### Changes
+
+- Use GitHub for fetching the CSR.
+
 ## [0.1.0-alpha.1] - 2024/10/22
 
 - Initial release.

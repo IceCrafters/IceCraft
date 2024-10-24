@@ -10,8 +10,8 @@ using IceCraft.Extensions.CentralRepo.Network;
 public class RepoConfigFactory
 {
     private static readonly RemoteRepositoryInfo OfficialRepository = new(
-        new Uri("https://gitlab.com/icecrafters/repository/-/archive/main/repository-main.tar.gz"),
-        "repository-main"
+        new Uri("https://github.com/IceCrafters/CSR/archive/refs/heads/main.tar.gz"),
+        "CSR-main"
     );
 
     private readonly IConfigManager _configMan;
