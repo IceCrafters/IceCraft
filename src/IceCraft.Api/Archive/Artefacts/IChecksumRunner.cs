@@ -6,14 +6,8 @@ namespace IceCraft.Api.Archive.Artefacts;
 
 public interface IChecksumRunner
 {
-    [Obsolete("Use ValidateAsync instead.")]
-    Task<bool> ValidateLocal(RemoteArtefact artefact, string file);
-    
-    [Obsolete("Use ValidateAsync instead.")]
-    Task<bool> ValidateLocal(RemoteArtefact artefact, Stream stream);
-
     /// <summary>
-    /// Vaildates the specified stream with the given artefact. The stream will be read to end.
+    /// Validates the specified stream with the given artefact. The stream will be read to end.
     /// </summary>
     /// <param name="artefact">The artefact to verify. Callers should expect that implementations will only accept
     /// <see cref="HashedArtefact"/> and <see cref="VolatileArtefact"/>.</param>

@@ -28,43 +28,6 @@ public class ArtefactManager : IArtefactManager
         _fileSystem.Directory.CreateDirectory(_artefactDirectory);
     }
     
-    [Obsolete("Use IArtefactDefinition reloads instead.")]
-    public async Task<bool> VerifyArtefactAsync(RemoteArtefact artefact, PackageMeta package)
-    {
-        return await GetSafeArtefactPathAsync(artefact, package) != null;
-    }
-
-    [Obsolete("Use IArtefactDefinition reloads instead.")]
-    public async Task<string?> GetSafeArtefactPathAsync(RemoteArtefact artefact, PackageMeta package)
-    {
-        var fileName = GetArtefactPath(artefact, package);
-        
-        if (!_fileSystem.File.Exists(fileName)
-            || !await _checksumRunner.ValidateLocal(artefact, fileName))
-        {
-            return null;
-        }
-        
-        return fileName;
-    }
-
-    [Obsolete("Use IArtefactDefinition reloads instead.")]
-    public string GetArtefactPath(RemoteArtefact artefact, PackageMeta package)
-    {
-        var idString = $"{package.Id}-{artefact.ChecksumType}-{artefact.Checksum}";
-        var strHash = Convert.ToHexString(SHA512.HashData(Encoding.UTF8.GetBytes(idString)));
-
-        return _fileSystem.Path.Combine(_artefactDirectory,
-            strHash);
-    }
-
-    [Obsolete("Use IArtefactDefinition reloads instead.")]
-    public Stream CreateArtefact(RemoteArtefact artefact, PackageMeta package)
-    {
-        var fileName = GetArtefactPath(artefact, package);
-        return _fileSystem.File.Create(fileName);
-    }
-
     public void CleanArtefacts()
     {
         var files = _fileSystem.Directory.GetFiles(_artefactDirectory);

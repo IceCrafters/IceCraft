@@ -202,27 +202,6 @@ public class DownloadManager : IDownloadManager
         return await DownloadTemporaryArtefactSecureAsync(packageInfo.Artefact, bestMirror, downloadTask, fileName);
     }
 
-    [Obsolete("Use DownloadTemporaryArtefactSecureAsync(IArtefactDefinition, ...) instead.")]
-    public async Task<string> DownloadTemporaryArtefactSecureAsync(RemoteArtefact artefact,
-        ArtefactMirrorInfo mirror,
-        IProgressedTask? downloadTask = null,
-        string? fileName = null)
-    {
-        var tempStream = CreateTemporaryPackageFile(out var path);
-        await using (var tempFile = tempStream)
-        {
-            await DownloadAsync(mirror, tempFile, downloadTask, fileName);
-        }
-
-        // ReSharper disable once InvertIf
-        if (!await _checksumRunner.ValidateLocal(artefact, path))
-        {
-            throw new KnownException("Artefact hash mismatches downloaded file.");
-        }
-
-        return path;
-    }
-
     [Obsolete("Use DownloadManagerExtensions.DownloadAtrefactAsync instead.")]
     public async Task<DownloadResult> DownloadAsync(CachedPackageInfo packageInfo, Stream to, IProgressedTask? downloadTask = null, string? fileName = null)
     {
