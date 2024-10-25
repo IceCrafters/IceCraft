@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.1.0-alpha.2] - 2024/10/25
+
 ### Added
 
 - Added the `build` command to verify a Mashiro package script.
@@ -35,5 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release.
 
-[Unreleased]: https://github.com/Icecrafters/IceCraft/compare/v0.1.0-alpha.1...HEAD
+[Unreleased]: https://github.com/Icecrafters/IceCraft/compare/v0.1.0-alpha.2...HEAD
+[0.1.0-alpha.2]: https://github.com/Icecrafters/IceCraft/compare/v0.1.0-alpha.1...v0.1.0-alpha.2
 [0.1.0-alpha.1]: https://github.com/Icecrafters/IceCraft/releases/tag/v0.1.0-alpha.1
