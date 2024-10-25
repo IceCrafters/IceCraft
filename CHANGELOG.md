@@ -21,7 +21,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changes
 
-- Use GitHub for fetching the CSR.
+- Updated dependencies.
+  - Jint was updated to `4.0.3`.
+  - `Microsoft.Extensions.DependencyInjection` was updated to `8.0.1`.
+- The CSR extension is changed to use GitHub for fetching the repository information.
+
+### Removed
+
+- Removed dependency on `Downloader`.
+- **API:** The `Downloader`-based `DownloadManager` is no longer available.
 
 ## [0.1.0-alpha.1] - 2024/10/22
 
