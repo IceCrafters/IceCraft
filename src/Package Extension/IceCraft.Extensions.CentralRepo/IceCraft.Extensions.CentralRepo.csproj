@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Jint" Version="4.0.2" />
+      <PackageReference Include="Jint" Version="4.0.3" />
       <PackageReference Include="SharpCompress" Version="0.38.0" />
       <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="21.0.29" />
     </ItemGroup>
