@@ -47,9 +47,6 @@ public sealed record PackageMeta
     public DependencyCollection? Dependencies { get; init; }
 
     public DependencyCollection? ConflictsWith { get; init; }
-
-    [Obsolete("Use CustomData instead.")]
-    public IDictionary<string, string?>? AdditionalMetadata { get; init; }
     
     /// <summary>
     /// Gets the dictionary containing custom data for the current package.

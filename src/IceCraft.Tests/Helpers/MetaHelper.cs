@@ -38,7 +38,6 @@ public static class MetaHelper
             .RuleFor(x => x.ReleaseDate, f => f.Date.Past())
             .RuleFor(x => x.Transcript, TranscriptFaker.Generate())
             .RuleFor(x => x.ConflictsWith, [])
-            .RuleFor(x => x.AdditionalMetadata, _ => null)
             .RuleFor(x => x.CustomData, _ => null);
 
         return faker.Generate();
