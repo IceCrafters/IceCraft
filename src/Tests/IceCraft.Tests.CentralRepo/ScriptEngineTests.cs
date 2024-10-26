@@ -351,7 +351,7 @@ public class ScriptEngineTests
         var mirrors = state.GetMirrors();
         
         // Assert
-        Assert.Equal(1, mirrors.Count);
+        Assert.Single(mirrors);
         Assert.Contains(mirrors, x => x.IsOrigin);
     }
     
