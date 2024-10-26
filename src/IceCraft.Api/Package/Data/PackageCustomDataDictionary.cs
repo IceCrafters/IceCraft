@@ -4,6 +4,7 @@
 
 namespace IceCraft.Api.Package.Data;
 
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
@@ -66,18 +67,21 @@ public class PackageCustomDataDictionary : Dictionary<string, JsonElement>
     
     public bool TryGetValueDeserialize<T>(string key, JsonTypeInfo<T> typeInfo, [NotNullWhen(true)] out T? result)
     {
-        if (!this.TryGetValue(key, out var element))
+        if (!TryGetValue(key, out var element))
         {
             result = default;
             return false;
         }
         
-        result = element.Deserialize(typeInfo);
-        if (result == null)
+        var output = element.Deserialize(typeInfo);
+        if (EqualityComparer<T>.Default.Equals(output, default))
         {
+            result = default;
             return false;
         }
 
+        Debug.Assert(output != null);
+        result = output;
         return true;
     }
 }
