@@ -14,7 +14,7 @@ public static class VersioningExtensions
     {
         return cache.Keys.Select(x => SemVersion.Parse(x, SemVersionStyles.Strict))
             .Where(x => !x.IsPrerelease || includePrerelease)
-            .OrderByDescending(x => x)
+            .OrderByDescending(x => x, SemVersion.SortOrderComparer)
             .First();
     }
     
@@ -23,7 +23,7 @@ public static class VersioningExtensions
     {
         return cache.Keys.Select(x => SemVersion.Parse(x, SemVersionStyles.Strict))
             .Where(x => !x.IsPrerelease || includePrerelease)
-            .OrderByDescending(x => x)
+            .OrderByDescending(x => x, SemVersion.SortOrderComparer)
             .FirstOrDefault();
     }
     
