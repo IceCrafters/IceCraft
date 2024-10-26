@@ -1,0 +1,5 @@
+#!/bin/sh
+
+rm -rf ./TestResults/*
+dotnet test src/IceCraft.sln --collect:"XPlat Code Coverage" --results-directory 'TestResults' --no-build
+dotnet-coverage merge ./TestResults/**/*.cobertura.xml -f cobertura -o TestResults/coverage.cobertura.xml
