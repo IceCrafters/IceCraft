@@ -1,12 +1,8 @@
 name: Sonar .NET
 on:
   push:
-    branches:
-      - trunk
     tags:
       - v*
-  pull_request:
-    types: [opened, synchronize, reopened]
 jobs:
   build:
     name: SonarCloud analyse
