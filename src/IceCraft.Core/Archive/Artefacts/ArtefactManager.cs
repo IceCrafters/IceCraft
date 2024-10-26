@@ -35,6 +35,7 @@ public class ArtefactManager : IArtefactManager
         
         foreach (var file in files)
         {
+            // TODO ensure this is configurable
             if (now - _fileSystem.File.GetCreationTimeUtc(file) > TimeSpan.FromDays(7))
             {
                 _fileSystem.File.Delete(file);
@@ -56,13 +57,18 @@ public class ArtefactManager : IArtefactManager
     {
         var fileName = GetArtefactPath(artefact, package);
         
-        if (!_fileSystem.File.Exists(fileName)
-            || !await _checksumRunner.ValidateAsync(artefact, fileName))
+        if (_fileSystem.File.Exists(fileName))
         {
-            return null;
+            using var stream = _fileSystem.File.OpenRead(fileName);
+            if (!await _checksumRunner.ValidateAsync(artefact, stream))
+            {
+                return null;
+            }
+
+            return fileName;
         }
         
-        return fileName;
+        return null;
     }
 
     public string? GetArtefactPath(IArtefactDefinition artefact, PackageMeta package)
