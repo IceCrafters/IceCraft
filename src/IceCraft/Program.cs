@@ -38,8 +38,9 @@ internal static class Program
 
     private static async Task<int> Main(string[] args)
     {
-        IceCraftApp.Initialize();
-        var app = new IceCraftApp();
+        using var app = new IceCraftApp();
+        app.Initialize();
+        
         var config = Config.Build();
 
         var dbFile = await app.ReadDatabase();

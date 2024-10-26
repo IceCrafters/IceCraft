@@ -13,10 +13,9 @@ using IceCraft.Api.Client;
 using IceCraft.Api.Network;
 using IceCraft.Core.Installation.Storage;
 using IceCraft.Frontend;
-using Serilog;
 using Spectre.Console;
 
-internal class IceCraftApp : IFrontendApp
+internal class IceCraftApp : IFrontendApp, IDisposable
 {
     private static readonly string DefaultUserRootDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "IceCraft");
@@ -24,7 +23,7 @@ internal class IceCraftApp : IFrontendApp
 
     internal static string? UserDataOverride { get; set; }
 
-    private static readonly CancellationTokenSource TokenSource = new();
+    private readonly CancellationTokenSource _tokenSource = new();
 
     /// <summary>
     /// Gets the product version information of the IceCraft driver.
@@ -67,19 +66,19 @@ internal class IceCraftApp : IFrontendApp
         return versionInfo.ProductVersion ?? "<unknown>";
     }
 
-    public static void Initialize()
+    public void Initialize()
     {
         Directory.CreateDirectory(DefaultUserRootDirectory);
         Console.CancelKeyPress += Console_CancelKeyPress;
     }
 
-    private static void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+    private void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
     {
         Console.WriteLine();
         Console.WriteLine("-----------------------");
         Console.WriteLine();
         Frontend.Output.Shared.Warning("Cancelled");
-        TokenSource.Cancel();
+        _tokenSource.Cancel();
     }
 
     internal async Task<DatabaseFile> ReadDatabase()
@@ -97,7 +96,7 @@ internal class IceCraftApp : IFrontendApp
 
     public CancellationToken GetCancellationToken()
     {
-        return TokenSource.Token;
+        return _tokenSource.Token;
     }
 
     public async Task DoProgressedTaskAsync(string description, Func<IProgressedTask, Task> action)
@@ -139,7 +138,7 @@ internal class IceCraftApp : IFrontendApp
 
         if (UserDataOverride != null)
         {
-            // Fail early if direcory doesn't exist and can't be created
+            // Fail early if directory doesn't exist and can't be created
             // This method succeeds on existing directory or when created a directory
             Directory.CreateDirectory(UserDataOverride);
 
@@ -147,7 +146,7 @@ internal class IceCraftApp : IFrontendApp
         }
         else if (envVar != null)
         {
-            // Fail early if direcory doesn't exist and can't be created
+            // Fail early if directory doesn't exist and can't be created
             // This method succeeds on existing directory or when created a directory 
             Directory.CreateDirectory(envVar);
 
@@ -164,5 +163,10 @@ internal class IceCraftApp : IFrontendApp
 
         _currentUserRoot = result;
         return result;
+    }
+
+    public void Dispose()
+    {
+        _tokenSource.Dispose();
     }
 }
