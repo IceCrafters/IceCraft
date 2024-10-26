@@ -2,7 +2,8 @@
 // Licensed under GNU General Public License, version 3 or (at your opinion)
 // any later version. See COPYING in repository root.
 
-using System.CommandLine;
+namespace IceCraft;
+
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 using System.Diagnostics;
@@ -10,14 +11,12 @@ using System.IO.Abstractions;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using DotNetConfig;
-using IceCraft;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Caching;
 using IceCraft.Api.Client;
 using IceCraft.Api.Exceptions;
 using IceCraft.Api.Installation;
 using IceCraft.Api.Installation.Database;
-using IceCraft.Core;
 using IceCraft.Core.Installation.Storage;
 using IceCraft.Developer;
 using IceCraft.Extensions.CentralRepo;
@@ -40,10 +39,6 @@ internal static class Program
     {
         using var app = new IceCraftApp();
         app.Initialize();
-        
-        var config = Config.Build();
-
-        var dbFile = await app.ReadDatabase();
 
         var others = new ServiceCollection()
             .AddLogging(configure => configure.AddSerilog())
@@ -101,10 +96,10 @@ internal static class Program
 
         var parser = builder.Build();
 
-        AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+        AppDomain.CurrentDomain.UnhandledException += (_, exArgs) =>
         {
             Output.Shared.Error("Unhandled error occurred!");
-            Output.Shared.Error(args.ExceptionObject?.ToString() ?? "(no error information available)");
+            Output.Shared.Error(exArgs.ExceptionObject.ToString() ?? "(no error information available)");
         };
 
         return await parser.InvokeAsync(args);
