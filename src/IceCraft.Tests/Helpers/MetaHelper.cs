@@ -7,6 +7,7 @@ namespace IceCraft.Tests.Helpers;
 using Bogus;
 using IceCraft.Api.Archive.Artefacts;
 using IceCraft.Api.Archive.Indexing;
+using IceCraft.Api.Installation;
 using IceCraft.Api.Package;
 using Semver;
 
@@ -62,5 +63,16 @@ public static class MetaHelper
             .RuleFor(x => x.BestMirror, _ => null);
 
         return faker.Generate();
+    }
+
+    public static InstalledPackageInfo GetFakeInstalledInfo(PackageMeta meta)
+    {
+        return new InstalledPackageInfo
+        {
+            IsExplicitlyInstalled = true,
+            Metadata = meta,
+            ProvidedBy = null,
+            State = InstallationState.Configured
+        };
     }
 }
