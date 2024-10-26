@@ -1,4 +1,4 @@
-# Contributor Guidelines
+# Contributors' Guide
 
 First, thank you for your interest on contributing to the IceCraft Package
 Manager project.

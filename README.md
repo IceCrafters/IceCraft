@@ -1,17 +1,32 @@
-<h1 style="text-align: center;"><img src="assets/logo.svg"/><br />IceCraft</h1>
+<h1 style="text-align: center;"><img src="assets/logo.svg" alt="IceCraft logo"/><br />IceCraft</h1>
 
-IceCraft is a package manager that is powered by: 
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/IceCrafters/IceCraft/dotnet.yml?style=flat-square&logo=github&link=https%3A%2F%2Fgithub.com%2FIceCrafters%2FIceCraft%2Factions%2Fworkflows%2Fdotnet.yml)
+![Sonar Quality Gate](https://img.shields.io/sonar/quality_gate/IceCrafters_IceCraft?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&logo=sonarcloud&link=https%3A%2F%2Fsonarcloud.io%2Fproject%2Foverview%3Fid%3DIceCrafters_IceCraft)
+![Sonar Coverage](https://img.shields.io/sonar/coverage/IceCrafters_IceCraft?server=https%3A%2F%2Fsonarcloud.io&style=flat-square&logo=sonarcloud)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/IceCrafters/IceCraft?style=flat-square)
 
-- A framework for managing installation and lifetime of packages, and various caches and artefacts
+IceCraft is a package manager that consists of: 
+
+- A framework for managing installation and lifetime of packages
+- Additional services that handle download and storage of package atrefacts,
+  as well as other miscellaneous services
 - Various extensions directly consumes various metadata APIs
+- as well as a CSR  extension that provides building source packages directly 
+  from their original tarballs
 
 ## Building
 
 IceCraft currently requires .NET SDK **8.0** to build. You can get it [here](https://dot.net).
 
-To produce your regular release build run `build.sh` / `build.cmd`. These should cover most use cases.
+To produce installable builds, use `scripts/build-prepped`. Additional
+instructions are available [here](BUILDING.md).
 
-The `build.cmd` file contains only the invocation of the `dotnet` command that is required for building the project properly. You can try get your shell to execute it if none of the above options are usable.
+## Contributing
+
+Contributions are welcome. You can report issues, suggest features or even
+submit code to this project!
+
+View the [Contributors' Guide](CONTRIBUTING.md) for details.
 
 ## License
 

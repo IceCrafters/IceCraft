@@ -4,11 +4,83 @@ This documentation explains the codebase of IceCraft, a package management
 software. If you want to contribute code to this project, please also read the
 [Contributors' Guide](CONTRIBUTING.md) as well.
 
-## Requirements
+## System Requirements
 
 - You need a .NET 8 SDK (the feature band doesn't matter).
 - As IceCraft is developed on GNU/Linux, the best way to develop IceCraft is
   either develop on Linux or use Visual Studio with WSL.
+
+### Recommendations
+
+- We recommend either Visual Studio or Rider. Both are free-to-use for
+  non-commercial purposes.
+
+## Git Commits
+
+We use the following commit formatting:
+
+```text
+<icon> (<scope>) <message> [<skip ci>]
+
+[description]
+
+Refs: [<issues, PRs>]
+Signed-off-by: <username> <email>
+```
+
+- **icon**: A [Gitmoji](https://gitmoji.dev) icon.
+- **scope**: The commit scope. Each commit may only have one scope.
+- **message**: A short commit message.
+- **[skip ci]**: If specified, this tells Actions to not run CI. May only be
+  used for changes that aren't code changes.
+- **description**: Optional long description of the commit.
+- **Refs**: Optional. You can reference issues here, and also you can put your
+  `closes`, `fixes` etc. here if you are allowed to do so.
+- **Signed-off-by**: Required. [Learn more](CONTRIBUTING.md#making-changes).
+
+### Commit scope
+
+- **actions**: The CI workflow definitions.
+- **adoptium**: Everything under the Adoptium extension.
+- **api**: Everything in the `IceCraft.Api` and `IceCraft.Api.Plugin` projects
+  that does not fit into other categories.
+- **archive**: The `IceCraft.(Api|Core).Archive` namespaces (unless otherwise
+  specified).
+- **artefact**: The `IceCraft.(Api|Core).Archive.Artefacts` namespace.
+- **checksum**: Everything related to artefact checksums (ChecksumRunners, etc.)
+- **csr**: Everything in CSR extension that does not fit into `mashiro`.
+- **database**: Everything under the following namespaces:
+  - `IceCraft.Api.Installation.Database` 
+  - `IceCraft.Core.Installation.Storage` 
+- **dependency**: Everything under the following namespaces:
+  - `IceCraft.Api.Installation.Dependency`
+  - `IceCraft.Core.Archive.Dependency`
+- **docs**: The `README`, `CONTRIBUTING` documentations, etc.
+- **dotnet**: Everything in the DotNet extension.
+- **download**: Everything in `IceCraft.(Api|Core).Network` that is related to
+  downloading artefacts.
+- **frontend**: Everything under `IceCraft` project as well as namespaces
+  `IceCraft.Api.Client`.
+- **index**: Everything in `IceCraft.(Api|Core).Archive.Indexing`.
+- **install**: Everything in `IceCraft.(Api|Core).Installation` that does not
+  fit into other categories.
+- **mashiro**: Everything related to the Mashiro scripting engine of the CSR
+  extension. This includes, but not limited to its `Runtime` and `Api`
+  namespaces.
+- **misc**: Everything not fit into any other category.
+- **platform**: Everything related to specific platform and OS matters,
+  including environment management, as well as the `Platform` namespaces.
+- **plugin**: The Plugin API and everything in bundled plugins and extensions
+  that don't fit int other categories.
+- **release**: Release commits - bumping version in CHANGELOG and project files,
+  and shall not include any other changes.
+- **scripts**: All development scripts.
+
+There may be other scopes uses in the past but all scopes not listed above are
+not recommended.
+
+If you need a new scope to be added, please **do not edit** this document
+unless you have permission from a maintainer to do so.
 
 ## Architecture
 
