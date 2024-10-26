@@ -66,7 +66,7 @@ public class CliRemoveCommandFactory : ICommandFactory
         }
         else
         {
-            selectedVersion = _installManager.GetLatestMetaOrDefault(packageName);
+            selectedVersion = await _installManager.GetLatestMetaOrDefaultAsync(packageName);
         }
 
         if (selectedVersion == null)
