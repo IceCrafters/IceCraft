@@ -14,6 +14,25 @@ IceCraft is a package manager that consists of:
 - as well as a CSR  extension that provides building source packages directly 
   from their original tarballs
 
+## Install
+
+You can either install from source or download an already built installer
+archive (both are currently for Linux only).
+
+### Install from source
+
+First, download the .NET 8.0 SDK from [here](https://dot.net). Remember: 8.0.
+
+Download the source archive from a release version, extract the release archive,
+and open your terminal in the folder where it was extracted in. Then, run the
+following command:
+
+```sh
+make install
+```
+
+This should prepare an installable build and install it for the current user.
+
 ## Building
 
 IceCraft currently requires .NET SDK **8.0** to build. You can get it [here](https://dot.net).

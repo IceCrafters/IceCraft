@@ -5,9 +5,11 @@
 # Basic variables
 SCRNAME=$(basename "$0")
 NEWLINE='\n'
-SH_OPTSTRING="t:h"
+SH_OPTSTRING="t:hy"
 
 TARGET_PATH="$HOME/.local/share/IceCraft"
+
+no_ask='0'
 
 # Check if an environment variable called XDG_DATA_HOME is set
 if [ -n "$XDG_DATA_HOME" ]; then
@@ -45,6 +47,10 @@ while getopts $SH_OPTSTRING flag; do
     if [ "$flag" = 't' ]; then
         TARGET_PATH=$OPTARG
     fi
+
+    if [ "$flag" = 'y' ]; then
+        no_ask='1'
+    fi
 done
 
 # Test for prepped_ic file (must run in extracted archive)
@@ -54,7 +60,7 @@ if [ ! -e ".prepped_ic" ]; then
 fi
 
 # Print intro
-
+if [ "$no_ask" = '0' ]; then
 echo "  _____          _____            __ _   "
 echo "|_   _|        / ____|          / _| | "
 echo "   | |  ___ ___| |     _ __ __ _| |_| |_ "
@@ -73,7 +79,7 @@ echo "Please note that while .NET is not required for installing, you need"
 echo "at least .NET Runtime 8 to run IceCraft."
 echo ""
 echo "IceCraft will be installed at '$TARGET_PATH'."
-echo "If you are ready to continue, press Y. If not, press N to exit."
+echo "If you are ready to continue, type 'yes'. If you want to cancel, type 'no'."
 echo ""
 
 # Test for Y/N
@@ -85,6 +91,7 @@ case $yn in
     * ) echo "Invalid response, assuming no";
         exit 1;;
 esac
+fi
 
 write_run_script() {
     touch $1
