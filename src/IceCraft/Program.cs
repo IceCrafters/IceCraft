@@ -10,7 +10,6 @@ using System.Diagnostics;
 using System.IO.Abstractions;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using DotNetConfig;
 using IceCraft.Api.Archive.Repositories;
 using IceCraft.Api.Caching;
 using IceCraft.Api.Client;

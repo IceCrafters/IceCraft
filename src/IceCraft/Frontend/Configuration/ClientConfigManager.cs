@@ -11,24 +11,29 @@ using IceCraft.Api.Configuration;
 
 public class ClientConfigManager : IConfigManager
 {
-    public const string ConfigDirectoryName = "config";
+    private static readonly string GlobalConfigHome = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "IceCraft.d");
 
-    private readonly IFrontendApp _frontend;
+    private readonly string _configDirectory;
+
+    static ClientConfigManager()
+    {
+        Directory.CreateDirectory(GetEffectiveConfigHome());
+    }
+
+    private const string ConfigDirectoryName = "config";
 
     public ClientConfigManager(IFrontendApp frontend)
     {
-        _frontend = frontend;
-
-        ConfigDirectory = Path.Combine(_frontend.DataBasePath, ConfigDirectoryName);
-        Directory.CreateDirectory(ConfigDirectory);
+        _configDirectory = Path.Combine(frontend.DataBasePath, ConfigDirectoryName);
+        Directory.CreateDirectory(_configDirectory);
     }
-
-    public string ConfigDirectory { get; }
 
     public T? GetJsonConfigFile<T>(string fileName, JsonTypeInfo<T> typeInfo, T? defaultValue = default)
     {
         Util.CheckFileName(fileName);
-        var path = Path.Combine(ConfigDirectory, $"{fileName}.json");
+        var path = Path.Combine(_configDirectory, $"{fileName}.json");
 
         if (!File.Exists(path))
         {
@@ -43,7 +48,7 @@ public class ClientConfigManager : IConfigManager
     public T? GetJsonConfigFile<T>(string fileName, T? defaultValue = default)
     {
         Util.CheckFileName(fileName);
-        var path = Path.Combine(ConfigDirectory, $"{fileName}.json");
+        var path = Path.Combine(_configDirectory, $"{fileName}.json");
 
         if (!File.Exists(path))
         {
@@ -58,14 +63,14 @@ public class ClientConfigManager : IConfigManager
     public async Task<T?> GetJsonConfigFileAsync<T>(string fileName, JsonTypeInfo<T> typeInfo, T? defaultValue = default)
     {
         Util.CheckFileName(fileName);
-        var path = Path.Combine(ConfigDirectory, $"{fileName}.json");
+        var path = Path.Combine(_configDirectory, $"{fileName}.json");
 
         if (!File.Exists(path))
         {
             return defaultValue;
         }
 
-        using var stream = File.OpenRead(path);
+        await using var stream = File.OpenRead(path);
 
         return await JsonSerializer.DeserializeAsync(stream, typeInfo);
     }
@@ -73,14 +78,14 @@ public class ClientConfigManager : IConfigManager
     public async Task<T?> GetJsonConfigFileAsync<T>(string fileName, T? defaultValue = default)
     {
         Util.CheckFileName(fileName);
-        var path = Path.Combine(ConfigDirectory, $"{fileName}.json");
+        var path = Path.Combine(_configDirectory, $"{fileName}.json");
 
         if (!File.Exists(path))
         {
             return defaultValue;
         }
 
-        using var stream = File.OpenRead(path);
+        await using var stream = File.OpenRead(path);
 
         return await JsonSerializer.DeserializeAsync<T>(stream);
     }
@@ -88,9 +93,9 @@ public class ClientConfigManager : IConfigManager
     public async Task WriteJsonConfigFileAsync<T>(string fileName, JsonTypeInfo<T> typeInfo, T value)
     {
         Util.CheckFileName(fileName);
-        var path = Path.Combine(ConfigDirectory, $"{fileName}.json");
+        var path = Path.Combine(_configDirectory, $"{fileName}.json");
 
-        using var stream = File.Create(path);
+        await using var stream = File.Create(path);
 
         await JsonSerializer.SerializeAsync(stream, value, typeInfo);
     }
@@ -98,10 +103,15 @@ public class ClientConfigManager : IConfigManager
     public async Task WriteJsonConfigFileAsync<T>(string fileName, T value)
     {
         Util.CheckFileName(fileName);
-        var path = Path.Combine(ConfigDirectory, $"{fileName}.json");
+        var path = Path.Combine(_configDirectory, $"{fileName}.json");
 
-        using var stream = File.Create(path);
+        await using var stream = File.Create(path);
 
-        await JsonSerializer.SerializeAsync<T>(stream, value);
+        await JsonSerializer.SerializeAsync(stream, value);
+    }
+    
+    internal static string GetEffectiveConfigHome()
+    {
+        return Environment.GetEnvironmentVariable("ICECRAFT_CONFIG_HOME") ?? GlobalConfigHome;
     }
 }
