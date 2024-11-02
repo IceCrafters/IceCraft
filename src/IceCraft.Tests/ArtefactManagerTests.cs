@@ -6,18 +6,16 @@ namespace IceCraft.Tests;
 
 using System.IO.Abstractions.TestingHelpers;
 using IceCraft.Api.Archive.Artefacts;
+using IceCraft.Api.Client;
 using IceCraft.Api.Package;
 using IceCraft.Core.Archive.Artefacts;
-using IceCraft.Tests.Helpers;
 using Moq;
 using Semver;
-using Xunit.Abstractions;
 
 public class ArtefactManagerTests
 {
     private const string MockBase = "/ic/";
-
-    private readonly FrontendAppHelper _frontendApp;
+    
     private static readonly PackageMeta MockMeta = new()
     {
         Id = "test",
@@ -32,11 +30,6 @@ public class ArtefactManagerTests
         ReleaseDate = DateTime.MinValue,
         PluginInfo = new PackagePluginInfo("mashiro", "mashiro")
     };
-
-    public ArtefactManagerTests(ITestOutputHelper outputHelper)
-    {
-        _frontendApp = new FrontendAppHelper(outputHelper, MockBase);
-    }
 
     [Fact]
     public void CleanArtefacts_RemoveSevenDayLongFiles()
@@ -54,10 +47,16 @@ public class ArtefactManagerTests
             CreationTime = newDate
         });
 
-        var manager = new ArtefactManager(_frontendApp, Mock.Of<IChecksumRunner>(), fs);
+        var managerConfig = new Mock<IManagerConfiguration>();
+        managerConfig.Setup(x => x.GetCachePath())
+            .Returns($"{MockBase}caches");
+        
+        var artefactManager = new ArtefactManager(managerConfig.Object,
+            Mock.Of<IChecksumRunner>(),
+            fs);
 
         // Act
-        manager.CleanArtefacts();
+        artefactManager.CleanArtefacts();
 
         // Assert
         Assert.False(fs.FileExists("/ic/artefacts/oldFile"));
@@ -69,7 +68,11 @@ public class ArtefactManagerTests
     {
         // Arrange
         var fileSystem = new MockFileSystem();
-        var artefactManager = new ArtefactManager(_frontendApp,
+        var managerConfig = new Mock<IManagerConfiguration>();
+        managerConfig.Setup(x => x.GetCachePath())
+            .Returns($"{MockBase}caches");
+        
+        var artefactManager = new ArtefactManager(managerConfig.Object,
             Mock.Of<IChecksumRunner>(),
             fileSystem);
         var artefact = new HashedArtefact("test", "test");
@@ -88,7 +91,11 @@ public class ArtefactManagerTests
     {
         // Arrange
         var fileSystem = new MockFileSystem();
-        var artefactManager = new ArtefactManager(_frontendApp,
+        var managerConfig = new Mock<IManagerConfiguration>();
+        managerConfig.Setup(x => x.GetCachePath())
+            .Returns($"{MockBase}caches");
+        
+        var artefactManager = new ArtefactManager(managerConfig.Object,
             Mock.Of<IChecksumRunner>(),
             fileSystem);
         var artefact = new VolatileArtefact();
@@ -105,7 +112,11 @@ public class ArtefactManagerTests
     {
         // Arrange
         var fileSystem = new MockFileSystem();
-        var artefactManager = new ArtefactManager(_frontendApp,
+        var managerConfig = new Mock<IManagerConfiguration>();
+        managerConfig.Setup(x => x.GetCachePath())
+            .Returns($"{MockBase}caches");
+        
+        var artefactManager = new ArtefactManager(managerConfig.Object,
             Mock.Of<IChecksumRunner>(),
             fileSystem);
 
@@ -121,7 +132,11 @@ public class ArtefactManagerTests
     {
         // Arrange
         var fileSystem = new MockFileSystem();
-        var artefactManager = new ArtefactManager(_frontendApp,
+        var managerConfig = new Mock<IManagerConfiguration>();
+        managerConfig.Setup(x => x.GetCachePath())
+            .Returns($"{MockBase}caches");
+        
+        var artefactManager = new ArtefactManager(managerConfig.Object,
             Mock.Of<IChecksumRunner>(),
             fileSystem);
         var artefact = new HashedArtefact("test", "test");
@@ -139,7 +154,11 @@ public class ArtefactManagerTests
     {
         // Arrange
         var fileSystem = new MockFileSystem();
-        var artefactManager = new ArtefactManager(_frontendApp,
+        var managerConfig = new Mock<IManagerConfiguration>();
+        managerConfig.Setup(x => x.GetCachePath())
+            .Returns($"{MockBase}caches");
+        
+        var artefactManager = new ArtefactManager(managerConfig.Object,
             Mock.Of<IChecksumRunner>(),
             fileSystem);
         var artefact = new HashedArtefact("test", "test");
@@ -161,8 +180,12 @@ public class ArtefactManagerTests
         checksumRunner.Setup(x => x.ValidateAsync(artefact, It.IsAny<Stream>()))
             .Returns(Task.FromResult(true));
 
-        var artefactManager = new ArtefactManager(_frontendApp,
-            checksumRunner.Object,
+        var managerConfig = new Mock<IManagerConfiguration>();
+        managerConfig.Setup(x => x.GetCachePath())
+            .Returns($"{MockBase}caches");
+        
+        var artefactManager = new ArtefactManager(managerConfig.Object,
+            Mock.Of<IChecksumRunner>(),
             fileSystem);
 
         var realPath = artefactManager.GetArtefactPath(artefact, MockMeta);
@@ -185,8 +208,12 @@ public class ArtefactManagerTests
         checksumRunner.Setup(x => x.ValidateAsync(artefact, It.IsAny<Stream>()))
             .Returns(Task.FromResult(false));
 
-        var artefactManager = new ArtefactManager(_frontendApp,
-            checksumRunner.Object,
+        var managerConfig = new Mock<IManagerConfiguration>();
+        managerConfig.Setup(x => x.GetCachePath())
+            .Returns($"{MockBase}caches");
+        
+        var artefactManager = new ArtefactManager(managerConfig.Object,
+            Mock.Of<IChecksumRunner>(),
             fileSystem);
 
         var realPath = artefactManager.GetArtefactPath(artefact, MockMeta);
@@ -204,7 +231,11 @@ public class ArtefactManagerTests
     {
         // Arrange
         var fileSystem = new MockFileSystem();
-        var artefactManager = new ArtefactManager(_frontendApp,
+        var managerConfig = new Mock<IManagerConfiguration>();
+        managerConfig.Setup(x => x.GetCachePath())
+            .Returns($"{MockBase}caches");
+        
+        var artefactManager = new ArtefactManager(managerConfig.Object,
             Mock.Of<IChecksumRunner>(),
             fileSystem);
 

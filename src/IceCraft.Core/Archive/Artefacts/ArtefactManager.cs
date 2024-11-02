@@ -17,12 +17,12 @@ public class ArtefactManager : IArtefactManager
     private readonly string _artefactDirectory;
     private readonly IFileSystem _fileSystem;
 
-    public ArtefactManager(IFrontendApp frontendApp, 
+    public ArtefactManager(IManagerConfiguration config, 
         IChecksumRunner checksumRunner,
         IFileSystem fileSystem)
     {
         _checksumRunner = checksumRunner;
-        _artefactDirectory = Path.Combine(frontendApp.DataBasePath, "artefacts");
+        _artefactDirectory = Path.Combine(config.GetCachePath(), "artefacts");
         _fileSystem = fileSystem;
 
         _fileSystem.Directory.CreateDirectory(_artefactDirectory);
@@ -56,19 +56,17 @@ public class ArtefactManager : IArtefactManager
     public async Task<string?> GetSafeArtefactPathAsync(IArtefactDefinition artefact, PackageMeta package)
     {
         var fileName = GetArtefactPath(artefact, package);
-        
-        if (_fileSystem.File.Exists(fileName))
-        {
-            using var stream = _fileSystem.File.OpenRead(fileName);
-            if (!await _checksumRunner.ValidateAsync(artefact, stream))
-            {
-                return null;
-            }
 
-            return fileName;
+        if (!_fileSystem.File.Exists(fileName)) return null;
+
+        await using var stream = _fileSystem.File.OpenRead(fileName);
+        if (!await _checksumRunner.ValidateAsync(artefact, stream))
+        {
+            return null;
         }
-        
-        return null;
+
+        return fileName;
+
     }
 
     public string? GetArtefactPath(IArtefactDefinition artefact, PackageMeta package)
