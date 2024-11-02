@@ -35,14 +35,18 @@ public class ArtefactManagerTests
     public void CleanArtefacts_RemoveSevenDayLongFiles()
     {
         // Arrange
+        const string artefactBase = "/ic/caches/artefacts";
+        const string oldFilePath = $"{artefactBase}/oldFile";
+        const string newFilePath = $"{artefactBase}/newFile";
+        
         var oldDate = DateTime.UtcNow - TimeSpan.FromDays(12);
         var newDate = DateTime.UtcNow - TimeSpan.FromDays(1);
         var fs = new MockFileSystem();
-        fs.AddFile("/ic/artefacts/oldFile", new MockFileData("OLD")
+        fs.AddFile(oldFilePath, new MockFileData("OLD")
         {
             CreationTime = oldDate
         });
-        fs.AddFile("/ic/artefacts/newFile", new MockFileData("NEW")
+        fs.AddFile(newFilePath, new MockFileData("NEW")
         {
             CreationTime = newDate
         });
@@ -59,8 +63,8 @@ public class ArtefactManagerTests
         artefactManager.CleanArtefacts();
 
         // Assert
-        Assert.False(fs.FileExists("/ic/artefacts/oldFile"));
-        Assert.True(fs.FileExists("/ic/artefacts/newFile"));
+        Assert.False(fs.FileExists(oldFilePath));
+        Assert.True(fs.FileExists(newFilePath));
     }
 
     [Fact]
@@ -175,7 +179,8 @@ public class ArtefactManagerTests
     {
         // Arrange
         var fileSystem = new MockFileSystem();
-        var checksumRunner = new Mock<IChecksumRunner>();
+        var checksumRunner = new Mock<IChecksumRunner>(MockBehavior.Strict);
+        
         var artefact = new HashedArtefact("test", "test");
         checksumRunner.Setup(x => x.ValidateAsync(artefact, It.IsAny<Stream>()))
             .Returns(Task.FromResult(true));
@@ -185,7 +190,7 @@ public class ArtefactManagerTests
             .Returns($"{MockBase}caches");
         
         var artefactManager = new ArtefactManager(managerConfig.Object,
-            Mock.Of<IChecksumRunner>(),
+            checksumRunner.Object,
             fileSystem);
 
         var realPath = artefactManager.GetArtefactPath(artefact, MockMeta);
