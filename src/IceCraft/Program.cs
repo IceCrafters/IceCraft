@@ -23,6 +23,7 @@ using IceCraft.Extensions.CentralRepo;
 using IceCraft.Extensions.DotNet;
 using IceCraft.Frontend;
 using IceCraft.Frontend.Cli;
+using IceCraft.Frontend.Configuration;
 using IceCraft.Frontend.Injection;
 using IceCraft.Plugin;
 using IceCraft.Repositories.Adoptium;
@@ -33,7 +34,6 @@ using Spectre.Console;
 internal static class Program
 {
     private static readonly IceCraftApp AppImpl = new();
-    private static readonly Config ConfigInstance = Config.Build();
 
     private static async Task<int> Main(string[] args)
     {
@@ -92,7 +92,9 @@ internal static class Program
             context.ExitCode = ExitCodes.GenericError;
         })
         .UseHelp()
-        .UseVersionOption();
+        .UseVersionOption()
+        .UseParseErrorReporting()
+        .EnablePosixBundling();
 
         var parser = builder.Build();
 
@@ -113,9 +115,8 @@ internal static class Program
 
         builder.RegisterInstance(AppImpl).As<IFrontendApp>().SingleInstance();
         builder.RegisterInstance(dbFile).As<DatabaseFile>().SingleInstance();
-        builder.RegisterInstance(ConfigInstance).As<Config>().SingleInstance();
 
-        builder.RegisterType<DotNetConfigServiceImpl>().As<IManagerConfiguration>().SingleInstance();
+        builder.RegisterType<ClientConfigImpl>().As<IManagerConfiguration>().SingleInstance();
         builder.RegisterType<FileSystemCacheManager>().As<ICacheManager>().SingleInstance();
         builder.RegisterType<DefaultSource>().As<IRepositoryDefaultsSupplier>();
         builder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();
