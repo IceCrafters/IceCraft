@@ -94,9 +94,15 @@ public class ClientConfigImpl : IManagerConfiguration
         data.EnabledSources.Add(sourceId);
         SaveData(data);
     }
-
+    
     public string GetCachePath()
     {
-        return Path.Combine(_frontend.DataBasePath, "caches");
+        if (Environment.OSVersion.Platform != PlatformID.Unix
+            || OperatingSystem.IsMacOS()) return Path.Combine(_frontend.DataBasePath, "caches");
+        
+        // Use XDG_CACHE_HOME (default: ~/.cache)
+        var cacheHome = Environment.GetEnvironmentVariable("XDG_CACHE_HOME")
+                        ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".cache");
+        return Path.Combine(cacheHome, "IceCraft.d");
     }
 }

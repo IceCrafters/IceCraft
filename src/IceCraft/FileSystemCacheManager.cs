@@ -23,12 +23,12 @@ internal class FileSystemCacheManager : ICacheManager
     public IEnumerable<ICacheStorage> EnumerateStorages()
     {
         var directories = Directory.GetDirectories(_baseDirectory);
-        Output.Shared.Verbose("base directory: {0}", _baseDirectory);
+        Output.Shared.Verbose("Cache base directory: {0}", _baseDirectory);
         var list = new List<ICacheStorage>(directories.Length);
 
         foreach (var dir in directories)
         {
-            Output.Shared.Verbose("evalutaing directory {0}", dir);
+            Output.Shared.Verbose("Evaluating cache directory {0}", dir);
 
             if (Guid.TryParse(Path.GetFileName(dir), out var id))
             {
