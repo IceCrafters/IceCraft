@@ -97,6 +97,12 @@ public class ClientConfigImpl : IManagerConfiguration
     
     public string GetCachePath()
     {
+        var customCacheHome = Environment.GetEnvironmentVariable("ICECRAFT_CACHE_HOME");
+        if (customCacheHome != null)
+        {
+            return customCacheHome;
+        }
+        
         if (Environment.OSVersion.Platform != PlatformID.Unix
             || OperatingSystem.IsMacOS()) return Path.Combine(_frontend.DataBasePath, "caches");
         

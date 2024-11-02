@@ -15,5 +15,6 @@ mkdir -p "$PWD/run/bin"
 export ICECRAFT_ROOT="$PWD/run"
 export ICECRAFT_DRY_ENV=1
 export ICECRAFT_CONFIG_HOME="$PWD/run/config"
+export ICECRAFT_CACHE_HOME="$PWD/run/caches"
 
 dotnet run --project "$PWD/src/IceCraft/IceCraft.csproj" --no-self-contained -- $@

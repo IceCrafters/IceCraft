@@ -27,6 +27,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IceCraft.Tests.CentralRepo"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontendTests", "FrontendTests\FrontendTests.csproj", "{55930EF8-96D7-490B-A3CE-BBE835AFFF0D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{311E830D-E2B8-41D0-AFBD-45BDA85320A1}"
+	ProjectSection(SolutionItems) = preProject
+		..\CONTRIBUTING.md = ..\CONTRIBUTING.md
+		..\CHANGELOG.md = ..\CHANGELOG.md
+		..\BUILDING.md = ..\BUILDING.md
+		..\README.md = ..\README.md
+		..\HACKING.md = ..\HACKING.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
